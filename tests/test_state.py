@@ -92,6 +92,7 @@ class TestState(BaseState):
     complex: Dict[int, Object] = {1: Object(), 2: Object()}
     fig: Figure = Figure()
     dt: datetime.datetime = datetime.datetime.fromisoformat("1989-11-09T18:53:00+01:00")
+    unused: str = "unused"
 
     @ComputedVar
     def sum(self) -> float:
@@ -116,6 +117,25 @@ class TestState(BaseState):
         pass
 
 
+# make variables used, so we can check them in the tests
+rx.fragment(
+    TestState.num1,
+    TestState.num2,
+    TestState.key,
+    TestState.map_key,
+    TestState.array,
+    TestState.mapping,
+    TestState.obj.prop1,
+    TestState.obj.prop2,
+    TestState.complex,
+    TestState.fig,
+    TestState.dt,
+    TestState.sum,
+    TestState.upper,
+    TestState.router,
+)
+
+
 class ChildState(TestState):
     """A child state fixture."""
 
@@ -133,10 +153,16 @@ class ChildState(TestState):
         self.count = count * 2
 
 
+rx.fragment(ChildState.value, ChildState.count)
+
+
 class ChildState2(TestState):
     """A child state fixture."""
 
     value: str
+
+
+rx.fragment(ChildState2.value)
 
 
 class GrandchildState(ChildState):
@@ -149,6 +175,9 @@ class GrandchildState(ChildState):
         pass
 
 
+rx.fragment(GrandchildState.value2)
+
+
 class DateTimeState(BaseState):
     """A State with some datetime fields."""
 
@@ -156,6 +185,14 @@ class DateTimeState(BaseState):
     dt: datetime.datetime = datetime.datetime.fromisoformat("1989-11-09T18:53:00+01:00")
     t: datetime.time = datetime.time.fromisoformat("18:53:00+01:00")
     td: datetime.timedelta = datetime.timedelta(days=11, minutes=11)
+
+
+rx.fragment(
+    DateTimeState.d,
+    DateTimeState.dt,
+    DateTimeState.t,
+    DateTimeState.td,
+)
 
 
 @pytest.fixture
@@ -213,6 +250,30 @@ def grandchild_state(child_state) -> GrandchildState:
     return grandchild_state
 
 
+def test_var_usage(test_state):
+    """Test that the var usage is set correctly.
+
+    Args:
+        test_state: A state.
+    """
+    cls = type(test_state)
+
+    assert cls.unused._var_is_used is False
+
+    assert cls.num1._var_is_used is True
+    assert cls.num2._var_is_used is True
+    assert cls.key._var_is_used is True
+    assert cls.map_key._var_is_used is True
+    assert cls.array._var_is_used is True
+    assert cls.mapping._var_is_used is True
+    assert cls.obj._var_is_used is True
+    assert cls.complex._var_is_used is True
+    assert cls.fig._var_is_used is True
+    assert cls.dt._var_is_used is True
+    assert cls.sum._var_is_used is True
+    assert cls.upper._var_is_used is True
+
+
 def test_base_class_vars(test_state):
     """Test that the class vars are set correctly.
 
@@ -267,6 +328,7 @@ def test_class_vars(test_state):
         "upper",
         "fig",
         "dt",
+        "unused",
     }
 
 
@@ -332,9 +394,16 @@ def test_dict(test_state):
     }
     test_state_dict = test_state.dict()
     assert set(test_state_dict) == substates
-    assert set(test_state_dict[test_state.get_name()]) == set(test_state.vars)
-    assert set(test_state.dict(include_computed=False)[test_state.get_name()]) == set(
-        test_state.base_vars
+
+    test_state_vars = set(test_state.vars)
+    test_state_vars.discard("unused")
+    assert set(test_state_dict[test_state.get_name()]) == test_state_vars
+
+    test_base_vars = set(test_state.base_vars)
+    test_base_vars.discard("unused")
+    assert (
+        set(test_state.dict(include_computed=False)[test_state.get_name()])
+        == test_base_vars
     )
 
 
@@ -648,6 +717,7 @@ def test_reset(test_state, child_state):
         "map_key",
         "mapping",
         "dt",
+        "unused",
     }
 
     # The dirty vars should be reset.
@@ -1085,6 +1155,11 @@ def test_computed_var_cached():
             comp_v_calls += 1
             return self.v
 
+    rx.fragment(
+        ComputedState.v,
+        ComputedState.comp_v,
+    )
+
     cs = ComputedState()
     assert cs.dict()[cs.get_full_name()]["v"] == 0
     assert comp_v_calls == 1
@@ -1115,6 +1190,13 @@ def test_computed_var_cached_depends_on_non_cached():
         @rx.cached_var
         def comp_v(self) -> int:
             return self.v
+
+    rx.fragment(
+        ComputedState.v,
+        ComputedState.no_cache_v,
+        ComputedState.comp_v,
+        ComputedState.dep_v,
+    )
 
     cs = ComputedState()
     assert cs.dirty_vars == set()
@@ -1155,6 +1237,12 @@ def test_computed_var_depends_on_parent_non_cached():
         def dep_v(self) -> int:
             return self.no_cache_v  # type: ignore
 
+    rx.fragment(
+        ChildState.no_cache_v,
+        ChildState.dep_v,
+        ChildState.router,
+    )
+
     ps = ParentState()
     cs = ps.substates[ChildState.get_name()]
 
@@ -1164,19 +1252,19 @@ def test_computed_var_depends_on_parent_non_cached():
     dict1 = ps.dict()
     assert dict1[ps.get_full_name()] == {
         "no_cache_v": 1,
-        "router": formatted_router,
+        "router": {},
     }
     assert dict1[cs.get_full_name()] == {"dep_v": 2}
     dict2 = ps.dict()
     assert dict2[ps.get_full_name()] == {
         "no_cache_v": 3,
-        "router": formatted_router,
+        "router": {},
     }
     assert dict2[cs.get_full_name()] == {"dep_v": 4}
     dict3 = ps.dict()
     assert dict3[ps.get_full_name()] == {
         "no_cache_v": 5,
-        "router": formatted_router,
+        "router": {},
     }
     assert dict3[cs.get_full_name()] == {"dep_v": 6}
     assert counter == 6
@@ -1203,6 +1291,11 @@ def test_cached_var_depends_on_event_handler(use_partial: bool):
             nonlocal counter
             counter += 1
             return counter
+
+    rx.fragment(
+        HandlerState.x,
+        HandlerState.cached_x_side_effect,
+    )
 
     if use_partial:
         HandlerState.handler = functools.partial(HandlerState.handler.fn)
@@ -1277,6 +1370,14 @@ def test_computed_var_dependencies():
                 A list of whether the values 0-4 are in self._z.
             """
             return [z in self._z for z in range(5)]
+
+    rx.fragment(
+        ComputedState.comp_v,
+        ComputedState.comp_w,
+        ComputedState.comp_x,
+        ComputedState.comp_y,
+        ComputedState.comp_z,
+    )
 
     cs = ComputedState()
     assert cs._computed_var_dependencies["v"] == {"comp_v"}
@@ -2222,17 +2323,40 @@ class Foo(Base):
     tags: List[str] = ["123", "456"]
 
 
+def test_state_which_uses_router_data():
+    class StateWithRouterData(BaseState):
+        pass
+
+    rx.fragment(
+        StateWithRouterData.router.page,
+        StateWithRouterData.router.session,
+        StateWithRouterData.router.headers,
+    )
+
+    state = StateWithRouterData()
+    assert state.dirty_vars == set()
+
+    d = state.dict()
+    assert d[state.get_full_name()] == {
+        "router": formatted_router,
+    }
+
+
 def test_json_dumps_with_mutables():
     """Test that json.dumps works with Base vars inside mutable types."""
 
     class MutableContainsBase(BaseState):
         items: List[Foo] = [Foo()]
 
+    rx.fragment(
+        MutableContainsBase.items[0],
+    )
+
     dict_val = MutableContainsBase().dict()
     assert isinstance(dict_val[MutableContainsBase.get_full_name()]["items"][0], dict)
     val = json_dumps(dict_val)
     f_items = '[{"tags": ["123", "456"]}]'
-    f_formatted_router = str(formatted_router).replace("'", '"')
+    f_formatted_router = "{}"
     assert (
         val
         == f'{{"{MutableContainsBase.get_full_name()}": {{"items": {f_items}, "router": {f_formatted_router}}}}}'

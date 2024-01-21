@@ -1229,20 +1229,21 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
         self.dirty_vars = set()
         self.dirty_substates = set()
 
-    def get_value(self, key: str) -> Any:
+    def get_value(self, key: str, include: set[str] | None = None) -> Any:
         """Get the value of a field (without proxying).
 
         The returned value will NOT track dirty state updates.
 
         Args:
             key: The key of the field.
+            include: Optional set of fields to include.
 
         Returns:
             The value of the field.
         """
         if isinstance(key, MutableProxy):
-            return super().get_value(key.__wrapped__)
-        return super().get_value(key)
+            return super().get_value(key.__wrapped__, include=include)
+        return super().get_value(key, include=include)
 
     def dict(self, include_computed: bool = True, **kwargs) -> dict[str, Any]:
         """Convert the object to a dictionary.
@@ -1260,22 +1261,19 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
             self.dirty_vars.update(self._always_dirty_computed_vars)
             self._mark_dirty()
 
-        base_vars = {
-            prop_name: self.get_value(getattr(self, prop_name))
-            for prop_name in self.base_vars
-        }
-        computed_vars = (
-            {
-                # Include the computed vars.
-                prop_name: self.get_value(getattr(self, prop_name))
-                for prop_name in self.computed_vars
-            }
-            if include_computed
-            else {}
-        )
-        variables = {**base_vars, **computed_vars}
+        if include_computed:
+            variables = self.base_vars | self.computed_vars
+        else:
+            variables = self.base_vars
+
         d = {
-            self.get_full_name(): {k: variables[k] for k in sorted(variables)},
+            self.get_full_name(): {
+                k: self.get_value(getattr(self, k), include=variables[k]._var_used_attributes)  # type: ignore[call-arg]
+                for k in sorted(variables)
+                if variables[k]._var_is_used
+                or k == constants.ROUTER
+                or k == constants.CompileVars.IS_HYDRATED
+            },
         }
         for substate_d in [
             v.dict(include_computed=include_computed, **kwargs)

@@ -22,6 +22,11 @@ def FormSubmit():
         def form_submit(self, form_data: dict):
             self.form_data = form_data
 
+    rx.fragment(
+        FormState.form_data,
+        FormState.var_options,
+    )
+
     app = rx.App(state=rx.State)
 
     @app.add_page
