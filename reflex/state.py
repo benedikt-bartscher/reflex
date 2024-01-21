@@ -1262,7 +1262,7 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
             self._mark_dirty()
 
         if include_computed:
-            variables = self.base_vars | self.computed_vars
+            variables = {**self.base_vars, **self.computed_vars}
         else:
             variables = self.base_vars
 
