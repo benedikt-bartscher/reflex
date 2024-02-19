@@ -213,6 +213,18 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
     # The router data for the current page
     router: RouterData = RouterData()
 
+    # Custom exception hanlder
+    _exception_handler = None
+
+    @classmethod
+    def set_exception_handler(cls, exception_handler):
+        cls._exception_handler = exception_handler
+
+    @classmethod
+    def _handle_exception(cls, exception):
+        if cls._exception_handler:
+            cls._exception_handler(exception)
+
     def __init__(self, *args, parent_state: BaseState | None = None, **kwargs):
         """Initialize the state.
 
@@ -1192,7 +1204,8 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
         # If an error occurs, throw a window alert.
         except Exception:
             error = traceback.format_exc()
-            print(error)
+            # print(error)
+            BaseState._handle_exception(error)
             yield state._as_state_update(
                 handler,
                 window_alert("An error occurred. See logs for details."),

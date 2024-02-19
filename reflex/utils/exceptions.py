@@ -19,3 +19,11 @@ class MatchTypeError(TypeError):
     """Raised when the return types of match cases are different."""
 
     pass
+
+class ExceptionHandler:
+    @staticmethod
+    def handle_exception(exception_handler, exception):
+        if exception_handler:
+            exception_handler(exception)
+        else:
+            print(exception)

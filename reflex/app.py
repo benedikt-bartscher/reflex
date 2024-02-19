@@ -141,7 +141,7 @@ class App(Base):
     # The radix theme for the entire app
     theme: Optional[Component] = themes.theme(accent_color="blue")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, exception_handler = None, *args, **kwargs):
         """Initialize the app.
 
         Args:
@@ -158,6 +158,7 @@ class App(Base):
                 "`connect_error_component` is deprecated, use `overlay_component` instead"
             )
         super().__init__(*args, **kwargs)
+        BaseState.set_exception_handler(exception_handler)
         state_subclasses = BaseState.__subclasses__()
         is_testing_env = constants.PYTEST_CURRENT_TEST in os.environ
 
