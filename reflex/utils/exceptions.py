@@ -21,6 +21,8 @@ class MatchTypeError(TypeError):
     pass
 
 class ExceptionHandler:
+    ''' this is another idea i thought of making an exception handler class. state.py and app.py 
+    will use it to handle exception during event handling '''
     @staticmethod
     def handle_exception(exception_handler, exception):
         if exception_handler:
