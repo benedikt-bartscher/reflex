@@ -641,7 +641,6 @@ def _callback_arg_spec(eval_result):
 def call_script(
     javascript_code: str,
     callback: EventHandler | Callable | None = None,
-    exception_handler: callable | None = None
 ) -> EventSpec:
     """Create an event handler that executes arbitrary javascript code.
 
@@ -668,19 +667,23 @@ def call_script(
         callback_kwargs = {
             "callback": f"({arg_name}) => queueEvents([{format.format_event(event_spec)}], {constants.CompileVars.SOCKET})"
         }
+    wrapped_code = f"""
+        try {{
+            {javascript_code}
+        }} catch (error) {{
+            queueEvents([{window_alert("'An error occurred. See logs for details.'")}], {constants.CompileVars.SOCKET});
+        }}
+    """
 
-    try:
-        return server_side(
+
+  
+    return server_side(
             "_call_script",
             get_fn_signature(call_script),
-            javascript_code=javascript_code,
+            javascript_code=wrapped_code,
             **callback_kwargs,
         )
-    except Exception as client_error:
-        if exception_handler and callable(exception_handler):
-            exception_handler(client_error)
-        else:
-            raise client_error
+
 
 
 def get_event(state, event):
