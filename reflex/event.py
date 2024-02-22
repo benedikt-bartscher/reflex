@@ -647,7 +647,6 @@ def call_script(
     Args:
         javascript_code: The code to execute.
         callback: EventHandler that will receive the result of evaluating the javascript code.
-        exception_handler: User-defined exception handler
 
     Returns:
         EventSpec: An event that will execute the client side javascript.
@@ -667,23 +666,13 @@ def call_script(
         callback_kwargs = {
             "callback": f"({arg_name}) => queueEvents([{format.format_event(event_spec)}], {constants.CompileVars.SOCKET})"
         }
-    wrapped_code = f"""
-        try {{
-            {javascript_code}
-        }} catch (error) {{
-            queueEvents([{window_alert("'An error occurred. See logs for details.'")}], {constants.CompileVars.SOCKET});
-        }}
-    """
-
-
-  
+ 
     return server_side(
             "_call_script",
             get_fn_signature(call_script),
-            javascript_code=wrapped_code,
+            javascript_code=javascript_code,
             **callback_kwargs,
         )
-
 
 
 def get_event(state, event):
