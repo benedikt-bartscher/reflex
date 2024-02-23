@@ -666,13 +666,23 @@ def call_script(
         callback_kwargs = {
             "callback": f"({arg_name}) => queueEvents([{format.format_event(event_spec)}], {constants.CompileVars.SOCKET})"
         }
- 
+    error_event_spec= None
+    wrapped_code = f"""
+    try {{
+        {javascript_code}
+    }} catch (error) {{
+        console.log(error)
+        queueEvents([{format.format_event(error_event_spec)}], {constants.CompileVars.SOCKET})
+    }}
+"""
+
     return server_side(
             "_call_script",
             get_fn_signature(call_script),
-            javascript_code=javascript_code,
+            javascript_code=wrapped_code,
             **callback_kwargs,
         )
+
 
 
 def get_event(state, event):
