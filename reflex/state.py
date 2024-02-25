@@ -128,12 +128,14 @@ class SessionData(Base):
     session_id: str = ""
 
     @classmethod
-    def from_router(cls, router_data: dict = {}):
+    def from_router(cls, router_data: dict | None = None):
         """Initalize the SessionData object based on router_data.
 
         Args:
             router_data: the router_data dict.
         """
+        if not router_data:
+            return cls()
         client_token = router_data.get(constants.RouteVar.CLIENT_TOKEN, "")
         client_ip = router_data.get(constants.RouteVar.CLIENT_IP, "")
         session_id = router_data.get(constants.RouteVar.SESSION_ID, "")
@@ -319,10 +321,7 @@ class BaseState(
         Returns:
             The serialized backend vars.
         """
-        d = {
-            name: self.get_value(getattr(self, name))
-            for name in self.backend_vars
-        }
+        d = {name: self.get_value(getattr(self, name)) for name in self.backend_vars}
         print(f"{self.get_full_name()} backend vars: {d}")
         return d
 
@@ -1384,7 +1383,6 @@ class BaseState(
             for prop_name in self.computed_vars
         }
 
-
     def dict(self, include_computed: bool = True, **kwargs) -> dict[str, Any]:
         """Convert the object to a dictionary.
 
@@ -1395,10 +1393,7 @@ class BaseState(
         Returns:
             The object as a dictionary.
         """
-        if include_computed:
-            computed_vars = self._dict_computed_vars()
-        else:
-            computed_vars = {}
+        computed_vars = self._dict_computed_vars() if include_computed else {}
 
         base_vars = {
             prop_name: self.get_value(getattr(self, prop_name))
@@ -1953,22 +1948,31 @@ class StateManagerRedis(StateManager):
         for sets in ["dirty_vars", "dirty_substates"]:
             if s := rs.get(sets):
                 rs[sets] = set(s)
-        
+
         state = state_cls.parse_obj(rs)
         #  state = state_cls.construct(**rs)
         return state
 
     @classmethod
     def to_redis(cls, state: BaseState):
-        exclude = set(state.event_handlers.keys()) | set(state.computed_vars.keys()) | {
-            "parent_state",
-            "substates",
-            #  "dirty_vars",
-            #  "dirty_substates",
-        }
+        exclude = (
+            set(state.event_handlers)
+            .union(set(state.computed_vars))
+            .union(
+                {
+                    "parent_state",
+                    "substates",
+                    #  "dirty_vars",
+                    #  "dirty_substates",
+                }
+            )
+        )
         backend_vars_d = state._backend_vars_dict()
 
-        d = super(Base, state).dict(exclude_none=True, exclude=exclude) | backend_vars_d
+        d = {
+            **super(Base, state).dict(exclude_none=True, exclude=exclude),
+            **backend_vars_d,
+        }
         #  if state.parent_state is not None:
         #      d["parent_state"] = cls.to_redis(state.parent_state)
         debug_d = {k: v for k, v in d.items() if k not in ["router", "router_data"]}

@@ -11,7 +11,6 @@ from typing import Any, Dict, Generator, List, Optional, Union
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from plotly.graph_objects import Figure
 
 import reflex as rx
 from reflex.app import App
@@ -74,7 +73,6 @@ class Object(Base):
 
     prop1: int = 42
     prop2: str = "hello"
-
 
 
 class TestState(BaseState):
