@@ -654,7 +654,6 @@ def call_script(
     Raises:
         ValueError: If the callback is not a valid event handler.
     """
-    wrapped_code = None
     callback_kwargs = {}
     if callback is not None:
         arg_name = parse_args_spec(_callback_arg_spec)[0]._var_name
