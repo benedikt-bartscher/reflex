@@ -144,6 +144,9 @@ class App(Base):
     # Custom exception handler
     exception_handler: Optional[Callable] = None
 
+    # client-side exception handler on error
+    load_error_handler: Optional[Callable] = None
+
     def __init__(self, *args, **kwargs):
         """Initialize the app.
 
@@ -394,6 +397,10 @@ class App(Base):
         | None = None,
         meta: list[dict[str, str]] = constants.DefaultPage.META_LIST,
         script_tags: list[Component] | None = None,
+        on_error: EventHandler
+        | EventSpec
+        | list[EventHandler | EventSpec]
+        | None = None,
     ):
         """Add a page to the app.
 
@@ -467,6 +474,11 @@ class App(Base):
             if not isinstance(on_load, list):
                 on_load = [on_load]
             self.load_events[route] = on_load
+        
+        if on_error:
+            self.load_error_handler = on_error
+
+        
 
     def get_load_events(self, route: str) -> list[EventHandler | EventSpec]:
         """Get the load events for a route.
