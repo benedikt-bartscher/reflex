@@ -132,6 +132,7 @@ _MAPPING = {
         "EventChain",
         "background",
         "call_script",
+        "client_error",
         "clear_local_storage",
         "console_log",
         "download",

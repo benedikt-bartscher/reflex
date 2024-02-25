@@ -18,7 +18,7 @@ from typing import (
 
 from reflex import constants
 from reflex.base import Base
-from reflex.utils import console, format
+from reflex.utils import console, format, prerequisites
 from reflex.utils.types import ArgsSpec
 from reflex.vars import BaseVar, Var
 
@@ -654,6 +654,7 @@ def call_script(
     Raises:
         ValueError: If the callback is not a valid event handler.
     """
+    wrapped_code = None
     callback_kwargs = {}
     if callback is not None:
         arg_name = parse_args_spec(_callback_arg_spec)[0]._var_name
@@ -666,16 +667,16 @@ def call_script(
         callback_kwargs = {
             "callback": f"({arg_name}) => queueEvents([{format.format_event(event_spec)}], {constants.CompileVars.SOCKET})"
         }
-    error_event_spec= None
+    
+    error_event_spec = client_error('client error')
+
     wrapped_code = f"""
     try {{
         {javascript_code}
-    }} catch (error) {{
-        console.log(error)
-        queueEvents([{format.format_event(error_event_spec)}], {constants.CompileVars.SOCKET})
+    }} catch (e) {{
+        queueEvents([{format.format_event(error_event_spec)}], {constants.CompileVars.SOCKET})       
     }}
-"""
-
+    """
     return server_side(
             "_call_script",
             get_fn_signature(call_script),
@@ -683,7 +684,17 @@ def call_script(
             **callback_kwargs,
         )
 
+def client_error(error: Any) -> EventSpec:
+    return server_side(
+        "_client_error",
+        get_fn_signature(client_error),
+        error = error
+    )
 
+def client_error_handler(): # just for test
+    app = getattr(prerequisites.get_app(), constants.CompileVars.APP) 
+    exception_handler = app.exception_handler    
+    return exception_handler
 
 def get_event(state, event):
     """Get the event from the given state.
