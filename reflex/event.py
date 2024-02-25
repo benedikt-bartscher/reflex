@@ -692,7 +692,7 @@ def client_error(error: Any) -> EventSpec:
 
 def client_error_handler(): # just for test
     app = getattr(prerequisites.get_app(), constants.CompileVars.APP) 
-    exception_handler = app.exception_handler    
+    exception_handler = app.load_error_handler  
     return exception_handler
 
 def get_event(state, event):
