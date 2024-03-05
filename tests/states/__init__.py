@@ -28,6 +28,9 @@ class GenState(BaseState):
         Yields:
             After each increment.
         """
+        if c < 0:
+            raise ValueError("Test exception")
+        
         for _ in range(c):
             self.value += 1
             yield
