@@ -1481,7 +1481,12 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
         # If an error occurs, throw a window alert.
         except Exception:
             error = traceback.format_exc()
-            print(error)
+            app = getattr(prerequisites.get_app(), constants.CompileVars.APP) 
+            exception_handler = app.exception_handler    
+            if callable(exception_handler):
+                exception_handler(error)
+            else:
+                print(error)
             yield state._as_state_update(
                 handler,
                 window_alert("An error occurred. See logs for details."),

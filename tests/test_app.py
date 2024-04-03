@@ -1158,6 +1158,24 @@ async def test_process_events(mocker, token: str):
         await app.state_manager.close()
 
 
+@pytest.mark.asyncio
+async def test_custom_exception_handler():
+
+    def custom_exception_handler(exception):
+        print(f"custom exception handler called: {exception}")
+
+    app = App(state=GenState, exception_handler=custom_exception_handler)
+    event = Event(
+        token="t",
+        name="gen_state.go",
+        payload={"c": -1},
+    )
+
+    with pytest.raises(ValueError, match="Test exception"):
+        async for _update in app.process(event, "mock_sid", {}, "127.0.0.1"):
+            pass
+
+
 @pytest.mark.parametrize(
     ("state", "overlay_component", "exp_page_child"),
     [

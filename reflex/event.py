@@ -18,7 +18,7 @@ from typing import (
 
 from reflex import constants
 from reflex.base import Base
-from reflex.utils import console, format
+from reflex.utils import console, format, prerequisites
 from reflex.utils.types import ArgsSpec
 from reflex.vars import BaseVar, Var
 
@@ -680,13 +680,34 @@ def call_script(
         callback_kwargs = {
             "callback": f"({arg_name}) => queueEvents([{format.format_event(event_spec)}], {constants.CompileVars.SOCKET})"
         }
+    
+    error_event_spec = client_error('client error')
+
+    wrapped_code = f"""
+    try {{
+        {javascript_code}
+    }} catch (e) {{
+        queueEvents([{format.format_event(error_event_spec)}], {constants.CompileVars.SOCKET})       
+    }}
+    """
     return server_side(
-        "_call_script",
-        get_fn_signature(call_script),
-        javascript_code=javascript_code,
-        **callback_kwargs,
+            "_call_script",
+            get_fn_signature(call_script),
+            javascript_code=wrapped_code,
+            **callback_kwargs,
+        )
+
+def client_error(error: Any) -> EventSpec:
+    return server_side(
+        "_client_error",
+        get_fn_signature(client_error),
+        error = error
     )
 
+def client_error_handler(): # just for test
+    app = getattr(prerequisites.get_app(), constants.CompileVars.APP) 
+    exception_handler = app.load_error_handler  
+    return exception_handler
 
 def get_event(state, event):
     """Get the event from the given state.
