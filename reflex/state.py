@@ -53,11 +53,18 @@ from reflex.event import (
     fix_events,
     window_alert,
 )
-from reflex.utils import console, format, prerequisites, types
+from reflex.utils import console, format, prerequisites, types, exceptions
 from reflex.utils.exceptions import ImmutableStateError, LockExpiredError
 from reflex.utils.exec import is_testing_env
 from reflex.utils.serializers import SerializedType, serialize, serializer
 from reflex.vars import BaseVar, ComputedVar, Var, computed_var
+
+from reflex.config import get_config
+from reflex.utils.exceptions import (
+    default_frontend_exception_handler,
+    default_backend_exception_handler,
+)
+
 
 if TYPE_CHECKING:
     from reflex.components.component import Component
@@ -1532,14 +1539,22 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
                 yield state._as_state_update(handler, events, final=True)
 
         # If an error occurs, throw a window alert.
-        except Exception:
-            error = traceback.format_exc()
-            print(error)
-            yield state._as_state_update(
-                handler,
-                window_alert("An error occurred. See logs for details."),
-                final=True,
-            )
+        except Exception as e:
+            stack_trace = traceback.format_exc()
+
+            config = get_config()
+
+            # Call the custom backend exception handler if specified. If not, fallback to the default handler.
+            if config.backend_exception_handler:
+                config.backend_exception_handler(message=str(e), stack=stack_trace)
+            else:
+                default_backend_exception_handler(message=str(e), stack=stack_trace)
+
+                yield state._as_state_update(
+                    handler,
+                    window_alert("An error occurred. See logs for details."),
+                    final=True,
+                )
 
     def _mark_dirty_computed_vars(self) -> None:
         """Mark ComputedVars that need to be recalculated based on dirty_vars."""
@@ -1805,6 +1820,25 @@ class State(BaseState):
 
     # The hydrated bool.
     is_hydrated: bool = False
+
+    def handle_frontend_exception(self, message: str, stack: str) -> None:
+        """Handle frontend exceptions.
+
+        If a frontend exception handler is defined for the exception name, it will be called.
+        Otherwise, the default frontend exception handler will be called.
+
+        Args:
+            message: The message of the exception.
+            stack: The stack trace of the exception.
+
+        """
+        config = get_config()
+
+        # Call the custom frontend exception handler if specified. If not, fallback to the default handler.
+        if config.frontend_exception_handler:
+            config.frontend_exception_handler(message, stack)
+        else:
+            default_frontend_exception_handler(message, stack)
 
 
 class UpdateVarsInternalState(State):

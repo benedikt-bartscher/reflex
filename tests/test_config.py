@@ -219,3 +219,108 @@ def test_reflex_dir_env_var(monkeypatch, tmp_path):
     mp_ctx = multiprocessing.get_context(method="spawn")
     with mp_ctx.Pool(processes=1) as pool:
         assert pool.apply(reflex_dir_constant) == str(tmp_path)
+
+
+def test_custom_frontend_exception_handler():
+    """Test that the custom frontend exception handler is set."""
+
+    def custom_exception_handler(message: str, stack: str):
+        print("Custom Frontend Exception")
+        print(stack)
+
+    config = rx.Config(
+        app_name="a", frontend_exception_handler=custom_exception_handler
+    )
+    assert config.frontend_exception_handler is not None
+
+
+def test_custom_backend_exception_handler():
+    """Test that the custom backend exception handler is set."""
+
+    def custom_exception_handler(message: str, stack: str):
+        print("Custom Backend Exception")
+        print(stack)
+
+    config = rx.Config(app_name="a", backend_exception_handler=custom_exception_handler)
+    assert config.backend_exception_handler is not None
+
+
+def valid_custom_handler(message: str, stack: str):
+    print("Custom Backend Exception")
+    print(stack)
+
+
+def custom_exception_handler_with_wrong_argspec(
+    message: int, stack: str  # Should be str
+):
+    print("Custom Backend Exception")
+    print(stack)
+
+
+custom_exception_handlers = {
+    "lambda": lambda message, stack: print("Custom Exception Handler", message, stack),
+    "wrong_argspec": custom_exception_handler_with_wrong_argspec,
+    "valid": valid_custom_handler,
+}
+
+
+@pytest.mark.parametrize(
+    ("handler_obj"),
+    [
+        # Should throw error that the handler is not a function
+        ({"fn": "", "fn_is_valid": False}),
+        # Should throw error that the named function must be provided, lambdas not allowed
+        ({"fn": custom_exception_handlers["lambda"], "fn_is_valid": False}),
+        # Should throw error that the `message`` arg is of type int but should be str
+        ({"fn": custom_exception_handlers["wrong_argspec"], "fn_is_valid": False}),
+        # Should pass
+        ({"fn": custom_exception_handlers["valid"], "fn_is_valid": True}),
+    ],
+)
+def test_frontend_exception_handler_validation(handler_obj: dict):
+    """Test that the custom frontend exception handler is properly validated.
+
+    Args:
+        handler_obj: A dictionary containing the function and whether it is valid or not.
+
+    """
+    fn_is_valid = None
+
+    try:
+        rx.Config(app_name="a", frontend_exception_handler=handler_obj["fn"])
+        fn_is_valid = True
+    except Exception as _:
+        fn_is_valid = False
+
+    assert fn_is_valid == handler_obj["fn_is_valid"]
+
+
+@pytest.mark.parametrize(
+    ("handler_obj"),
+    [
+        # Should throw error that the handler is not a function
+        ({"fn": "", "fn_is_valid": False}),
+        # Should throw error that the named function must be provided, lambdas not allowed
+        ({"fn": custom_exception_handlers["lambda"], "fn_is_valid": False}),
+        # Should throw error that the `message`` arg is of type int but should be str
+        ({"fn": custom_exception_handlers["wrong_argspec"], "fn_is_valid": False}),
+        # Should pass
+        ({"fn": custom_exception_handlers["valid"], "fn_is_valid": True}),
+    ],
+)
+def test_backend_exception_handler_validation(handler_obj: dict):
+    """Test that the custom backend exception handler is properly validated.
+
+    Args:
+        handler_obj: A dictionary containing the function and whether it is valid or not.
+
+    """
+    fn_is_valid = None
+
+    try:
+        rx.Config(app_name="a", backend_exception_handler=handler_obj["fn"])
+        fn_is_valid = True
+    except Exception as _:
+        fn_is_valid = False
+
+    assert fn_is_valid == handler_obj["fn_is_valid"]

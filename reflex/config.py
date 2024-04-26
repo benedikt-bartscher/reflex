@@ -5,8 +5,9 @@ from __future__ import annotations
 import importlib
 import os
 import sys
+import inspect
 import urllib.parse
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Callable
 
 try:
     # TODO The type checking guard can be removed once
@@ -207,6 +208,12 @@ class Config(Base):
     # Attributes that were explicitly set by the user.
     _non_default_attributes: Set[str] = pydantic.PrivateAttr(set())
 
+    # Frontend Error Handler Function
+    frontend_exception_handler: Optional[Callable[[str, str], Any]] = None
+
+    # Backend Error Handler Function
+    backend_exception_handler: Optional[Callable[[str, str], Any]] = None
+
     def __init__(self, *args, **kwargs):
         """Initialize the config values.
 
@@ -228,6 +235,9 @@ class Config(Base):
         kwargs.update(env_kwargs)
         self._non_default_attributes.update(kwargs)
         self._replace_defaults(**kwargs)
+
+        # Check the exception handlers
+        self._validate_exception_handlers()
 
     @property
     def module(self) -> str:
@@ -356,6 +366,58 @@ class Config(Base):
             setattr(self, key, value)
         self._non_default_attributes.update(kwargs)
         self._replace_defaults(**kwargs)
+
+    def _validate_exception_handlers(self):
+        """Validate the custom event exception handlers for front- and backend.
+
+        If none are passed, the default handlers will be used.
+
+        Raises:
+            ValueError: If the custom exception handlers are invalid.
+
+        """
+        for handler_domain, handler_fn, handler_spec in zip(
+            ["frontend", "backend"],
+            [self.frontend_exception_handler, self.backend_exception_handler],
+            [
+                constants.EventExceptionHandlers.FRONTEND_ARG_SPEC,
+                constants.EventExceptionHandlers.BACKEND_ARG_SPEC,
+            ],
+        ):
+            if handler_fn is not None:
+                _fn_name = handler_fn.__name__
+
+                if not inspect.isfunction(handler_fn):
+                    raise ValueError(
+                        f"Provided custom {handler_domain} exception handler `{_fn_name}` is not a function."
+                    )
+
+                # Allow named functions only as lambda functions cannot be introspected
+                if _fn_name == "<lambda>":
+                    raise ValueError(
+                        f"Provided custom {handler_domain} exception handler `{_fn_name}` is a lambda function. Please use a named function instead."
+                    )
+
+                # Check if the function has the necessary annotations and types
+                arg_annotations = inspect.get_annotations(handler_fn)
+
+                for required_arg in handler_spec:
+                    if required_arg not in arg_annotations:
+                        raise ValueError(
+                            f"Provided custom {handler_domain} exception handler `{_fn_name}` does not have the required argument `{required_arg}`"
+                        )
+
+                for arg, arg_type in arg_annotations.items():
+
+                    # Skip the return annotation
+                    if arg == "return":
+                        continue
+
+                    if arg_type != handler_spec[arg]:
+                        raise ValueError(
+                            f"Provided custom {handler_domain} exception handler `{_fn_name}` has the wrong type for {arg} argument."
+                            f"Expected `{handler_spec[arg]}` but got `{arg_type}`"
+                        )
 
 
 def get_config(reload: bool = False) -> Config:
