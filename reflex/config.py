@@ -385,7 +385,10 @@ class Config(Base):
             ],
         ):
             if handler_fn is not None:
-                _fn_name = handler_fn.__name__
+                if not hasattr(handler_fn, '__name__'):
+                    _fn_name = handler_fn.__class__.__name__
+                else:
+                    _fn_name = handler_fn.__name__
 
                 if not inspect.isfunction(handler_fn):
                     raise ValueError(
@@ -407,16 +410,10 @@ class Config(Base):
                             f"Provided custom {handler_domain} exception handler `{_fn_name}` does not have the required argument `{required_arg}`"
                         )
 
-                for arg, arg_type in arg_annotations.items():
-
-                    # Skip the return annotation
-                    if arg == "return":
-                        continue
-
-                    if arg_type != handler_spec[arg]:
+                    if arg_annotations[required_arg] != handler_spec[required_arg]:
                         raise ValueError(
-                            f"Provided custom {handler_domain} exception handler `{_fn_name}` has the wrong type for {arg} argument."
-                            f"Expected `{handler_spec[arg]}` but got `{arg_type}`"
+                            f"Provided custom {handler_domain} exception handler `{_fn_name}` has the wrong type for {required_arg} argument."
+                            f"Expected `{handler_spec[required_arg]}` but got `{arg_annotations[required_arg]}`"
                         )
 
 
