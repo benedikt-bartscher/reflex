@@ -6,6 +6,7 @@ import importlib
 import os
 import sys
 import inspect
+import functools
 import urllib.parse
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Callable
 
@@ -390,7 +391,12 @@ class Config(Base):
                 else:
                     _fn_name = handler_fn.__name__
 
-                if not inspect.isfunction(handler_fn):
+                if isinstance(handler_fn, functools.partial):
+                    raise ValueError(
+                        f"Provided custom {handler_domain} exception handler `{_fn_name}` is a partial function. Please provide a named function instead."
+                    )
+
+                if not inspect.isfunction(handler_fn) and not inspect.ismethod(handler_fn):
                     raise ValueError(
                         f"Provided custom {handler_domain} exception handler `{_fn_name}` is not a function."
                     )

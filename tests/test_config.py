@@ -3,7 +3,7 @@ import os
 from typing import Any, Dict
 
 import pytest
-
+import functools
 import reflex as rx
 import reflex.config
 from reflex.constants import Endpoint
@@ -245,7 +245,7 @@ def test_custom_backend_exception_handler():
     assert config.backend_exception_handler is not None
 
 
-def valid_custom_handler(message: str, stack: str):
+def valid_custom_handler(message: str, stack: str, logger: str = "test"):
     print("Custom Backend Exception")
     print(stack)
 
@@ -256,11 +256,19 @@ def custom_exception_handler_with_wrong_argspec(
     print("Custom Backend Exception")
     print(stack)
 
+class SomeHandler:
+
+    def handle(self, message:str, stack:str):
+        print("Custom Backend Exception")
+        print(stack)
+
 
 custom_exception_handlers = {
     "lambda": lambda message, stack: print("Custom Exception Handler", message, stack),
     "wrong_argspec": custom_exception_handler_with_wrong_argspec,
     "valid": valid_custom_handler,
+    "partial": functools.partial(valid_custom_handler, logger="test"),
+    "method": SomeHandler().handle
 }
 
 
@@ -275,6 +283,8 @@ custom_exception_handlers = {
         ({"fn": custom_exception_handlers["wrong_argspec"], "fn_is_valid": False}),
         # Should pass
         ({"fn": custom_exception_handlers["valid"], "fn_is_valid": True}),
+        # Should pass
+        ({"fn": custom_exception_handlers["method"], "fn_is_valid": True}),
     ],
 )
 def test_frontend_exception_handler_validation(handler_obj: dict):
@@ -298,6 +308,8 @@ def test_frontend_exception_handler_validation(handler_obj: dict):
 @pytest.mark.parametrize(
     ("handler_obj"),
     [
+        # Should throw error that the handler should not be a partial function
+        ({"fn": custom_exception_handlers["partial"], "fn_is_valid": False}),
         # Should throw error that the handler is not a function
         ({"fn": "", "fn_is_valid": False}),
         # Should throw error that the named function must be provided, lambdas not allowed
