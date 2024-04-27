@@ -1824,7 +1824,7 @@ class State(BaseState):
     def handle_frontend_exception(self, message: str, stack: str) -> None:
         """Handle frontend exceptions.
 
-        If a frontend exception handler is defined for the exception name, it will be called.
+        If a frontend exception handler is provided, it will be called.
         Otherwise, the default frontend exception handler will be called.
 
         Args:
@@ -1836,9 +1836,9 @@ class State(BaseState):
 
         # Call the custom frontend exception handler if specified. If not, fallback to the default handler.
         if config.frontend_exception_handler:
-            config.frontend_exception_handler(message, stack)
+            config.frontend_exception_handler(message=message, stack=stack)
         else:
-            default_frontend_exception_handler(message, stack)
+            default_frontend_exception_handler(message=message, stack=stack)
 
 
 class UpdateVarsInternalState(State):
