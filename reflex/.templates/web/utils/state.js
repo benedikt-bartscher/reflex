@@ -202,6 +202,9 @@ export const applyEvent = async (event, socket) => {
       }
     } catch (e) {
       console.log("_call_script", e);
+      if (window && window?.onerror) {
+        window.onerror(e.message, null, null, null, e)
+      }
     }
     return false;
   }

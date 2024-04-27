@@ -386,7 +386,7 @@ class Config(Base):
             ],
         ):
             if handler_fn is not None:
-                if not hasattr(handler_fn, '__name__'):
+                if not hasattr(handler_fn, "__name__"):
                     _fn_name = handler_fn.__class__.__name__
                 else:
                     _fn_name = handler_fn.__name__
@@ -396,7 +396,9 @@ class Config(Base):
                         f"Provided custom {handler_domain} exception handler `{_fn_name}` is a partial function. Please provide a named function instead."
                     )
 
-                if not inspect.isfunction(handler_fn) and not inspect.ismethod(handler_fn):
+                if not inspect.isfunction(handler_fn) and not inspect.ismethod(
+                    handler_fn
+                ):
                     raise ValueError(
                         f"Provided custom {handler_domain} exception handler `{_fn_name}` is not a function."
                     )

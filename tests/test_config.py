@@ -256,9 +256,9 @@ def custom_exception_handler_with_wrong_argspec(
     print("Custom Backend Exception")
     print(stack)
 
-class SomeHandler:
 
-    def handle(self, message:str, stack:str):
+class SomeHandler:
+    def handle(self, message: str, stack: str):
         print("Custom Backend Exception")
         print(stack)
 
@@ -268,7 +268,7 @@ custom_exception_handlers = {
     "wrong_argspec": custom_exception_handler_with_wrong_argspec,
     "valid": valid_custom_handler,
     "partial": functools.partial(valid_custom_handler, logger="test"),
-    "method": SomeHandler().handle
+    "method": SomeHandler().handle,
 }
 
 
