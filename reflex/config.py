@@ -396,9 +396,7 @@ class Config(Base):
                         f"Provided custom {handler_domain} exception handler `{_fn_name}` is a partial function. Please provide a named function instead."
                     )
 
-                if not inspect.isfunction(handler_fn) and not inspect.ismethod(
-                    handler_fn
-                ):
+                if not callable(handler_fn):
                     raise ValueError(
                         f"Provided custom {handler_domain} exception handler `{_fn_name}` is not a function."
                     )
