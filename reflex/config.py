@@ -27,8 +27,8 @@ from reflex import constants
 from reflex.base import Base
 from reflex.utils import console
 from reflex.utils.exceptions import (
-    default_frontend_exception_handler, 
-    default_backend_exception_handler
+    default_frontend_exception_handler,
+    default_backend_exception_handler,
 )
 
 
@@ -214,10 +214,14 @@ class Config(Base):
     _non_default_attributes: Set[str] = pydantic.PrivateAttr(set())
 
     # Frontend Error Handler Function
-    frontend_exception_handler: Optional[Callable[[str, str], None]] = default_frontend_exception_handler
+    frontend_exception_handler: Optional[
+        Callable[[str, str], None]
+    ] = default_frontend_exception_handler
 
     # Backend Error Handler Function
-    backend_exception_handler: Optional[Callable[[str, str], None]] = default_backend_exception_handler
+    backend_exception_handler: Optional[
+        Callable[[str, str], None]
+    ] = default_backend_exception_handler
 
     def __init__(self, *args, **kwargs):
         """Initialize the config values.
@@ -422,6 +426,7 @@ class Config(Base):
                         f"Provided custom {handler_domain} exception handler `{_fn_name}` has the wrong type for {required_arg} argument."
                         f"Expected `{handler_spec[required_arg]}` but got `{arg_annotations[required_arg]}`"
                     )
+
 
 def get_config(reload: bool = False) -> Config:
     """Get the app config.

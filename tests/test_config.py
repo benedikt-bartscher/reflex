@@ -7,6 +7,7 @@ import functools
 import reflex as rx
 import reflex.config
 from reflex.constants import Endpoint
+from contextlib import nullcontext as does_not_raise
 
 
 def test_requires_app_name():
@@ -249,66 +250,84 @@ custom_exception_handlers = {
 
 
 @pytest.mark.parametrize(
-    ("handler_obj"),
+    "handler_fn, expected",
     [
-        # Should throw error that the handler is not a function
-        ({"fn": "", "fn_is_valid": False}),
-        # Should throw error that the named function must be provided, lambdas not allowed
-        ({"fn": custom_exception_handlers["lambda"], "fn_is_valid": False}),
-        # Should throw error that the `message`` arg is of type int but should be str
-        ({"fn": custom_exception_handlers["wrong_argspec"], "fn_is_valid": False}),
-        # Should pass
-        ({"fn": custom_exception_handlers["valid"], "fn_is_valid": True}),
-        # Should pass
-        ({"fn": custom_exception_handlers["method"], "fn_is_valid": True}),
+        pytest.param(
+            custom_exception_handlers["partial"],
+            pytest.raises(ValueError),
+            id="partial",
+        ),
+        pytest.param(
+            custom_exception_handlers["lambda"],
+            pytest.raises(ValueError),
+            id="lambda",
+        ),
+        pytest.param(
+            custom_exception_handlers["wrong_argspec"],
+            pytest.raises(ValueError),
+            id="wrong_argspec",
+        ),
+        pytest.param(
+            custom_exception_handlers["valid"],
+            does_not_raise(),
+            id="valid_handler",
+        ),
+        pytest.param(
+            custom_exception_handlers["method"],
+            does_not_raise(),
+            id="valid_class_method",
+        ),
     ],
 )
-def test_frontend_exception_handler_validation(handler_obj: dict):
+def test_frontend_exception_handler_validation(handler_fn, expected):
     """Test that the custom frontend exception handler is properly validated.
 
     Args:
-        handler_obj: A dictionary containing the function and whether it is valid or not.
+        handler_fn: The handler function.
+        expected: The expected result.
 
     """
-    fn_is_valid = None
-
-    try:
-        rx.Config(app_name="a", frontend_exception_handler=handler_obj["fn"])
-        fn_is_valid = True
-    except Exception as _:
-        fn_is_valid = False
-
-    assert fn_is_valid == handler_obj["fn_is_valid"]
+    with expected:
+        rx.Config(app_name="a", frontend_exception_handler=handler_fn)
 
 
 @pytest.mark.parametrize(
-    ("handler_obj"),
+    "handler_fn, expected",
     [
-        # Should throw error that the handler should not be a partial function
-        ({"fn": custom_exception_handlers["partial"], "fn_is_valid": False}),
-        # Should throw error that the handler is not a function
-        ({"fn": "", "fn_is_valid": False}),
-        # Should throw error that the named function must be provided, lambdas not allowed
-        ({"fn": custom_exception_handlers["lambda"], "fn_is_valid": False}),
-        # Should throw error that the `message`` arg is of type int but should be str
-        ({"fn": custom_exception_handlers["wrong_argspec"], "fn_is_valid": False}),
-        # Should pass
-        ({"fn": custom_exception_handlers["valid"], "fn_is_valid": True}),
+        pytest.param(
+            custom_exception_handlers["partial"],
+            pytest.raises(ValueError),
+            id="partial",
+        ),
+        pytest.param(
+            custom_exception_handlers["lambda"],
+            pytest.raises(ValueError),
+            id="lambda",
+        ),
+        pytest.param(
+            custom_exception_handlers["wrong_argspec"],
+            pytest.raises(ValueError),
+            id="wrong_argspec",
+        ),
+        pytest.param(
+            custom_exception_handlers["valid"],
+            does_not_raise(),
+            id="valid_handler",
+        ),
+        pytest.param(
+            custom_exception_handlers["method"],
+            does_not_raise(),
+            id="valid_class_method",
+        ),
     ],
 )
-def test_backend_exception_handler_validation(handler_obj: dict):
+def test_backend_exception_handler_validation(handler_fn, expected):
     """Test that the custom backend exception handler is properly validated.
 
     Args:
-        handler_obj: A dictionary containing the function and whether it is valid or not.
+        handler_fn: The handler function.
+        expected: The expected result.
 
     """
-    fn_is_valid = None
-
-    try:
-        rx.Config(app_name="a", backend_exception_handler=handler_obj["fn"])
-        fn_is_valid = True
-    except Exception as e:
-        fn_is_valid = False
-
-    assert fn_is_valid == handler_obj["fn_is_valid"]
+    with expected:
+        rx.Config(app_name="a", backend_exception_handler=handler_fn)

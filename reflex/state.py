@@ -1542,11 +1542,11 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
 
             config.backend_exception_handler(message=str(e), stack=stack_trace)
 
-            # yield state._as_state_update(
-            #     handler,
-            #     window_alert("An error occurred. See logs for details."),
-            #     final=True,
-            # )
+            yield state._as_state_update(
+                handler,
+                window_alert("An error occurred. See logs for details."),
+                final=True,
+            )
 
     def _mark_dirty_computed_vars(self) -> None:
         """Mark ComputedVars that need to be recalculated based on dirty_vars."""
