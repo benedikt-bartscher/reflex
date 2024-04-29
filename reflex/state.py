@@ -53,7 +53,7 @@ from reflex.event import (
     fix_events,
     window_alert,
 )
-from reflex.utils import console, format, prerequisites, types, exceptions
+from reflex.utils import console, format, prerequisites, types
 from reflex.utils.exceptions import ImmutableStateError, LockExpiredError
 from reflex.utils.exec import is_testing_env
 from reflex.utils.serializers import SerializedType, serialize, serializer
