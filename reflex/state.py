@@ -60,10 +60,6 @@ from reflex.utils.serializers import SerializedType, serialize, serializer
 from reflex.vars import BaseVar, ComputedVar, Var, computed_var
 
 from reflex.config import get_config
-from reflex.utils.exceptions import (
-    default_frontend_exception_handler,
-    default_backend_exception_handler,
-)
 
 
 if TYPE_CHECKING:
@@ -1544,17 +1540,13 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
 
             config = get_config()
 
-            # Call the custom backend exception handler if specified. If not, fallback to the default handler.
-            if config.backend_exception_handler:
-                config.backend_exception_handler(message=str(e), stack=stack_trace)
-            else:
-                default_backend_exception_handler(message=str(e), stack=stack_trace)
+            config.backend_exception_handler(message=str(e), stack=stack_trace)
 
-                yield state._as_state_update(
-                    handler,
-                    window_alert("An error occurred. See logs for details."),
-                    final=True,
-                )
+            # yield state._as_state_update(
+            #     handler,
+            #     window_alert("An error occurred. See logs for details."),
+            #     final=True,
+            # )
 
     def _mark_dirty_computed_vars(self) -> None:
         """Mark ComputedVars that need to be recalculated based on dirty_vars."""
@@ -1834,11 +1826,7 @@ class State(BaseState):
         """
         config = get_config()
 
-        # Call the custom frontend exception handler if specified. If not, fallback to the default handler.
-        if config.frontend_exception_handler:
-            config.frontend_exception_handler(message=message, stack=stack)
-        else:
-            default_frontend_exception_handler(message=message, stack=stack)
+        config.frontend_exception_handler(message=message, stack=stack)
 
 
 class UpdateVarsInternalState(State):

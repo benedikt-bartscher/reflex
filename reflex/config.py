@@ -26,6 +26,10 @@ from reflex_cli.constants.hosting import Hosting
 from reflex import constants
 from reflex.base import Base
 from reflex.utils import console
+from reflex.utils.exceptions import (
+    default_frontend_exception_handler, 
+    default_backend_exception_handler
+)
 
 
 class DBConfig(Base):
@@ -210,10 +214,10 @@ class Config(Base):
     _non_default_attributes: Set[str] = pydantic.PrivateAttr(set())
 
     # Frontend Error Handler Function
-    frontend_exception_handler: Optional[Callable[[str, str], Any]] = None
+    frontend_exception_handler: Optional[Callable[[str, str], None]] = default_frontend_exception_handler
 
     # Backend Error Handler Function
-    backend_exception_handler: Optional[Callable[[str, str], Any]] = None
+    backend_exception_handler: Optional[Callable[[str, str], None]] = default_backend_exception_handler
 
     def __init__(self, *args, **kwargs):
         """Initialize the config values.
@@ -371,8 +375,6 @@ class Config(Base):
     def _validate_exception_handlers(self):
         """Validate the custom event exception handlers for front- and backend.
 
-        If none are passed, the default handlers will be used.
-
         Raises:
             ValueError: If the custom exception handlers are invalid.
 
@@ -385,43 +387,41 @@ class Config(Base):
                 constants.EventExceptionHandlers.BACKEND_ARG_SPEC,
             ],
         ):
-            if handler_fn is not None:
-                if not hasattr(handler_fn, "__name__"):
-                    _fn_name = handler_fn.__class__.__name__
-                else:
-                    _fn_name = handler_fn.__name__
+            if hasattr(handler_fn, "__name__"):
+                _fn_name = handler_fn.__name__
+            else:
+                _fn_name = handler_fn.__class__.__name__
 
-                if isinstance(handler_fn, functools.partial):
+            if isinstance(handler_fn, functools.partial):
+                raise ValueError(
+                    f"Provided custom {handler_domain} exception handler `{_fn_name}` is a partial function. Please provide a named function instead."
+                )
+
+            if not callable(handler_fn):
+                raise ValueError(
+                    f"Provided custom {handler_domain} exception handler `{_fn_name}` is not a function."
+                )
+
+            # Allow named functions only as lambda functions cannot be introspected
+            if _fn_name == "<lambda>":
+                raise ValueError(
+                    f"Provided custom {handler_domain} exception handler `{_fn_name}` is a lambda function. Please use a named function instead."
+                )
+
+            # Check if the function has the necessary annotations and types
+            arg_annotations = inspect.get_annotations(handler_fn)
+
+            for required_arg in handler_spec:
+                if required_arg not in arg_annotations:
                     raise ValueError(
-                        f"Provided custom {handler_domain} exception handler `{_fn_name}` is a partial function. Please provide a named function instead."
+                        f"Provided custom {handler_domain} exception handler `{_fn_name}` does not take the required argument `{required_arg}`"
                     )
 
-                if not callable(handler_fn):
+                if arg_annotations[required_arg] != handler_spec[required_arg]:
                     raise ValueError(
-                        f"Provided custom {handler_domain} exception handler `{_fn_name}` is not a function."
+                        f"Provided custom {handler_domain} exception handler `{_fn_name}` has the wrong type for {required_arg} argument."
+                        f"Expected `{handler_spec[required_arg]}` but got `{arg_annotations[required_arg]}`"
                     )
-
-                # Allow named functions only as lambda functions cannot be introspected
-                if _fn_name == "<lambda>":
-                    raise ValueError(
-                        f"Provided custom {handler_domain} exception handler `{_fn_name}` is a lambda function. Please use a named function instead."
-                    )
-
-                # Check if the function has the necessary annotations and types
-                arg_annotations = inspect.get_annotations(handler_fn)
-
-                for required_arg in handler_spec:
-                    if required_arg not in arg_annotations:
-                        raise ValueError(
-                            f"Provided custom {handler_domain} exception handler `{_fn_name}` does not have the required argument `{required_arg}`"
-                        )
-
-                    if arg_annotations[required_arg] != handler_spec[required_arg]:
-                        raise ValueError(
-                            f"Provided custom {handler_domain} exception handler `{_fn_name}` has the wrong type for {required_arg} argument."
-                            f"Expected `{handler_spec[required_arg]}` but got `{arg_annotations[required_arg]}`"
-                        )
-
 
 def get_config(reload: bool = False) -> Config:
     """Get the app config.
