@@ -221,30 +221,6 @@ def test_reflex_dir_env_var(monkeypatch, tmp_path):
         assert pool.apply(reflex_dir_constant) == str(tmp_path)
 
 
-def test_custom_frontend_exception_handler():
-    """Test that the custom frontend exception handler is set."""
-
-    def custom_exception_handler(message: str, stack: str):
-        print("Custom Frontend Exception")
-        print(stack)
-
-    config = rx.Config(
-        app_name="a", frontend_exception_handler=custom_exception_handler
-    )
-    assert config.frontend_exception_handler is not None
-
-
-def test_custom_backend_exception_handler():
-    """Test that the custom backend exception handler is set."""
-
-    def custom_exception_handler(message: str, stack: str):
-        print("Custom Backend Exception")
-        print(stack)
-
-    config = rx.Config(app_name="a", backend_exception_handler=custom_exception_handler)
-    assert config.backend_exception_handler is not None
-
-
 def valid_custom_handler(message: str, stack: str, logger: str = "test"):
     print("Custom Backend Exception")
     print(stack)
@@ -332,7 +308,7 @@ def test_backend_exception_handler_validation(handler_obj: dict):
     try:
         rx.Config(app_name="a", backend_exception_handler=handler_obj["fn"])
         fn_is_valid = True
-    except Exception as _:
+    except Exception as e:
         fn_is_valid = False
 
     assert fn_is_valid == handler_obj["fn_is_valid"]
