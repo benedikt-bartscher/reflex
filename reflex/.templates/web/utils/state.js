@@ -580,14 +580,17 @@ export const useEventLoop = (
   // Handle frontend errors and send them to the backend via websocket.
   useEffect(() => {
         
-    if (typeof window !== 'undefined') {
-    
+    if (typeof window === 'undefined') {
+      return;
+  
+    }
+
     window.onerror = function (msg, url, lineNo, columnNo, error) {
-        addEvents([Event("state.handle_frontend_exception", {
-          message: error.message,
-          stack: error.stack,
-        })])
-        return false;
+      addEvents([Event("state.handle_frontend_exception", {
+        message: error.message,
+        stack: error.stack,
+      })])
+      return false;
     }
 
     window.onunhandledrejection = function (event) {
@@ -597,9 +600,8 @@ export const useEventLoop = (
         })])
         return false;
     }
-}
 
-},[])
+  },[])
 
   const sentHydrate = useRef(false); // Avoid double-hydrate due to React strict-mode
   useEffect(() => {
