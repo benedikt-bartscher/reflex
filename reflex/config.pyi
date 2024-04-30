@@ -3,7 +3,7 @@
 from reflex import constants as constants
 from reflex.base import Base as Base
 from reflex.utils import console as console
-from typing import Any, Dict, List, Optional, overload
+from typing import Any, Dict, List, Optional, Callable, overload
 
 class DBConfig(Base):
     engine: str
@@ -70,6 +70,8 @@ class Config(Base):
     cp_web_url: str
     username: Optional[str]
     gunicorn_worker_class: str
+    frontend_exception_handler: Optional[Callable[[str, str], None]]
+    backend_exception_handler: Optional[Callable[[str, str], None]]
 
     def __init__(
         self,
