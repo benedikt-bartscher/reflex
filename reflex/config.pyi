@@ -3,6 +3,7 @@
 from reflex import constants as constants
 from reflex.base import Base as Base
 from reflex.utils import console as console
+from reflex.event import EventSpec as EventSpec
 from typing import Any, Dict, List, Optional, Callable, overload
 
 class DBConfig(Base):
@@ -71,7 +72,9 @@ class Config(Base):
     username: Optional[str]
     gunicorn_worker_class: str
     frontend_exception_handler: Optional[Callable[[str, str], None]]
-    backend_exception_handler: Optional[Callable[[str, str], None]]
+    backend_exception_handler: Optional[
+        Callable[[str, str], EventSpec | list[EventSpec] | None]
+    ]
 
     def __init__(
         self,

@@ -1540,11 +1540,11 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
 
             config = get_config()
 
-            config.backend_exception_handler(message=str(e), stack=stack_trace)
+            events = config.backend_exception_handler(message=str(e), stack=stack_trace)
 
             yield state._as_state_update(
                 handler,
-                window_alert("An error occurred. See logs for details."),
+                events,
                 final=True,
             )
 

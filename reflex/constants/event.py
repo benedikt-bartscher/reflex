@@ -93,17 +93,3 @@ class EventTriggers(SimpleNamespace):
     ON_CLEAR_SERVER_ERRORS = "on_clear_server_errors"
     ON_VALUE_COMMIT = "on_value_commit"
     ON_SELECT = "on_select"
-
-
-class EventExceptionHandlers(SimpleNamespace):
-    """Front- and Backend Event exception handlers."""
-
-    FRONTEND_ARG_SPEC = {
-        "message": str,
-        "stack": str,
-    }
-
-    BACKEND_ARG_SPEC = {
-        "message": str,
-        "stack": str,
-    }

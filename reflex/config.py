@@ -30,6 +30,7 @@ from reflex.utils.exceptions import (
     default_frontend_exception_handler,
     default_backend_exception_handler,
 )
+from reflex.event import EventSpec
 
 
 class DBConfig(Base):
@@ -220,7 +221,7 @@ class Config(Base):
 
     # Backend Error Handler Function
     backend_exception_handler: Optional[
-        Callable[[str, str], None]
+        Callable[[str, str], EventSpec | list[EventSpec] | None]
     ] = default_backend_exception_handler
 
     def __init__(self, *args, **kwargs):
@@ -383,12 +384,22 @@ class Config(Base):
             ValueError: If the custom exception handlers are invalid.
 
         """
+        FRONTEND_ARG_SPEC = {
+            "message": str,
+            "stack": str,
+        }
+
+        BACKEND_ARG_SPEC = {
+            "message": str,
+            "stack": str,
+        }
+
         for handler_domain, handler_fn, handler_spec in zip(
             ["frontend", "backend"],
             [self.frontend_exception_handler, self.backend_exception_handler],
             [
-                constants.EventExceptionHandlers.FRONTEND_ARG_SPEC,
-                constants.EventExceptionHandlers.BACKEND_ARG_SPEC,
+                FRONTEND_ARG_SPEC,
+                BACKEND_ARG_SPEC,
             ],
         ):
             if hasattr(handler_fn, "__name__"):
@@ -416,6 +427,7 @@ class Config(Base):
             arg_annotations = inspect.get_annotations(handler_fn)
 
             for required_arg in handler_spec:
+
                 if required_arg not in arg_annotations:
                     raise ValueError(
                         f"Provided custom {handler_domain} exception handler `{_fn_name}` does not take the required argument `{required_arg}`"
@@ -425,6 +437,24 @@ class Config(Base):
                     raise ValueError(
                         f"Provided custom {handler_domain} exception handler `{_fn_name}` has the wrong type for {required_arg} argument."
                         f"Expected `{handler_spec[required_arg]}` but got `{arg_annotations[required_arg]}`"
+                    )
+
+            # Check if the return type is valid for backend exception handler
+            if handler_domain == "backend":
+                sig = inspect.signature(self.backend_exception_handler)
+                return_type = sig.return_annotation
+
+                valid = bool(
+                    return_type == EventSpec
+                    or return_type == Optional[EventSpec]
+                    or return_type == list[EventSpec]
+                    or return_type == inspect.Signature.empty
+                )
+
+                if not valid:
+                    raise ValueError(
+                        f"Provided custom {handler_domain} exception handler `{_fn_name}` has the wrong return type."
+                        f"Expected `EventSpec | list[EventSpec] | None` but got `{return_type}`"
                     )
 
 

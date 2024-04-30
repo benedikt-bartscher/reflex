@@ -45,7 +45,7 @@ from .config import (
 from .custom_components import (
     CustomComponents,
 )
-from .event import Endpoint, EventTriggers, SocketEvent, EventExceptionHandlers
+from .event import Endpoint, EventTriggers, SocketEvent
 from .installer import (
     Bun,
     Fnm,
@@ -78,7 +78,6 @@ __ALL__ = [
     Endpoint,
     Env,
     EventTriggers,
-    EventExceptionHandlers,
     Expiration,
     Ext,
     Fnm,

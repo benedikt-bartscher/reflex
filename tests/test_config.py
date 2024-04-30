@@ -291,9 +291,30 @@ def test_frontend_exception_handler_validation(handler_fn, expected):
         rx.Config(app_name="a", frontend_exception_handler=handler_fn)
 
 
+def backend_exception_handler_with_wrong_return_type(message: str, stack: str) -> int:
+    """Custom backend exception handler with wrong return type.
+
+    Args:
+        message: The error message.
+        stack: The stack trace.
+
+    Returns:
+        int: The wrong return type.
+    """
+    print("Custom Backend Exception")
+    print(stack)
+
+    return 5
+
+
 @pytest.mark.parametrize(
     "handler_fn, expected",
     [
+        pytest.param(
+            backend_exception_handler_with_wrong_return_type,
+            pytest.raises(ValueError),
+            id="wrong_return_type",
+        ),
         pytest.param(
             custom_exception_handlers["partial"],
             pytest.raises(ValueError),
