@@ -204,6 +204,9 @@ export const applyEvent = async (event, socket) => {
       }
     } catch (e) {
       console.log("_call_script", e);
+      if (window && window?.onerror) {
+        window.onerror(e.message, null, null, null, e)
+      }
     }
     return false;
   }
@@ -591,6 +594,32 @@ export const useEventLoop = (
       queueEvents(events, socket);
     }
   };
+
+  // Handle frontend errors and send them to the backend via websocket.
+  useEffect(() => {
+        
+    if (typeof window === 'undefined') {
+      return;
+  
+    }
+
+    window.onerror = function (msg, url, lineNo, columnNo, error) {
+      addEvents([Event("state.handle_frontend_exception", {
+        message: error.message,
+        stack: error.stack,
+      })])
+      return false;
+    }
+
+    window.onunhandledrejection = function (event) {
+        addEvents([Event("state.handle_frontend_exception", {
+          message: event.reason.message,
+          stack: event.reason.stack,
+        })])
+        return false;
+    }
+
+  },[])
 
   const sentHydrate = useRef(false); // Avoid double-hydrate due to React strict-mode
   useEffect(() => {

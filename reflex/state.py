@@ -59,6 +59,9 @@ from reflex.utils.exec import is_testing_env
 from reflex.utils.serializers import SerializedType, serialize, serializer
 from reflex.vars import BaseVar, ComputedVar, Var, computed_var
 
+from reflex.config import get_config
+
+
 if TYPE_CHECKING:
     from reflex.components.component import Component
 
@@ -1612,12 +1615,16 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
                 yield state._as_state_update(handler, events, final=True)
 
         # If an error occurs, throw a window alert.
-        except Exception:
-            error = traceback.format_exc()
-            print(error)
+        except Exception as e:
+            stack_trace = traceback.format_exc()
+
+            config = get_config()
+
+            events = config.backend_exception_handler(message=str(e), stack=stack_trace)
+
             yield state._as_state_update(
                 handler,
-                window_alert("An error occurred. See logs for details."),
+                events,
                 final=True,
             )
 
@@ -1888,6 +1895,21 @@ class State(BaseState):
 
     # The hydrated bool.
     is_hydrated: bool = False
+
+    def handle_frontend_exception(self, message: str, stack: str) -> None:
+        """Handle frontend exceptions.
+
+        If a frontend exception handler is provided, it will be called.
+        Otherwise, the default frontend exception handler will be called.
+
+        Args:
+            message: The message of the exception.
+            stack: The stack trace of the exception.
+
+        """
+        config = get_config()
+
+        config.frontend_exception_handler(message=message, stack=stack)
 
 
 class UpdateVarsInternalState(State):

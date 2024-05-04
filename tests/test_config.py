@@ -2,10 +2,11 @@ import multiprocessing
 import os
 
 import pytest
-
+import functools
 import reflex as rx
 import reflex.config
 from reflex.constants import Endpoint
+from contextlib import nullcontext as does_not_raise
 
 
 def test_requires_app_name():
@@ -193,3 +194,135 @@ def test_reflex_dir_env_var(monkeypatch, tmp_path):
     mp_ctx = multiprocessing.get_context(method="spawn")
     with mp_ctx.Pool(processes=1) as pool:
         assert pool.apply(reflex_dir_constant) == str(tmp_path)
+
+
+def valid_custom_handler(message: str, stack: str, logger: str = "test"):
+    print("Custom Backend Exception")
+    print(stack)
+
+
+def custom_exception_handler_with_wrong_argspec(
+    message: int, stack: str  # Should be str
+):
+    print("Custom Backend Exception")
+    print(stack)
+
+
+class SomeHandler:
+    def handle(self, message: str, stack: str):
+        print("Custom Backend Exception")
+        print(stack)
+
+
+custom_exception_handlers = {
+    "lambda": lambda message, stack: print("Custom Exception Handler", message, stack),
+    "wrong_argspec": custom_exception_handler_with_wrong_argspec,
+    "valid": valid_custom_handler,
+    "partial": functools.partial(valid_custom_handler, logger="test"),
+    "method": SomeHandler().handle,
+}
+
+
+@pytest.mark.parametrize(
+    "handler_fn, expected",
+    [
+        pytest.param(
+            custom_exception_handlers["partial"],
+            pytest.raises(ValueError),
+            id="partial",
+        ),
+        pytest.param(
+            custom_exception_handlers["lambda"],
+            pytest.raises(ValueError),
+            id="lambda",
+        ),
+        pytest.param(
+            custom_exception_handlers["wrong_argspec"],
+            pytest.raises(ValueError),
+            id="wrong_argspec",
+        ),
+        pytest.param(
+            custom_exception_handlers["valid"],
+            does_not_raise(),
+            id="valid_handler",
+        ),
+        pytest.param(
+            custom_exception_handlers["method"],
+            does_not_raise(),
+            id="valid_class_method",
+        ),
+    ],
+)
+def test_frontend_exception_handler_validation(handler_fn, expected):
+    """Test that the custom frontend exception handler is properly validated.
+
+    Args:
+        handler_fn: The handler function.
+        expected: The expected result.
+
+    """
+    with expected:
+        rx.Config(app_name="a", frontend_exception_handler=handler_fn)
+
+
+def backend_exception_handler_with_wrong_return_type(message: str, stack: str) -> int:
+    """Custom backend exception handler with wrong return type.
+
+    Args:
+        message: The error message.
+        stack: The stack trace.
+
+    Returns:
+        int: The wrong return type.
+    """
+    print("Custom Backend Exception")
+    print(stack)
+
+    return 5
+
+
+@pytest.mark.parametrize(
+    "handler_fn, expected",
+    [
+        pytest.param(
+            backend_exception_handler_with_wrong_return_type,
+            pytest.raises(ValueError),
+            id="wrong_return_type",
+        ),
+        pytest.param(
+            custom_exception_handlers["partial"],
+            pytest.raises(ValueError),
+            id="partial",
+        ),
+        pytest.param(
+            custom_exception_handlers["lambda"],
+            pytest.raises(ValueError),
+            id="lambda",
+        ),
+        pytest.param(
+            custom_exception_handlers["wrong_argspec"],
+            pytest.raises(ValueError),
+            id="wrong_argspec",
+        ),
+        pytest.param(
+            custom_exception_handlers["valid"],
+            does_not_raise(),
+            id="valid_handler",
+        ),
+        pytest.param(
+            custom_exception_handlers["method"],
+            does_not_raise(),
+            id="valid_class_method",
+        ),
+    ],
+)
+def test_backend_exception_handler_validation(handler_fn, expected):
+    """Test that the custom backend exception handler is properly validated.
+
+    Args:
+        handler_fn: The handler function.
+        expected: The expected result.
+
+    """
+    with expected:
+        rx.Config(app_name="a", backend_exception_handler=handler_fn)
