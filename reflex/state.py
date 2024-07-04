@@ -31,7 +31,7 @@ import dill
 
 try:
     import pydantic.v1 as pydantic
-except ModuleNotFoundError:
+except (ImportError, AttributeError):
     import pydantic
 
 import wrapt

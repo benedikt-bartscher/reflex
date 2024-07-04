@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional, Set
 
 try:
     import pydantic.v1 as pydantic
-except ModuleNotFoundError:
+except (ImportError, AttributeError):
     import pydantic
 
 from reflex_cli.constants.hosting import Hosting

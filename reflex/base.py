@@ -9,7 +9,7 @@ try:
     import pydantic.v1.main as pydantic_main
     from pydantic.v1 import BaseModel
     from pydantic.v1.fields import ModelField
-except ModuleNotFoundError:
+except (ImportError, AttributeError):
     if not TYPE_CHECKING:
         import pydantic.main as pydantic_main
         from pydantic import BaseModel

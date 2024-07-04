@@ -32,7 +32,7 @@ from reflex.components.core.breakpoints import Breakpoints
 
 try:
     from pydantic.v1.fields import ModelField
-except ModuleNotFoundError:
+except (ImportError, AttributeError):
     from pydantic.fields import ModelField  # type: ignore
 
 from sqlalchemy.ext.associationproxy import AssociationProxyInstance

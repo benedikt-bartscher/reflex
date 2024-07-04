@@ -11,7 +11,7 @@ from reflex.utils.prerequisites import get_web_dir
 
 try:
     from pydantic.v1.fields import ModelField
-except ModuleNotFoundError:
+except (ImportError, AttributeError):
     from pydantic.fields import ModelField  # type: ignore
 
 from reflex import constants
