@@ -54,6 +54,7 @@ from reflex.utils.imports import (
     parse_imports,
 )
 from reflex.utils.serializers import serializer
+from reflex.utils.types import override
 from reflex.vars import Var, VarData
 
 
@@ -138,6 +139,7 @@ class BaseComponent(Base, ABC):
 class ComponentNamespace(SimpleNamespace):
     """A namespace to manage components with subcomponents."""
 
+    @override
     def __hash__(self) -> int:
         """Get the hash of the namespace.
 

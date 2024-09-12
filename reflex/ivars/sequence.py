@@ -27,7 +27,7 @@ from typing import (
 from reflex import constants
 from reflex.constants.base import REFLEX_VAR_OPENING_TAG
 from reflex.utils.exceptions import VarTypeError
-from reflex.utils.types import GenericType, get_origin
+from reflex.utils.types import GenericType, get_origin, override
 from reflex.vars import (
     Var,
     VarData,
@@ -165,7 +165,7 @@ class StringVar(ImmutableVar[str]):
             raise_unsupported_operand_types("[]", (type(self), type(i)))
         return string_item_operation(self, i)
 
-    def length(self) -> NumberVar:
+    def length(self) -> NumberVar[int]:
         """Get the length of the string.
 
         Returns:
@@ -197,7 +197,8 @@ class StringVar(ImmutableVar[str]):
         """
         return string_strip_operation(self)
 
-    def bool(self):
+    @override
+    def bool(self) -> BooleanVar:
         """Boolean conversion.
 
         Returns:
@@ -223,6 +224,7 @@ class StringVar(ImmutableVar[str]):
         self, other: NoReturn, field: StringVar | str | None = None
     ) -> NoReturn: ...
 
+    @override
     def contains(self, other: Any, field: Any = None) -> BooleanVar:
         """Check if the string contains another string.
 
@@ -875,7 +877,7 @@ class ArrayVar(ImmutableVar[ARRAY_VAR_TYPE]):
             raise_unsupported_operand_types("[]", (type(self), type(i)))
         return array_item_operation(self, i)
 
-    def length(self) -> NumberVar:
+    def length(self) -> NumberVar[int]:
         """Get the length of the array.
 
         Returns:
