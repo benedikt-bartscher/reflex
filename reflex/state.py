@@ -163,6 +163,7 @@ def _no_chain_background_task(
     raise TypeError(f"{fn} is marked as a background task, but is not async.")
 
 
+@functools.lru_cache()
 def _substate_key(
     token: str,
     state_cls_or_name: BaseState | Type[BaseState] | str | Sequence[str],
@@ -185,6 +186,7 @@ def _substate_key(
     return f"{token}_{state_cls_or_name}"
 
 
+@functools.lru_cache()
 def _split_substate_key(substate_key: str) -> tuple[str, str]:
     """Split the substate key into token and state name.
 
@@ -3158,6 +3160,8 @@ class StateManagerRedis(StateManager):
         "e"  # For evicted events (i.e. maxmemory exceeded)
     )
 
+    _redis_notify_keyspace_events_configured: bool = False
+
     # These events indicate that a lock is no longer held
     _redis_keyspace_lock_release_events: Set[bytes] = {
         b"del",
@@ -3432,15 +3436,17 @@ class StateManagerRedis(StateManager):
         state_is_locked = False
         lock_key_channel = f"__keyspace@0__:{lock_key.decode()}"
         # Enable keyspace notifications for the lock key, so we know when it is available.
-        try:
-            await self.redis.config_set(
-                "notify-keyspace-events",
-                self._redis_notify_keyspace_events,
-            )
-        except ResponseError:
-            # Some redis servers only allow out-of-band configuration, so ignore errors here.
-            if not environment.REFLEX_IGNORE_REDIS_CONFIG_ERROR.get():
-                raise
+        if not self._redis_notify_keyspace_events_configured:
+            try:
+                await self.redis.config_set(
+                    "notify-keyspace-events",
+                    self._redis_notify_keyspace_events,
+                )
+            except ResponseError:
+                # Some redis servers only allow out-of-band configuration, so ignore errors here.
+                if not environment.REFLEX_IGNORE_REDIS_CONFIG_ERROR.get():
+                    raise
+            self._redis_notify_keyspace_events_configured = True
         async with self.redis.pubsub() as pubsub:
             await pubsub.psubscribe(lock_key_channel)
             while not state_is_locked:
