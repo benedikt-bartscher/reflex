@@ -347,7 +347,6 @@ class EnvVar(Generic[T]):
         self.validators = validators or []
 
         self.validate(default)
-        self.validate(self.get())
 
     def validate(self, value: T | None = None) -> None:
         """Validate the environment variable.
@@ -377,7 +376,9 @@ class EnvVar(Generic[T]):
         """
         env_value = os.getenv(self.name, None)
         if env_value is not None:
-            return self.interpret(env_value)
+            interpreted = self.interpret(env_value)
+            self.validate(interpreted)
+            return interpreted
         return None
 
     def is_set(self) -> bool:
