@@ -25,6 +25,7 @@ from typing import (
     BinaryIO,
     Callable,
     ClassVar,
+    DefaultDict,
     Dict,
     List,
     Optional,
@@ -38,6 +39,8 @@ from typing import (
     get_args,
     get_type_hints,
 )
+
+from redis.asyncio.client import PubSub
 
 from sqlalchemy.orm import DeclarativeBase
 from typing_extensions import Self
@@ -3178,6 +3181,19 @@ def _default_lock_expiration() -> int:
 
 
 class StateManagerRedis(StateManager):
+    """
+
+    Attributes:
+        redis:
+        token_expiration:
+        lock_expiration:
+        _redis_notify_keyspace_events:
+        _redis_keyspace_lock_release_events:
+        _pubsub_locks:
+        _pubsub:
+        _pubsub_listener_task:
+    """
+
     """A state manager that stores states in redis."""
 
     # The redis client to use.
@@ -3206,7 +3222,85 @@ class StateManagerRedis(StateManager):
     }
 
     # This lock is used to ensure we only subscribe to keyspace events once per token and worker
-    _pubsub_locks: Dict[bytes, asyncio.Lock] = pydantic.PrivateAttr({})
+    # _pubsub_locks: Dict[bytes, asyncio.Lock] = pydantic.PrivateAttr({})
+    _pubsub_locks: DefaultDict[bytes, List[asyncio.Lock]] = defaultdict(list)
+    _pubsub: Optional[PubSub] = None
+    _pubsub_listener_task: Optional[asyncio.Task]
+
+    async def _get_pubsub(self) -> PubSub:
+        """Ensure the Pub/Sub instance is initialized and start it if necessary."""
+        if self._pubsub is None:
+            # Enable keyspace notifications for the lock key, so we know when it is available.
+            try:
+                await self.redis.config_set(
+                    "notify-keyspace-events",
+                    self._redis_notify_keyspace_events,
+                )
+            except ResponseError:
+                # Some redis servers only allow out-of-band configuration, so ignore errors here.
+                if not environment.REFLEX_IGNORE_REDIS_CONFIG_ERROR.get():
+                    raise
+            self._pubsub = self.redis.pubsub()
+            self._pubsub_listener_task = asyncio.create_task(self._pubsub_listener())
+        return self._pubsub
+
+    async def _pubsub_listener(self) -> None:
+        """Listen for messages and notify the longest-waiting consumer."""
+        pubsub = await self._get_pubsub()
+        async for message in pubsub.listen():
+            if message is None:
+                continue
+            if message["data"] not in self._redis_keyspace_lock_release_events:
+                continue
+
+            channel = message["channel"]
+
+            if channel not in self._pubsub_locks:
+                raise RuntimeError(f"Received unexpected message: {message}")
+
+            if not self._pubsub_locks[channel]:
+                raise RuntimeError(f"Received unexpected message: {message}")
+
+            # Notify the first lock in the list (oldest waiting consumer)
+            # lock = self._pubsub_locks[channel].pop(0)
+            lock = self._pubsub_locks[channel][0]
+            if not lock.locked():
+                raise RuntimeError(f"Received unexpected message: {message}")
+            lock.release()  # Notify the consumer
+            await self._pubsub_subscribe(channel)
+            # Re-add the lock to the end of the list
+            # self._pubsub_locks[channel].append(lock)
+
+    async def _pubsub_subscribe(self, channel: bytes) -> asyncio.Lock:
+        """Ensure the channel is subscribed and return a new lock."""
+        pubsub = await self._get_pubsub()
+        if channel not in self._pubsub_locks:
+            await pubsub.psubscribe(channel)
+        # Create a new lock for this consumer and add it to the list
+        lock = asyncio.Lock()
+        await lock.acquire()  # Lock it initially
+        self._pubsub_locks[channel].append(lock)
+        return lock
+
+    async def _pubsub_unsubscribe(self, channel: bytes, lock: asyncio.Lock) -> None:
+        """Remove a specific lock for a channel and unsubscribe if no locks remain."""
+        if channel in self._pubsub_locks and lock in self._pubsub_locks[channel]:
+            self._pubsub_locks[channel].remove(lock)
+            if not self._pubsub_locks[channel]:  # If no locks remain
+                pubsub = await self._get_pubsub()
+                await pubsub.punsubscribe(channel)
+                del self._pubsub_locks[channel]
+
+    async def _pubsub_stop(self) -> None:
+        """Stop the Pub/Sub listener and close Redis connection."""
+        if self._pubsub_listener_task:
+            self._pubsub_listener_task.cancel()
+            try:
+                await self._pubsub_listener_task
+            except asyncio.CancelledError:
+                pass
+        if self._pubsub:
+            await self._pubsub.close()
 
     async def _get_parent_state(
         self, token: str, state: BaseState | None = None
@@ -3471,36 +3565,25 @@ class StateManagerRedis(StateManager):
         Raises:
             ResponseError: when the keyspace config cannot be set.
         """
-        state_is_locked = False
-        lock_key_channel = f"__keyspace@0__:{lock_key.decode()}"
-        # Enable keyspace notifications for the lock key, so we know when it is available.
-        try:
-            await self.redis.config_set(
-                "notify-keyspace-events",
-                self._redis_notify_keyspace_events,
-            )
-        except ResponseError:
-            # Some redis servers only allow out-of-band configuration, so ignore errors here.
-            if not environment.REFLEX_IGNORE_REDIS_CONFIG_ERROR.get():
-                raise
-        if lock_key not in self._pubsub_locks:
-            self._pubsub_locks[lock_key] = asyncio.Lock()
-        async with self._pubsub_locks[lock_key], self.redis.pubsub() as pubsub:
-            await pubsub.psubscribe(lock_key_channel)
-            while not state_is_locked:
-                # wait for the lock to be released
-                while True:
-                    if not await self.redis.exists(lock_key):
-                        break  # key was removed, try to get the lock again
-                    message = await pubsub.get_message(
-                        ignore_subscribe_messages=True,
-                        timeout=self.lock_expiration / 1000.0,
-                    )
-                    if message is None:
-                        continue
-                    if message["data"] in self._redis_keyspace_lock_release_events:
-                        break
-                state_is_locked = await self._try_get_lock(lock_key, lock_id)
+        channel = f"__keyspace@0__:{lock_key.decode()}".encode()
+
+        lock = await self._pubsub_subscribe(channel)
+        while True:
+            if await self._try_get_lock(lock_key, lock_id):
+                break
+            # with contextlib.suppress(asyncio.TimeoutError):
+            try:
+                # Attempt to acquire the lock with a timeout
+                await asyncio.wait_for(
+                    lock.acquire(),
+                    # self.lock_expiration,
+                    self.lock_expiration / 1000.0 / 1000,
+                )
+            except asyncio.TimeoutError:
+                continue
+            # raise Exception("i want to see this!")
+
+        await self._pubsub_unsubscribe(channel, lock)
 
     @override
     async def disconnect(self, token: str):
@@ -3509,11 +3592,13 @@ class StateManagerRedis(StateManager):
         Args:
             token: The token to disconnect.
         """
-        lock_key = self._lock_key(token)
-        if lock := self._pubsub_locks.get(lock_key):
-            if lock.locked():
-                lock.release()
-            del self._pubsub_locks[lock_key]
+        await self._pubsub_stop()
+        return
+        # lock_key = self._lock_key(token)
+        # if lock := self._pubsub_locks.get(lock_key):
+        #     if lock.locked():
+        #         lock.release()
+        #     del self._pubsub_locks[lock_key]
 
     @contextlib.asynccontextmanager
     async def _lock(self, token: str):
