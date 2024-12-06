@@ -1218,7 +1218,7 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
             The value of the var.
         """
         # If the state hasn't been initialized yet, return the default value.
-        if not super().__getattribute__("__dict__"):
+        if not super().__getattribute__("__dict__") or name.startswith("__"):
             return super().__getattribute__(name)
 
         inherited_vars = {
@@ -1277,6 +1277,9 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
         Raises:
             SetUndefinedStateVarError: If a value of a var is set without first defining it.
         """
+        if name.startswith("__"):
+            super().__setattr__(name, value)
+
         if isinstance(value, MutableProxy):
             # unwrap proxy objects when assigning back to the state
             value = value.__wrapped__
@@ -2630,6 +2633,8 @@ class StateProxy(wrapt.ObjectProxy):
                 "manager. Use `async with self` to modify state."
             )
         value = super().__getattr__(name)
+        if name.startswith("__"):
+            return value
         if not name.startswith("_self_") and isinstance(value, MutableProxy):
             # ensure mutations to these containers are blocked unless proxy is _mutable
             return ImmutableMutableProxy(
