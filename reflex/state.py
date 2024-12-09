@@ -1325,11 +1325,11 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
                     "0.7.0",
                 )
 
-        # Set the attribute.
-        super().__setattr__(name, value)
-
         # Add the var to the dirty list.
         if name in self.vars or name in self._computed_var_dependencies:
+            # do not mark base vars as dirty if the value did not change
+            if name in self.base_vars and value == getattr(self, name):
+                return
             self.dirty_vars.add(name)
             self._mark_dirty()
 
@@ -1337,6 +1337,9 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
         if name == constants.ROUTER_DATA:
             self.dirty_vars.add(name)
             self._mark_dirty()
+
+        # Set the attribute.
+        super().__setattr__(name, value)
 
     def reset(self):
         """Reset all the base vars to their default values."""
