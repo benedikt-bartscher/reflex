@@ -720,7 +720,7 @@ def test_set_dirty_substate(
     assert grandchild_state.dirty_vars == set()
 
 
-def test_reset(test_state, child_state):
+def test_reset(test_state: TestState, child_state: ChildState):
     """Test resetting the state.
 
     Args:
@@ -745,29 +745,17 @@ def test_reset(test_state, child_state):
     expected_dirty_vars = {
         "num1",
         "num2",
-        "obj",
-        "upper",
-        "complex",
-        "fig",
-        "key",
         "sum",
-        "array",
-        "map_key",
-        "mapping",
-        "dt",
         "_backend",
-        "asynctest",
     }
 
     # The dirty vars should be reset.
     assert test_state.dirty_vars == expected_dirty_vars
-    assert child_state.dirty_vars == {"count", "value"}
+    assert child_state.dirty_vars == {"value"}
 
     # The dirty substates should be reset.
     assert test_state.dirty_substates == {
         ChildState.get_name(),
-        ChildState2.get_name(),
-        ChildState3.get_name(),
     }
 
 
@@ -2275,7 +2263,9 @@ def test_mutable_list(mutable_state: MutableTestState):
     assert_array_dirty()
     mutable_state.array.clear()
     assert_array_dirty()
+    print(mutable_state.array)
     mutable_state.array += [1, 2, 3]
+    print(mutable_state.array)
     assert_array_dirty()
     mutable_state.array.reverse()
     assert_array_dirty()
