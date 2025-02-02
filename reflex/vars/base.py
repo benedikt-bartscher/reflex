@@ -13,7 +13,7 @@ import re
 import string
 import uuid
 import warnings
-from types import CodeType, FunctionType
+from types import CodeType, FunctionType, NoneType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -41,6 +41,8 @@ from typing import (
     reveal_type,
 )
 
+from pandas import DataFrame
+from PIL.Image import Image
 from typing_extensions import ParamSpec, TypeGuard, deprecated, get_type_hints, override
 
 from reflex import constants
@@ -1939,7 +1941,22 @@ class CallableVar(Var):
         return hash((type(self).__name__, self.original_var))
 
 
-RETURN_TYPE = TypeVar("RETURN_TYPE")
+if TYPE_CHECKING:
+    from _typeshed import DataclassInstance
+
+    RETURN_TYPE = TypeVar(
+        "RETURN_TYPE",
+        bound=str
+        | int
+        | float
+        | list
+        | tuple
+        | Mapping
+        | Base
+        | DataclassInstance
+        | Image
+        | DataFrame,
+    )
 
 DICT_KEY = TypeVar("DICT_KEY")
 DICT_VAL = TypeVar("DICT_VAL")
@@ -2516,9 +2533,9 @@ if TYPE_CHECKING:
 
 
 @overload
-def computed_var(
+def computed_var(  # pyright: ignore[reportOverlappingOverload]
     fget: None = None,
-    initial_value: RETURN_TYPE | types.Unset = types.Unset(),
+    initial_value: Any | types.Unset = types.Unset(),
     cache: bool = True,
     deps: Optional[List[Union[str, Var]]] = None,
     auto_deps: bool = True,
@@ -2529,9 +2546,25 @@ def computed_var(
 
 
 @overload
+def computed_var(  # pyright: ignore[reportOverlappingOverload]
+    fget: None = None,
+    initial_value: Any | types.Unset = types.Unset(),
+    cache: bool = True,
+    deps: Optional[List[Union[str, Var]]] = None,
+    auto_deps: bool = True,
+    interval: Optional[Union[datetime.timedelta, int]] = None,
+    backend: bool | None = None,
+    **kwargs,
+) -> Callable[
+    [Callable[[BASE_STATE], Coroutine[None, None, RETURN_TYPE]]],
+    AsyncComputedVar[RETURN_TYPE],
+]: ...  # pyright: ignore [reportInvalidTypeVarUse]
+
+
+@overload
 def computed_var(
     fget: Callable[[BASE_STATE], RETURN_TYPE],
-    initial_value: RETURN_TYPE | types.Unset = types.Unset(),
+    initial_value: Any | types.Unset = types.Unset(),
     cache: bool = True,
     deps: Optional[List[Union[str, Var]]] = None,
     auto_deps: bool = True,
@@ -2541,8 +2574,23 @@ def computed_var(
 ) -> ComputedVar[RETURN_TYPE]: ...
 
 
+@overload
 def computed_var(
-    fget: Callable[[BASE_STATE], RETURN_TYPE] | None = None,
+    fget: Callable[[BASE_STATE], Coroutine[None, None, RETURN_TYPE]],
+    initial_value: Any | types.Unset = types.Unset(),
+    cache: bool = True,
+    deps: Optional[List[Union[str, Var]]] = None,
+    auto_deps: bool = True,
+    interval: Optional[Union[datetime.timedelta, int]] = None,
+    backend: bool | None = None,
+    **kwargs,
+) -> AsyncComputedVar[RETURN_TYPE]: ...
+
+
+def computed_var(
+    fget: Callable[[BASE_STATE], RETURN_TYPE]
+    | Callable[[BASE_STATE], Coroutine[None, None, RETURN_TYPE]]
+    | None = None,
     initial_value: RETURN_TYPE | types.Unset = types.Unset(),
     cache: bool = True,
     deps: Optional[List[Union[str, Var]]] = None,
@@ -2550,7 +2598,15 @@ def computed_var(
     interval: Optional[Union[datetime.timedelta, int]] = None,
     backend: bool | None = None,
     **kwargs,
-) -> ComputedVar | Callable[[Callable[[BASE_STATE], Any]], ComputedVar]:
+) -> (
+    ComputedVar
+    | AsyncComputedVar
+    | Callable[[Callable[[BASE_STATE], Any]], ComputedVar]
+    | Callable[
+        [Callable[[BASE_STATE], Coroutine[None, None, RETURN_TYPE]]],
+        AsyncComputedVar[RETURN_TYPE],
+    ]
+):
     """A ComputedVar decorator with or without kwargs.
 
     Args:
@@ -2582,7 +2638,7 @@ def computed_var(
         else:
             computed_var_cls = ComputedVar
         return computed_var_cls(
-            fget,
+            fget,  # pyright: ignore[reportArgumentType]
             initial_value=initial_value,
             cache=cache,
             deps=deps,
@@ -2623,6 +2679,45 @@ class TestState(BaseState):
         return ""
 
     reveal_type(cached_string)
+
+    @computed_var
+    async def astring(self) -> str:
+        return ""
+
+    reveal_type(astring)
+
+    @computed_var(cache=True)
+    async def cached_astring(self) -> str:
+        return ""
+
+    reveal_type(cached_astring)
+
+    @computed_var
+    def integer(self) -> int:
+        return 0
+
+    reveal_type(integer)
+
+    @computed_var(cache=True)
+    def cached_integer(self) -> int:
+        return 0
+
+    reveal_type(cached_integer)
+
+    @computed_var
+    async def ainteger(self) -> int:
+        return 0
+
+    reveal_type(ainteger)
+
+    # TODO: initial value type check for non async computed vars broken
+    @computed_var(initial_value=0)
+    def wrong_initial(self) -> str:
+        return ""
+
+    @computed_var(initial_value=0)  # pyright: ignore[reportArgumentType]
+    async def awrong_initial(self) -> str:
+        return ""
 
 
 RETURN = TypeVar("RETURN")
