@@ -38,6 +38,7 @@ from typing import (
     cast,
     get_args,
     overload,
+    reveal_type,
 )
 
 from typing_extensions import ParamSpec, TypeGuard, deprecated, get_type_hints, override
@@ -2517,7 +2518,7 @@ if TYPE_CHECKING:
 @overload
 def computed_var(
     fget: None = None,
-    initial_value: Any | types.Unset = types.Unset(),
+    initial_value: RETURN_TYPE | types.Unset = types.Unset(),
     cache: bool = True,
     deps: Optional[List[Union[str, Var]]] = None,
     auto_deps: bool = True,
@@ -2541,8 +2542,8 @@ def computed_var(
 
 
 def computed_var(
-    fget: Callable[[BASE_STATE], Any] | None = None,
-    initial_value: Any | types.Unset = types.Unset(),
+    fget: Callable[[BASE_STATE], RETURN_TYPE] | None = None,
+    initial_value: RETURN_TYPE | types.Unset = types.Unset(),
     cache: bool = True,
     deps: Optional[List[Union[str, Var]]] = None,
     auto_deps: bool = True,
@@ -2608,6 +2609,20 @@ def computed_var(
         )
 
     return wrapper
+
+
+class TestState(BaseState):
+    @computed_var
+    def string(self) -> str:
+        return ""
+
+    reveal_type(string)
+
+    @computed_var(cache=True)
+    def cached_string(self) -> str:
+        return ""
+
+    reveal_type(cached_string)
 
 
 RETURN = TypeVar("RETURN")
