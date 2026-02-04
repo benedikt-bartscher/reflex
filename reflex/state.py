@@ -276,8 +276,13 @@ def get_var_for_field(cls: type[BaseState], name: str, f: Field) -> Var:
     Returns:
         The Var instance.
     """
+    # Use minified var name in the JS expression if var minification is enabled
+    minified_name = cls._get_var_name(name)
     field_name = (
-        format.format_state_name(cls.get_full_name()) + "." + name + FIELD_MARKER
+        format.format_state_name(cls.get_full_name())
+        + "."
+        + minified_name
+        + FIELD_MARKER
     )
 
     return dispatch(
@@ -603,6 +608,16 @@ class BaseState(EvenMoreBasicBaseState):
             name: v._replace(merge_var_data=VarData.from_state(cls))
             for name, v in computed_vars
         }
+
+        # Update computed vars' _js_expr to use minified names if enabled
+        from reflex.minify import is_var_minify_enabled
+
+        if is_var_minify_enabled():
+            cls.computed_vars = {
+                name: cv._replace(_js_expr=cls._get_var_name(name) + FIELD_MARKER)
+                for name, cv in cls.computed_vars.items()
+            }
+
         cls.vars = {
             **cls.inherited_vars,
             **cls.base_vars,
@@ -629,6 +644,11 @@ class BaseState(EvenMoreBasicBaseState):
                 if is_computed_var(value):
                     fget = cls._copy_fn(value.fget)
                     newcv = value._replace(fget=fget, _var_data=VarData.from_state(cls))
+                    # Update _js_expr for minification if enabled
+                    if is_var_minify_enabled():
+                        newcv = newcv._replace(
+                            _js_expr=cls._get_var_name(name) + FIELD_MARKER
+                        )
                     # cleanup refs to mixin cls in var_data
                     setattr(cls, name, newcv)
                     cls.computed_vars[name] = newcv
@@ -1065,6 +1085,35 @@ class BaseState(EvenMoreBasicBaseState):
         if parent_state is not None:
             name = parent_state.get_full_name() + "." + name
         return name
+
+    @classmethod
+    @functools.lru_cache(maxsize=None)
+    def _get_var_name(cls, var_name: str) -> str:
+        """Get the minified name for a variable, or the original name if not minified.
+
+        This method is used to map Python variable names to their minified
+        frontend names when var minification is enabled.
+
+        Args:
+            var_name: The original Python variable name.
+
+        Returns:
+            The minified variable name if var minification is enabled
+            and configured, otherwise the original name.
+        """
+        from reflex.minify import (
+            get_state_full_path,
+            get_var_id,
+            is_var_minify_enabled,
+        )
+
+        if is_var_minify_enabled():
+            state_path = get_state_full_path(cls)
+            var_id = get_var_id(state_path, var_name)
+            if var_id is not None:
+                return var_id
+
+        return var_name
 
     @classmethod
     @functools.lru_cache
@@ -2174,7 +2223,7 @@ class BaseState(EvenMoreBasicBaseState):
         )
 
         subdelta: dict[str, Any] = {
-            prop + FIELD_MARKER: self.get_value(prop)
+            type(self)._get_var_name(prop) + FIELD_MARKER: self.get_value(prop)
             for prop in delta_vars
             if not types.is_backend_base_variable(prop, type(self))
         }
@@ -2327,7 +2376,8 @@ class BaseState(EvenMoreBasicBaseState):
         variables = {**base_vars, **computed_vars}
         d = {
             self.get_full_name(): {
-                k + FIELD_MARKER: variables[k] for k in sorted(variables)
+                self._get_var_name(k) + FIELD_MARKER: variables[k]
+                for k in sorted(variables)
             },
         }
         for substate_d in [

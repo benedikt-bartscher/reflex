@@ -270,7 +270,9 @@ def _compile_client_storage_recursive(
         if name in state.inherited_vars:
             # only include vars defined in this state
             continue
-        state_key = f"{state_name}.{name}" + FIELD_MARKER
+        # Use minified var name in the state key if var minification is enabled
+        minified_name = state._get_var_name(name)
+        state_key = f"{state_name}.{minified_name}" + FIELD_MARKER
         field_type, options = _compile_client_storage_field(field)
         if field_type is None or options is None:
             continue

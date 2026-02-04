@@ -11,15 +11,18 @@ from reflex.minify import (
     MINIFY_JSON,
     SCHEMA_VERSION,
     MinifyConfig,
+    _get_frontend_var_names,
     clear_config_cache,
     generate_minify_config,
     get_event_id,
     get_state_full_path,
     get_state_id,
+    get_var_id,
     int_to_minified_name,
     is_event_minify_enabled,
     is_minify_enabled,
     is_state_minify_enabled,
+    is_var_minify_enabled,
     minified_name_to_int,
     save_minify_config,
     sync_minify_config,
@@ -875,3 +878,228 @@ class TestMinifiedNameCollision:
         # Instance get_substate should resolve a.b.b to ChildState2
         resolved = root.get_substate(["a", "b", "b"])
         assert type(resolved) is ChildState2
+
+
+class TestVarMinification:
+    """Tests for variable name minification with minify.json."""
+
+    def test_var_minify_disabled_by_default(self, temp_minify_json):
+        """Test that var minification is disabled by default."""
+        config: MinifyConfig = {
+            "version": SCHEMA_VERSION,
+            "states": {"test.module.MyState": "a"},
+            "events": {},
+            "vars": {"test.module.MyState": {"my_var": "a"}},
+        }
+        save_minify_config(config)
+        clear_config_cache()
+
+        assert is_var_minify_enabled() is False
+
+    def test_var_minify_enabled_with_env_and_config(
+        self, temp_minify_json, monkeypatch
+    ):
+        """Test that var minification is enabled when env var is enabled and config exists."""
+        monkeypatch.setenv(
+            environment.REFLEX_MINIFY_VARS.name, MinifyMode.ENABLED.value
+        )
+        config: MinifyConfig = {
+            "version": SCHEMA_VERSION,
+            "states": {"test.module.MyState": "a"},
+            "events": {},
+            "vars": {"test.module.MyState": {"my_var": "a"}},
+        }
+        save_minify_config(config)
+        clear_config_cache()
+
+        assert is_var_minify_enabled() is True
+
+    def test_var_minify_disabled_without_config(self, temp_minify_json, monkeypatch):
+        """Test that var minification is disabled when env var is enabled but no config exists."""
+        monkeypatch.setenv(
+            environment.REFLEX_MINIFY_VARS.name, MinifyMode.ENABLED.value
+        )
+        clear_config_cache()
+
+        assert is_var_minify_enabled() is False
+
+    def test_get_var_id_returns_minified_name(self, temp_minify_json, monkeypatch):
+        """Test that get_var_id returns the minified name from config."""
+        monkeypatch.setenv(
+            environment.REFLEX_MINIFY_VARS.name, MinifyMode.ENABLED.value
+        )
+        config: MinifyConfig = {
+            "version": SCHEMA_VERSION,
+            "states": {"test.module.MyState": "a"},
+            "events": {},
+            "vars": {"test.module.MyState": {"my_var": "x"}},
+        }
+        save_minify_config(config)
+        clear_config_cache()
+
+        assert get_var_id("test.module.MyState", "my_var") == "x"
+        assert get_var_id("test.module.MyState", "nonexistent") is None
+        assert get_var_id("nonexistent.State", "my_var") is None
+
+    def test_get_frontend_var_names(self, temp_minify_json):
+        """Test that _get_frontend_var_names returns correct var names."""
+        import reflex as rx
+
+        class TestStateVars(BaseState):
+            count: int = 0
+            name: str = ""
+
+            @rx.var
+            def computed_value(self) -> int:
+                return self.count * 2
+
+            @rx.var(backend=True)
+            def _backend_var(self) -> str:
+                return "internal"
+
+        var_names = _get_frontend_var_names(TestStateVars)
+
+        # Should include base vars and non-backend computed vars
+        assert "count" in var_names
+        assert "name" in var_names
+        assert "computed_value" in var_names
+        # Should NOT include backend computed vars
+        assert "_backend_var" not in var_names
+
+    def test_generate_config_includes_vars(self, temp_minify_json):
+        """Test that generate_minify_config includes vars section."""
+        import reflex as rx
+
+        class TestStateGenVars(BaseState):
+            my_field: int = 0
+
+            @rx.var
+            def my_computed(self) -> int:
+                return self.my_field * 2
+
+        config = generate_minify_config(TestStateGenVars)
+
+        assert "vars" in config
+        state_path = get_state_full_path(TestStateGenVars)
+        config_vars = config.get("vars", {})
+        assert state_path in config_vars
+        assert "my_field" in config_vars[state_path]
+        assert "my_computed" in config_vars[state_path]
+
+    def test_validate_config_detects_duplicate_var_ids(self, temp_minify_json):
+        """Test that validate_minify_config detects duplicate var IDs."""
+
+        class TestStateValidate(BaseState):
+            var_a: int = 0
+            var_b: int = 0
+
+        state_path = get_state_full_path(TestStateValidate)
+        config: MinifyConfig = {
+            "version": SCHEMA_VERSION,
+            "states": {state_path: "a"},
+            "events": {},
+            "vars": {
+                state_path: {
+                    "var_a": "x",
+                    "var_b": "x",  # Duplicate!
+                },
+            },
+        }
+
+        errors, _warnings, _missing = validate_minify_config(config, TestStateValidate)
+
+        assert any("Duplicate var_id='x'" in e for e in errors)
+
+    def test_validate_config_detects_missing_vars(self, temp_minify_json):
+        """Test that validate_minify_config detects missing vars."""
+
+        class TestStateMissing(BaseState):
+            my_var: int = 0
+
+        state_path = get_state_full_path(TestStateMissing)
+        config: MinifyConfig = {
+            "version": SCHEMA_VERSION,
+            "states": {state_path: "a"},
+            "events": {},
+            "vars": {},  # Missing vars section
+        }
+
+        _errors, _warnings, missing = validate_minify_config(config, TestStateMissing)
+
+        assert any(f"var:{state_path}.my_var" in m for m in missing)
+
+    def test_sync_config_adds_new_vars(self, temp_minify_json):
+        """Test that sync_minify_config adds new vars."""
+
+        class TestStateSync(BaseState):
+            new_var: int = 0
+
+        state_path = get_state_full_path(TestStateSync)
+        existing_config: MinifyConfig = {
+            "version": SCHEMA_VERSION,
+            "states": {state_path: "a"},
+            "events": {},
+            "vars": {},
+        }
+
+        new_config = sync_minify_config(existing_config, TestStateSync)
+
+        new_config_vars = new_config.get("vars", {})
+        assert state_path in new_config_vars
+        assert "new_var" in new_config_vars[state_path]
+
+    def test_state_get_var_name_returns_minified(self, temp_minify_json, monkeypatch):
+        """Test that _get_var_name returns minified name when enabled."""
+        monkeypatch.setenv(
+            environment.REFLEX_MINIFY_VARS.name, MinifyMode.ENABLED.value
+        )
+
+        class TestStateGetVarName(State):
+            my_field: int = 0
+
+        state_path = get_state_full_path(TestStateGetVarName)
+        config: MinifyConfig = {
+            "version": SCHEMA_VERSION,
+            "states": {
+                "reflex.state.State": "a",
+                state_path: "b",
+            },
+            "events": {},
+            "vars": {state_path: {"my_field": "z"}},
+        }
+        save_minify_config(config)
+        clear_config_cache()
+        State.get_name.cache_clear()
+        State.get_full_name.cache_clear()
+        TestStateGetVarName._get_var_name.cache_clear()
+
+        # _get_var_name should return minified name
+        assert TestStateGetVarName._get_var_name("my_field") == "z"
+
+    def test_state_get_var_name_returns_original_when_disabled(
+        self, temp_minify_json, monkeypatch
+    ):
+        """Test that _get_var_name returns original name when env var is disabled."""
+        monkeypatch.setenv(
+            environment.REFLEX_MINIFY_VARS.name, MinifyMode.DISABLED.value
+        )
+
+        class TestStateGetVarNameOrig(State):
+            my_field: int = 0
+
+        state_path = get_state_full_path(TestStateGetVarNameOrig)
+        config: MinifyConfig = {
+            "version": SCHEMA_VERSION,
+            "states": {
+                "reflex.state.State": "a",
+                state_path: "b",
+            },
+            "events": {},
+            "vars": {state_path: {"my_field": "z"}},
+        }
+        save_minify_config(config)
+        clear_config_cache()
+        TestStateGetVarNameOrig._get_var_name.cache_clear()
+
+        # _get_var_name should return original name when disabled
+        assert TestStateGetVarNameOrig._get_var_name("my_field") == "my_field"

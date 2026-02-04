@@ -882,8 +882,9 @@ def minify_init():
 
     num_states = len(config["states"])
     num_events = sum(len(handlers) for handlers in config["events"].values())
+    num_vars = sum(len(var_map) for var_map in config.get("vars", {}).values())
     console.log(
-        f"Created {MINIFY_JSON} with {num_states} states and {num_events} events."
+        f"Created {MINIFY_JSON} with {num_states} states, {num_events} events, and {num_vars} vars."
     )
 
 
@@ -932,6 +933,7 @@ def minify_sync(reassign_deleted: bool, prune: bool):
 
     old_states = len(existing_config["states"])
     old_events = sum(len(handlers) for handlers in existing_config["events"].values())
+    old_vars = sum(len(var_map) for var_map in existing_config.get("vars", {}).values())
 
     # Sync the configuration
     new_config = sync_minify_config(
@@ -941,10 +943,12 @@ def minify_sync(reassign_deleted: bool, prune: bool):
 
     new_states = len(new_config["states"])
     new_events = sum(len(handlers) for handlers in new_config["events"].values())
+    new_vars = sum(len(var_map) for var_map in new_config.get("vars", {}).values())
 
     console.log(f"Updated {MINIFY_JSON}:")
     console.log(f"  States: {old_states} -> {new_states}")
     console.log(f"  Events: {old_events} -> {new_events}")
+    console.log(f"  Vars: {old_vars} -> {new_vars}")
 
 
 @minify.command(name="validate")
@@ -1020,6 +1024,8 @@ def minify_list(output_json: bool):
         get_minify_config,
         get_state_full_path,
         get_state_id,
+        get_var_id,
+        _get_frontend_var_names,
     )
     from reflex.state import BaseState, State
     from reflex.utils import prerequisites
@@ -1030,6 +1036,12 @@ def minify_list(output_json: bool):
         name: str
         event_id: str | None  # The minified name (e.g., "a", "ba") or None
 
+    class VarData(TypedDict):
+        """Type for variable data in state tree."""
+
+        name: str
+        var_id: str | None  # The minified name (e.g., "a", "ba") or None
+
     class StateTreeData(TypedDict):
         """Type for state tree data."""
 
@@ -1037,6 +1049,7 @@ def minify_list(output_json: bool):
         full_path: str
         state_id: str | None  # The minified name (e.g., "a", "ba") or None
         event_handlers: list[EventHandlerData]
+        vars: list[VarData]
         substates: list[StateTreeData]
 
     # Load the user's app to register all state classes
@@ -1070,6 +1083,16 @@ def minify_list(output_json: bool):
                 "event_id": event_id,
             })
 
+        # Build vars list
+        vars_list = []
+        for var_name in sorted(_get_frontend_var_names(state_cls)):
+            # var_id is the minified name directly (a string like "a", "ba")
+            var_id = get_var_id(state_path, var_name) if minify_enabled else None
+            vars_list.append({
+                "name": var_name,
+                "var_id": var_id,
+            })
+
         # Build substates recursively
         substates = [
             build_state_tree(substate)
@@ -1081,6 +1104,7 @@ def minify_list(output_json: bool):
             "full_path": state_path,
             "state_id": state_id,
             "event_handlers": handlers,
+            "vars": vars_list,
             "substates": substates,
         }
 
@@ -1109,12 +1133,16 @@ def minify_list(output_json: bool):
 
         # Print event handlers
         handlers = state_data["event_handlers"]
+        vars_list = state_data["vars"]
         substates = state_data["substates"]
+        has_vars = len(vars_list) > 0
         has_substates = len(substates) > 0
 
         if handlers:
             console.log(f"{child_prefix}|-- Event Handlers:")
-            handler_prefix = child_prefix + ("|   " if has_substates else "    ")
+            handler_prefix = child_prefix + (
+                "|   " if (has_vars or has_substates) else "    "
+            )
             for i, handler in enumerate(handlers):
                 is_last_handler = i == len(handlers) - 1
                 h_connector = "`-- " if is_last_handler else "|-- "
@@ -1126,6 +1154,21 @@ def minify_list(output_json: bool):
                     )
                 else:
                     console.log(f"{handler_prefix}{h_connector}{handler['name']}")
+
+        # Print vars
+        if vars_list:
+            console.log(f"{child_prefix}|-- Vars:")
+            var_prefix = child_prefix + ("|   " if has_substates else "    ")
+            for i, var_data in enumerate(vars_list):
+                is_last_var = i == len(vars_list) - 1
+                v_connector = "`-- " if is_last_var else "|-- "
+                var_id = var_data["var_id"]
+                if var_id is not None:
+                    console.log(
+                        f'{var_prefix}{v_connector}{var_data["name"]} -> "{var_id}"'
+                    )
+                else:
+                    console.log(f"{var_prefix}{v_connector}{var_data['name']}")
 
         # Print substates recursively
         for i, substate in enumerate(substates):

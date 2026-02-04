@@ -775,6 +775,9 @@ class EnvironmentVariables:
     # Whether to enable event ID minification (requires minify.json).
     REFLEX_MINIFY_EVENTS: EnvVar[MinifyMode] = env_var(MinifyMode.DISABLED)
 
+    # Whether to enable variable name minification (requires minify.json).
+    REFLEX_MINIFY_VARS: EnvVar[MinifyMode] = env_var(MinifyMode.DISABLED)
+
 
 environment = EnvironmentVariables()
 

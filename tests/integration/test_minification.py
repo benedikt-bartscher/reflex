@@ -135,6 +135,7 @@ def minify_enabled_app(
     # Enable minification via env vars (required in addition to minify.json)
     monkeypatch.setenv(environment.REFLEX_MINIFY_STATES.name, MinifyMode.ENABLED.value)
     monkeypatch.setenv(environment.REFLEX_MINIFY_EVENTS.name, MinifyMode.ENABLED.value)
+    monkeypatch.setenv(environment.REFLEX_MINIFY_VARS.name, MinifyMode.ENABLED.value)
 
     # Clear minify config cache to ensure clean state
     clear_config_cache()
@@ -173,6 +174,15 @@ def minify_enabled_app(
             },
             sub_state_path: {
                 "update_message": "h",  # int_to_minified_name(7) = 'h'
+            },
+        },
+        "vars": {
+            # Vars are nested under their state path
+            root_state_path: {
+                "count": "m",  # minified var name
+            },
+            sub_state_path: {
+                "message": "n",  # minified var name
             },
         },
     }

@@ -11,6 +11,8 @@ import json
 from pathlib import Path
 from typing import TYPE_CHECKING, TypedDict
 
+from typing_extensions import NotRequired
+
 if TYPE_CHECKING:
     from reflex.state import BaseState
 
@@ -24,14 +26,18 @@ SCHEMA_VERSION = 1
 class MinifyConfig(TypedDict):
     """Schema for minify.json file.
 
-    Version 2 format:
+    Version 1 format:
     - states: dict mapping state_path -> minified_name (string)
     - events: dict mapping state_path -> {handler_name -> minified_name}
+    - vars (optional): dict mapping state_path -> {var_name -> minified_name}
     """
 
     version: int
     states: dict[str, str]  # state_path -> minified_name
     events: dict[str, dict[str, str]]  # state_path -> {handler_name -> minified_name}
+    vars: NotRequired[
+        dict[str, dict[str, str]]
+    ]  # state_path -> {var_name -> minified_name}
 
 
 def _get_minify_json_path() -> Path:
@@ -95,11 +101,28 @@ def _load_minify_config_uncached() -> MinifyConfig | None:
                 msg = f"Invalid {MINIFY_JSON}: event '{state_path}.{handler_name}' has non-string id: {event_id}"
                 raise ValueError(msg)
 
-    return MinifyConfig(
+    # Validate vars (optional): must be dict of dicts with string values
+    if "vars" in data:
+        if not isinstance(data["vars"], dict):
+            msg = f"Invalid {MINIFY_JSON}: 'vars' must be a dictionary."
+            raise ValueError(msg)
+        for state_path, var_map in data["vars"].items():
+            if not isinstance(var_map, dict):
+                msg = f"Invalid {MINIFY_JSON}: vars for '{state_path}' must be a dictionary."
+                raise ValueError(msg)
+            for var_name, var_id in var_map.items():
+                if not isinstance(var_id, str):
+                    msg = f"Invalid {MINIFY_JSON}: var '{state_path}.{var_name}' has non-string id: {var_id}"
+                    raise ValueError(msg)
+
+    config = MinifyConfig(
         version=data["version"],
         states=data["states"],
         events=data["events"],
     )
+    if "vars" in data:
+        config["vars"] = data["vars"]
+    return config
 
 
 @functools.cache
@@ -157,6 +180,23 @@ def is_event_minify_enabled() -> bool:
     )
 
 
+@functools.cache
+def is_var_minify_enabled() -> bool:
+    """Check if variable name minification is enabled.
+
+    Requires both REFLEX_MINIFY_VARS=enabled and minify.json to exist.
+
+    Returns:
+        True if variable minification is enabled.
+    """
+    from reflex.environment import MinifyMode, environment
+
+    return (
+        environment.REFLEX_MINIFY_VARS.get() == MinifyMode.ENABLED
+        and get_minify_config() is not None
+    )
+
+
 def get_state_id(state_full_path: str) -> str | None:
     """Get the minified ID for a state.
 
@@ -191,6 +231,25 @@ def get_event_id(state_full_path: str, handler_name: str) -> str | None:
     return state_events.get(handler_name)
 
 
+def get_var_id(state_full_path: str, var_name: str) -> str | None:
+    """Get the minified ID for a variable.
+
+    Args:
+        state_full_path: The full path to the state.
+        var_name: The name of the variable.
+
+    Returns:
+        The minified variable name (e.g., "a", "ba") if configured, None otherwise.
+    """
+    config = get_minify_config()
+    if config is None:
+        return None
+    state_vars = config.get("vars", {}).get(state_full_path)
+    if state_vars is None:
+        return None
+    return state_vars.get(var_name)
+
+
 def save_minify_config(config: MinifyConfig) -> None:
     """Save minify configuration to minify.json.
 
@@ -211,6 +270,7 @@ def clear_config_cache() -> None:
     get_minify_config.cache_clear()
     is_state_minify_enabled.cache_clear()
     is_event_minify_enabled.cache_clear()
+    is_var_minify_enabled.cache_clear()
 
 
 # Base-54 encoding for minified names
@@ -319,8 +379,27 @@ def collect_all_states(
     return result
 
 
+def _get_frontend_var_names(state_cls: type[BaseState]) -> set[str]:
+    """Get the names of frontend variables for a state class.
+
+    This includes base_vars and non-backend computed_vars.
+    These are the variables that get sent to the frontend.
+
+    Args:
+        state_cls: The state class.
+
+    Returns:
+        Set of variable names that are sent to the frontend.
+    """
+    var_names: set[str] = set(state_cls.base_vars.keys())
+    var_names.update(
+        name for name, cv in state_cls.computed_vars.items() if not cv._backend
+    )
+    return var_names
+
+
 def generate_minify_config(root_state: type[BaseState]) -> MinifyConfig:
-    """Generate a complete minify configuration for all states and events.
+    """Generate a complete minify configuration for all states, events, and vars.
 
     Assigns minified names starting from 'a' for each scope (siblings get unique names),
     sorted alphabetically by name for determinism.
@@ -333,6 +412,7 @@ def generate_minify_config(root_state: type[BaseState]) -> MinifyConfig:
     """
     states: dict[str, str] = {}
     events: dict[str, dict[str, str]] = {}
+    vars_: dict[str, dict[str, str]] = {}
 
     def process_state(
         state_cls: type[BaseState],
@@ -364,6 +444,14 @@ def generate_minify_config(root_state: type[BaseState]) -> MinifyConfig:
         if state_events:
             events[state_path] = state_events
 
+        # Assign var IDs for this state's frontend vars (sorted alphabetically)
+        var_names = sorted(_get_frontend_var_names(state_cls))
+        state_vars: dict[str, str] = {}
+        for var_id, var_name in enumerate(var_names):
+            state_vars[var_name] = int_to_minified_name(var_id)
+        if state_vars:
+            vars_[state_path] = state_vars
+
         # Process children (sorted alphabetically)
         children = sorted(state_cls.class_subclasses, key=lambda s: s.__name__)
         for child in children:
@@ -373,11 +461,14 @@ def generate_minify_config(root_state: type[BaseState]) -> MinifyConfig:
     sibling_counter: dict[type[BaseState] | None, int] = {}
     process_state(root_state, sibling_counter)
 
-    return MinifyConfig(
+    config = MinifyConfig(
         version=SCHEMA_VERSION,
         states=states,
         events=events,
     )
+    if vars_:
+        config["vars"] = vars_
+    return config
 
 
 def validate_minify_config(
@@ -394,7 +485,7 @@ def validate_minify_config(
         A tuple of (errors, warnings, missing_entries):
         - errors: Critical issues (duplicate IDs, etc.)
         - warnings: Non-critical issues (orphaned entries)
-        - missing_entries: States/events in code but not in config
+        - missing_entries: States/events/vars in code but not in config
     """
     errors: list[str] = []
 
@@ -436,6 +527,21 @@ def validate_minify_config(
                     f"Duplicate event_id='{minified_name}' in '{state_path}': {handler_names}"
                 )
 
+    # Check for duplicate var IDs within same state
+    config_vars = config.get("vars", {})
+    for state_path, state_vars in config_vars.items():
+        id_to_var_names: dict[str, list[str]] = {}
+        for var_name, minified_name in state_vars.items():
+            if minified_name not in id_to_var_names:
+                id_to_var_names[minified_name] = []
+            id_to_var_names[minified_name].append(var_name)
+
+        for minified_name, var_names in id_to_var_names.items():
+            if len(var_names) > 1:
+                errors.append(
+                    f"Duplicate var_id='{minified_name}' in '{state_path}': {var_names}"
+                )
+
     # Check for missing states (in code but not in config)
     code_state_paths = {get_state_full_path(s) for s in all_states}
     missing: list[str] = [
@@ -454,6 +560,16 @@ def validate_minify_config(
             if handler_name not in state_events
         )
 
+    # Check for missing vars (in code but not in config)
+    for state_cls in all_states:
+        state_path = get_state_full_path(state_cls)
+        state_vars = config_vars.get(state_path, {})
+        missing.extend(
+            f"var:{state_path}.{var_name}"
+            for var_name in _get_frontend_var_names(state_cls)
+            if var_name not in state_vars
+        )
+
     # Check for orphaned entries (in config but not in code)
     warnings: list[str] = [
         f"Orphaned state in config: {state_path}"
@@ -462,9 +578,11 @@ def validate_minify_config(
     ]
 
     code_event_keys: dict[str, set[str]] = {}
+    code_var_keys: dict[str, set[str]] = {}
     for state_cls in all_states:
         state_path = get_state_full_path(state_cls)
         code_event_keys[state_path] = set(state_cls.event_handlers.keys())
+        code_var_keys[state_path] = _get_frontend_var_names(state_cls)
 
     for state_path, state_events in config["events"].items():
         if state_path not in code_event_keys:
@@ -474,6 +592,16 @@ def validate_minify_config(
                 f"Orphaned event in config: {state_path}.{handler_name}"
                 for handler_name in state_events
                 if handler_name not in code_event_keys[state_path]
+            )
+
+    for state_path, state_vars in config_vars.items():
+        if state_path not in code_var_keys:
+            warnings.append(f"Orphaned vars for state: {state_path}")
+        else:
+            warnings.extend(
+                f"Orphaned var in config: {state_path}.{var_name}"
+                for var_name in state_vars
+                if var_name not in code_var_keys[state_path]
             )
 
     return errors, warnings, missing
@@ -491,7 +619,7 @@ def sync_minify_config(
         existing_config: The existing configuration to update.
         root_state: The root state class.
         reassign_deleted: If True, reassign IDs that are no longer in use.
-        prune: If True, remove entries for states/events that no longer exist.
+        prune: If True, remove entries for states/events/vars that no longer exist.
 
     Returns:
         The updated configuration.
@@ -499,15 +627,20 @@ def sync_minify_config(
     all_states = collect_all_states(root_state)
     code_state_paths = {get_state_full_path(s) for s in all_states}
 
-    # Build current event keys by state
+    # Build current event and var keys by state
     code_events_by_state: dict[str, set[str]] = {}
+    code_vars_by_state: dict[str, set[str]] = {}
     for state_cls in all_states:
         state_path = get_state_full_path(state_cls)
         code_events_by_state[state_path] = set(state_cls.event_handlers.keys())
+        code_vars_by_state[state_path] = _get_frontend_var_names(state_cls)
 
     new_states = dict(existing_config["states"])
     new_events: dict[str, dict[str, str]] = {
         k: dict(v) for k, v in existing_config["events"].items()
+    }
+    new_vars: dict[str, dict[str, str]] = {
+        k: dict(v) for k, v in existing_config.get("vars", {}).items()
     }
 
     # Prune orphaned entries if requested
@@ -524,6 +657,18 @@ def sync_minify_config(
         }
         # Remove empty event dicts
         new_events = {k: v for k, v in new_events.items() if v}
+
+        new_vars = {
+            state_path: {
+                v: vid
+                for v, vid in var_map.items()
+                if v in code_vars_by_state.get(state_path, set())
+            }
+            for state_path, var_map in new_vars.items()
+            if state_path in code_state_paths
+        }
+        # Remove empty var dicts
+        new_vars = {k: v for k, v in new_vars.items() if v}
 
     # Find states that need IDs assigned
     # Group by parent for sibling-unique assignment
@@ -582,8 +727,34 @@ def sync_minify_config(
 
             new_events[state_path] = state_events
 
-    return MinifyConfig(
+    # Find vars that need IDs assigned
+    for state_cls in all_states:
+        state_path = get_state_full_path(state_cls)
+        state_vars = new_vars.get(state_path, {})
+        new_var_names = [
+            v for v in _get_frontend_var_names(state_cls) if v not in state_vars
+        ]
+
+        if new_var_names:
+            # Get existing IDs for this state's vars
+            existing_ids = {minified_name_to_int(vid) for vid in state_vars.values()}
+
+            next_id = 0 if reassign_deleted else (max(existing_ids, default=-1) + 1)
+
+            for var_name in sorted(new_var_names):
+                while next_id in existing_ids:
+                    next_id += 1
+                state_vars[var_name] = int_to_minified_name(next_id)
+                existing_ids.add(next_id)
+                next_id += 1
+
+            new_vars[state_path] = state_vars
+
+    config = MinifyConfig(
         version=SCHEMA_VERSION,
         states=new_states,
         events=new_events,
     )
+    if new_vars:
+        config["vars"] = new_vars
+    return config
