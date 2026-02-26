@@ -76,12 +76,12 @@ def TestEventAction():
             ),
             rx.button(
                 "Click event",
-                on_click=EventActionState.on_click("no_event_actions"),  # pyright: ignore [reportCallIssue]
+                on_click=EventActionState.on_click("no_event_actions"),  # type: ignore [reportCallIssue]
                 id="btn-click-event",
             ),
             rx.button(
                 "Click stop propagation",
-                on_click=EventActionState.on_click("stop_propagation").stop_propagation,  # pyright: ignore [reportCallIssue]
+                on_click=EventActionState.on_click("stop_propagation").stop_propagation,  # type: ignore [reportCallIssue]
                 id="btn-click-stop-propagation",
             ),
             rx.button(
@@ -97,13 +97,13 @@ def TestEventAction():
             rx.link(
                 "Link",
                 href="?link",
-                on_click=EventActionState.on_click("link_no_event_actions"),  # pyright: ignore [reportCallIssue]
+                on_click=EventActionState.on_click("link_no_event_actions"),  # type: ignore [reportCallIssue]
                 id="link",
             ),
             rx.link(
                 "Link Stop Propagation",
                 href="?link-stop-propagation",
-                on_click=EventActionState.on_click(  # pyright: ignore [reportCallIssue]
+                on_click=EventActionState.on_click(  # type: ignore [reportCallIssue]
                     "link_stop_propagation"
                 ).stop_propagation,
                 id="link-stop-propagation",
@@ -117,7 +117,7 @@ def TestEventAction():
             rx.link(
                 "Link Prevent Default",
                 href="/invalid",
-                on_click=EventActionState.on_click(  # pyright: ignore [reportCallIssue]
+                on_click=EventActionState.on_click(  # type: ignore [reportCallIssue]
                     "link_prevent_default"
                 ).prevent_default,
                 id="link-prevent-default",
@@ -125,20 +125,20 @@ def TestEventAction():
             rx.link(
                 "Link Both",
                 href="/invalid",
-                on_click=EventActionState.on_click(  # pyright: ignore [reportCallIssue]
+                on_click=EventActionState.on_click(  # type: ignore [reportCallIssue]
                     "link_both"
                 ).stop_propagation.prevent_default,
                 id="link-stop-propagation-prevent-default",
             ),
             EventFiringComponent.create(
                 id="custom-stop-propagation",
-                on_click=EventActionState.on_click(  # pyright: ignore [reportCallIssue]
+                on_click=EventActionState.on_click(  # type: ignore [reportCallIssue]
                     "custom-stop-propagation"
                 ).stop_propagation,
             ),
             EventFiringComponent.create(
                 id="custom-prevent-default",
-                on_click=EventActionState.on_click(  # pyright: ignore [reportCallIssue]
+                on_click=EventActionState.on_click(  # type: ignore [reportCallIssue]
                     "custom-prevent-default"
                 ).prevent_default,
             ),
@@ -146,7 +146,7 @@ def TestEventAction():
                 "Throttle",
                 id="btn-throttle",
                 on_click=lambda: (
-                    EventActionState.on_click_throttle.throttle(  # pyright: ignore [reportFunctionMemberAccess]
+                    EventActionState.on_click_throttle.throttle(  # type: ignore [reportFunctionMemberAccess]
                         200
                     ).stop_propagation
                 ),
@@ -154,17 +154,17 @@ def TestEventAction():
             rx.button(
                 "Debounce",
                 id="btn-debounce",
-                on_click=EventActionState.on_click_debounce.debounce(  # pyright: ignore [reportFunctionMemberAccess]
+                on_click=EventActionState.on_click_debounce.debounce(  # type: ignore [reportFunctionMemberAccess]
                     200
                 ).stop_propagation,
             ),
-            rx.list(  # pyright: ignore [reportAttributeAccessIssue]
+            rx.list(  # type: ignore [reportAttributeAccessIssue]
                 rx.foreach(
                     EventActionState.order,
                     rx.list_item,
                 ),
             ),
-            on_click=EventActionState.on_click("outer"),  # pyright: ignore [reportCallIssue]
+            on_click=EventActionState.on_click("outer"),  # type: ignore [reportCallIssue]
         ), rx.form(
             rx.dialog.root(
                 rx.dialog.trigger(
@@ -175,12 +175,12 @@ def TestEventAction():
                     rx.dialog.close(
                         rx.form(
                             rx.button("Submit", id="btn-submit"),
-                            on_submit=EventActionState.on_submit.stop_propagation,  # pyright: ignore [reportCallIssue]
+                            on_submit=EventActionState.on_submit.stop_propagation,  # type: ignore [reportCallIssue]
                         ),
                     ),
                 ),
             ),
-            on_submit=EventActionState.on_submit,  # pyright: ignore [reportCallIssue]
+            on_submit=EventActionState.on_submit,  # type: ignore [reportCallIssue]
         )
 
     app = rx.App()
@@ -267,10 +267,10 @@ def poll_for_order(
 
     async def _poll_for_order(exp_order: list[str]):
         async def _check():
-            return (await _backend_state(event_action, token)).order == exp_order  # pyright: ignore[reportAttributeAccessIssue]
+            return (await _backend_state(event_action, token)).order == exp_order  # type: ignore[reportAttributeAccessIssue]
 
         await AppHarness._poll_for_async(_check)
-        assert (await _backend_state(event_action, token)).order == exp_order  # pyright: ignore[reportAttributeAccessIssue]
+        assert (await _backend_state(event_action, token)).order == exp_order  # type: ignore[reportAttributeAccessIssue]
 
     return _poll_for_order
 
@@ -360,12 +360,12 @@ async def test_event_actions_throttle_debounce(
     # Wait until the debounce event shows up
     async def _debounce_received():
         state = await _backend_state(event_action, token)
-        return state.order and state.order[-1] == "on_click_debounce"  # pyright: ignore[reportAttributeAccessIssue]
+        return state.order and state.order[-1] == "on_click_debounce"  # type: ignore[reportAttributeAccessIssue]
 
     await AppHarness._poll_for_async(_debounce_received)
 
     # This test is inherently racy, so ensure the `on_click_throttle` event is fired approximately the expected number of times.
-    final_event_order = (await _backend_state(event_action, token)).order  # pyright: ignore[reportAttributeAccessIssue]
+    final_event_order = (await _backend_state(event_action, token)).order  # type: ignore[reportAttributeAccessIssue]
     n_on_click_throttle_received = final_event_order.count("on_click_throttle")
     print(
         f"Expected ~{exp_events} on_click_throttle events, received {n_on_click_throttle_received}"
@@ -394,8 +394,8 @@ async def test_event_actions_dialog_form_in_form(
 
     driver.find_element(By.ID, open_dialog_id).click()
     el = wait.until(EC.element_to_be_clickable((By.ID, submit_button_id)))
-    el.click()  # pyright: ignore[reportAttributeAccessIssue]
-    el.send_keys(Keys.ESCAPE)  # pyright: ignore[reportAttributeAccessIssue]
+    el.click()  # type: ignore[reportAttributeAccessIssue]
+    el.send_keys(Keys.ESCAPE)  # type: ignore[reportAttributeAccessIssue]
 
     btn_no_events = wait.until(EC.element_to_be_clickable((By.ID, "btn-no-events")))
     btn_no_events.location_once_scrolled_into_view

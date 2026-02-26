@@ -241,7 +241,7 @@ class Match(MemoizationLeaf):
                     cond=match_cond_var,
                     match_cases=match_cases,
                     default=default,
-                    children=[case[1] for case in match_cases] + [default],  # pyright: ignore [reportArgumentType]
+                    children=[case[1] for case in match_cases] + [default],  # type: ignore [reportArgumentType]
                 )
             )
 

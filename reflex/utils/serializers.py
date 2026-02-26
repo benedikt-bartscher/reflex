@@ -516,7 +516,7 @@ with contextlib.suppress(ImportError):
         base64_image = base64.b64encode(image_bytes).decode("utf-8")
         try:
             # Newer method to get the mime type, but does not always work.
-            mime_type = image.get_format_mimetype()  # pyright: ignore [reportAttributeAccessIssue]
+            mime_type = image.get_format_mimetype()  # type: ignore [reportAttributeAccessIssue]
         except AttributeError:
             try:
                 # Fallback method

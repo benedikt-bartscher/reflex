@@ -322,7 +322,7 @@ def _override_base_method(fn: Callable[PARAMS, RETURN]) -> Callable[PARAMS, RETU
     Returns:
         The marked function.
     """
-    fn.__override_base_method__ = True  # pyright: ignore[reportFunctionMemberAccess]
+    fn.__override_base_method__ = True  # type: ignore[reportFunctionMemberAccess]
     return fn
 
 
@@ -1695,7 +1695,7 @@ class BaseState(EvenMoreBasicBaseState):
         if (
             var_value := getattr(var, "_var_value", unset)
         ) is not unset and not isinstance(var_value, Var):
-            return var_value  # pyright: ignore [reportReturnType]
+            return var_value  # type: ignore [reportReturnType]
 
         var_data = var._get_all_var_data()
         if var_data is None or not var_data.state:

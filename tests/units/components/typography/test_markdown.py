@@ -29,7 +29,7 @@ def test_get_component(tag, expected):
         expected: The expected component.
     """
     md = Markdown.create("# Hello")
-    assert tag in md.component_map  # pyright: ignore [reportAttributeAccessIssue]
+    assert tag in md.component_map  # type: ignore [reportAttributeAccessIssue]
     assert md.get_component(tag).tag == expected
 
 

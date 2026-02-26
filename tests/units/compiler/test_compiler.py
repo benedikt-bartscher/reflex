@@ -367,17 +367,17 @@ def test_create_document_root():
     assert isinstance(root, utils.Html)
     assert isinstance(root.children[0], utils.Head)
     # Default language.
-    lang = root.lang  # pyright: ignore [reportAttributeAccessIssue]
+    lang = root.lang  # type: ignore [reportAttributeAccessIssue]
     assert isinstance(lang, LiteralStringVar)
     assert lang.equals(Var.create("en"))
     # No children in head.
     assert len(root.children[0].children) == 6
     assert isinstance(root.children[0].children[1], utils.Meta)
-    char_set = root.children[0].children[1].char_set  # pyright: ignore [reportAttributeAccessIssue]
+    char_set = root.children[0].children[1].char_set  # type: ignore [reportAttributeAccessIssue]
     assert isinstance(char_set, LiteralStringVar)
     assert char_set.equals(Var.create("utf-8"))
     assert isinstance(root.children[0].children[2], utils.Meta)
-    name = root.children[0].children[2].name  # pyright: ignore [reportAttributeAccessIssue]
+    name = root.children[0].children[2].name  # type: ignore [reportAttributeAccessIssue]
     assert isinstance(name, LiteralStringVar)
     assert name.equals(Var.create("viewport"))
     assert isinstance(root.children[0].children[3], document.Meta)
@@ -409,7 +409,7 @@ def test_create_document_root_with_scripts():
         "link",
         "Links",
     ]
-    lang = root.lang  # pyright: ignore [reportAttributeAccessIssue]
+    lang = root.lang  # type: ignore [reportAttributeAccessIssue]
     assert isinstance(lang, LiteralStringVar)
     assert lang.equals(Var.create("rx"))
     assert isinstance(root.custom_attrs, dict)
@@ -428,7 +428,7 @@ def test_create_document_root_with_meta_char_set():
     assert len(root.children[0].children) == 6
     names = [c.tag for c in root.children[0].children]
     assert names == ["script", "meta", "meta", "Meta", "link", "Links"]
-    assert str(root.children[0].children[1].char_set) == '"cp1252"'  # pyright: ignore [reportAttributeAccessIssue]
+    assert str(root.children[0].children[1].char_set) == '"cp1252"'  # type: ignore [reportAttributeAccessIssue]
 
 
 def test_create_document_root_with_meta_viewport():
@@ -444,7 +444,7 @@ def test_create_document_root_with_meta_viewport():
     assert len(root.children[0].children) == 7
     names = [c.tag for c in root.children[0].children]
     assert names == ["script", "meta", "meta", "meta", "Meta", "link", "Links"]
-    assert str(root.children[0].children[1].http_equiv) == '"refresh"'  # pyright: ignore [reportAttributeAccessIssue]
-    assert str(root.children[0].children[2].name) == '"viewport"'  # pyright: ignore [reportAttributeAccessIssue]
-    assert str(root.children[0].children[2].content) == '"foo"'  # pyright: ignore [reportAttributeAccessIssue]
-    assert str(root.children[0].children[3].char_set) == '"utf-8"'  # pyright: ignore [reportAttributeAccessIssue]
+    assert str(root.children[0].children[1].http_equiv) == '"refresh"'  # type: ignore [reportAttributeAccessIssue]
+    assert str(root.children[0].children[2].name) == '"viewport"'  # type: ignore [reportAttributeAccessIssue]
+    assert str(root.children[0].children[2].content) == '"foo"'  # type: ignore [reportAttributeAccessIssue]
+    assert str(root.children[0].children[3].char_set) == '"utf-8"'  # type: ignore [reportAttributeAccessIssue]

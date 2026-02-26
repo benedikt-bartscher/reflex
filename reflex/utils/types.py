@@ -25,9 +25,9 @@ from typing import (  # noqa: UP035
     Tuple,
     TypeVar,
     Union,
-    _eval_type,  # pyright: ignore [reportAttributeAccessIssue]
-    _GenericAlias,  # pyright: ignore [reportAttributeAccessIssue]
-    _SpecialGenericAlias,  # pyright: ignore [reportAttributeAccessIssue]
+    _eval_type,  # type: ignore [reportAttributeAccessIssue]
+    _GenericAlias,  # type: ignore [reportAttributeAccessIssue]
+    _SpecialGenericAlias,  # type: ignore [reportAttributeAccessIssue]
     get_args,
     is_typeddict,
 )
@@ -74,24 +74,24 @@ class _ArgsSpec0(Protocol):
 
 
 class _ArgsSpec1(Protocol):
-    def __call__(self, var1: VAR1, /) -> Sequence[Var]: ...  # pyright: ignore [reportInvalidTypeVarUse]
+    def __call__(self, var1: VAR1, /) -> Sequence[Var]: ...  # type: ignore [reportInvalidTypeVarUse]
 
 
 class _ArgsSpec2(Protocol):
-    def __call__(self, var1: VAR1, var2: VAR2, /) -> Sequence[Var]: ...  # pyright: ignore [reportInvalidTypeVarUse]
+    def __call__(self, var1: VAR1, var2: VAR2, /) -> Sequence[Var]: ...  # type: ignore [reportInvalidTypeVarUse]
 
 
 class _ArgsSpec3(Protocol):
-    def __call__(self, var1: VAR1, var2: VAR2, var3: VAR3, /) -> Sequence[Var]: ...  # pyright: ignore [reportInvalidTypeVarUse]
+    def __call__(self, var1: VAR1, var2: VAR2, var3: VAR3, /) -> Sequence[Var]: ...  # type: ignore [reportInvalidTypeVarUse]
 
 
 class _ArgsSpec4(Protocol):
     def __call__(
         self,
-        var1: VAR1,  # pyright: ignore [reportInvalidTypeVarUse]
-        var2: VAR2,  # pyright: ignore [reportInvalidTypeVarUse]
-        var3: VAR3,  # pyright: ignore [reportInvalidTypeVarUse]
-        var4: VAR4,  # pyright: ignore [reportInvalidTypeVarUse]
+        var1: VAR1,  # type: ignore [reportInvalidTypeVarUse]
+        var2: VAR2,  # type: ignore [reportInvalidTypeVarUse]
+        var3: VAR3,  # type: ignore [reportInvalidTypeVarUse]
+        var4: VAR4,  # type: ignore [reportInvalidTypeVarUse]
         /,
     ) -> Sequence[Var]: ...
 
@@ -99,11 +99,11 @@ class _ArgsSpec4(Protocol):
 class _ArgsSpec5(Protocol):
     def __call__(
         self,
-        var1: VAR1,  # pyright: ignore [reportInvalidTypeVarUse]
-        var2: VAR2,  # pyright: ignore [reportInvalidTypeVarUse]
-        var3: VAR3,  # pyright: ignore [reportInvalidTypeVarUse]
-        var4: VAR4,  # pyright: ignore [reportInvalidTypeVarUse]
-        var5: VAR5,  # pyright: ignore [reportInvalidTypeVarUse]
+        var1: VAR1,  # type: ignore [reportInvalidTypeVarUse]
+        var2: VAR2,  # type: ignore [reportInvalidTypeVarUse]
+        var3: VAR3,  # type: ignore [reportInvalidTypeVarUse]
+        var4: VAR4,  # type: ignore [reportInvalidTypeVarUse]
+        var5: VAR5,  # type: ignore [reportInvalidTypeVarUse]
         /,
     ) -> Sequence[Var]: ...
 
@@ -111,12 +111,12 @@ class _ArgsSpec5(Protocol):
 class _ArgsSpec6(Protocol):
     def __call__(
         self,
-        var1: VAR1,  # pyright: ignore [reportInvalidTypeVarUse]
-        var2: VAR2,  # pyright: ignore [reportInvalidTypeVarUse]
-        var3: VAR3,  # pyright: ignore [reportInvalidTypeVarUse]
-        var4: VAR4,  # pyright: ignore [reportInvalidTypeVarUse]
-        var5: VAR5,  # pyright: ignore [reportInvalidTypeVarUse]
-        var6: VAR6,  # pyright: ignore [reportInvalidTypeVarUse]
+        var1: VAR1,  # type: ignore [reportInvalidTypeVarUse]
+        var2: VAR2,  # type: ignore [reportInvalidTypeVarUse]
+        var3: VAR3,  # type: ignore [reportInvalidTypeVarUse]
+        var4: VAR4,  # type: ignore [reportInvalidTypeVarUse]
+        var5: VAR5,  # type: ignore [reportInvalidTypeVarUse]
+        var6: VAR6,  # type: ignore [reportInvalidTypeVarUse]
         /,
     ) -> Sequence[Var]: ...
 
@@ -124,13 +124,13 @@ class _ArgsSpec6(Protocol):
 class _ArgsSpec7(Protocol):
     def __call__(
         self,
-        var1: VAR1,  # pyright: ignore [reportInvalidTypeVarUse]
-        var2: VAR2,  # pyright: ignore [reportInvalidTypeVarUse]
-        var3: VAR3,  # pyright: ignore [reportInvalidTypeVarUse]
-        var4: VAR4,  # pyright: ignore [reportInvalidTypeVarUse]
-        var5: VAR5,  # pyright: ignore [reportInvalidTypeVarUse]
-        var6: VAR6,  # pyright: ignore [reportInvalidTypeVarUse]
-        var7: VAR7,  # pyright: ignore [reportInvalidTypeVarUse]
+        var1: VAR1,  # type: ignore [reportInvalidTypeVarUse]
+        var2: VAR2,  # type: ignore [reportInvalidTypeVarUse]
+        var3: VAR3,  # type: ignore [reportInvalidTypeVarUse]
+        var4: VAR4,  # type: ignore [reportInvalidTypeVarUse]
+        var5: VAR5,  # type: ignore [reportInvalidTypeVarUse]
+        var6: VAR6,  # type: ignore [reportInvalidTypeVarUse]
+        var7: VAR7,  # type: ignore [reportInvalidTypeVarUse]
         /,
     ) -> Sequence[Var]: ...
 
@@ -235,7 +235,7 @@ def get_type_hints(obj: Any) -> dict[str, Any]:
 
 def _unionize(args: list[GenericType]) -> GenericType:
     if not args:
-        return Any  # pyright: ignore [reportReturnType]
+        return Any  # type: ignore [reportReturnType]
     if len(args) == 1:
         return args[0]
     return Union[tuple(args)]  # noqa: UP007
@@ -464,13 +464,13 @@ def get_attribute_access_type(cls: GenericType, name: str) -> GenericType | None
                 if type_ is not None:
                     if hasattr(column_type, "item_type"):
                         try:
-                            item_type = column_type.item_type.python_type  # pyright: ignore [reportAttributeAccessIssue]
+                            item_type = column_type.item_type.python_type  # type: ignore [reportAttributeAccessIssue]
                         except NotImplementedError:
                             item_type = None
                         if item_type is not None:
                             if type_ in PrimitiveToAnnotation:
                                 type_ = PrimitiveToAnnotation[type_]
-                            type_ = type_[item_type]  # pyright: ignore [reportIndexIssue]
+                            type_ = type_[item_type]  # type: ignore [reportIndexIssue]
                     if hasattr(column, "nullable") and column.nullable:
                         type_ = type_ | None
                     return type_
@@ -488,7 +488,7 @@ def get_attribute_access_type(cls: GenericType, name: str) -> GenericType | None
                     return list[
                         get_attribute_access_type(
                             attr.target_class,
-                            attr.remote_attr.key,  # pyright: ignore [reportAttributeAccessIssue]
+                            attr.remote_attr.key,  # type: ignore [reportAttributeAccessIssue]
                         )
                     ]
         elif (
@@ -497,7 +497,7 @@ def get_attribute_access_type(cls: GenericType, name: str) -> GenericType | None
             and issubclass(cls, sqlmodel_types)
         ):
             # Check in the annotations directly (for sqlmodel.Relationship)
-            hints = get_type_hints(cls)  # pyright: ignore [reportArgumentType]
+            hints = get_type_hints(cls)  # type: ignore [reportArgumentType]
             if name in hints:
                 type_ = hints[name]
                 type_origin = get_origin(type_)
@@ -518,7 +518,7 @@ def get_attribute_access_type(cls: GenericType, name: str) -> GenericType | None
         # Bare class
         exceptions = NameError
         try:
-            hints = get_type_hints(cls)  # pyright: ignore [reportArgumentType]
+            hints = get_type_hints(cls)  # type: ignore [reportArgumentType]
             if name in hints:
                 return hints[name]
         except exceptions as e:
@@ -548,7 +548,7 @@ def get_base_class(cls: GenericType) -> type:
         return type(get_args(cls)[0])
 
     if is_union(cls):
-        return tuple(get_base_class(arg) for arg in get_args(cls))  # pyright: ignore [reportReturnType]
+        return tuple(get_base_class(arg) for arg in get_args(cls))  # type: ignore [reportReturnType]
 
     return get_base_class(cls.__origin__) if is_generic_alias(cls) else cls
 

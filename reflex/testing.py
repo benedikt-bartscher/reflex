@@ -70,7 +70,7 @@ FRONTEND_POPEN_ARGS = {}
 T = TypeVar("T")
 TimeoutType = int | float | None
 if platform.system() == "Windows":
-    FRONTEND_POPEN_ARGS["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP  # pyright: ignore [reportAttributeAccessIssue]
+    FRONTEND_POPEN_ARGS["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP  # type: ignore [reportAttributeAccessIssue]
     FRONTEND_POPEN_ARGS["shell"] = True
 else:
     FRONTEND_POPEN_ARGS["start_new_session"] = True
@@ -442,7 +442,7 @@ class AppHarness:
             while True:
                 try:
                     line = (
-                        self.frontend_process.stdout.readline()  # pyright: ignore [reportOptionalMemberAccess]
+                        self.frontend_process.stdout.readline()  # type: ignore [reportOptionalMemberAccess]
                     )
                 # catch I/O operation on closed file.
                 except ValueError as e:
@@ -668,29 +668,29 @@ class AppHarness:
             want_headless = True
         if driver_clz is None:
             requested_driver = environment.APP_HARNESS_DRIVER.get()
-            driver_clz = getattr(webdriver, requested_driver)  # pyright: ignore [reportPossiblyUnboundVariable]
+            driver_clz = getattr(webdriver, requested_driver)  # type: ignore [reportPossiblyUnboundVariable]
             if driver_options is None:
-                driver_options = getattr(webdriver, f"{requested_driver}Options")()  # pyright: ignore [reportPossiblyUnboundVariable]
-        if driver_clz is webdriver.Chrome:  # pyright: ignore [reportPossiblyUnboundVariable]
+                driver_options = getattr(webdriver, f"{requested_driver}Options")()  # type: ignore [reportPossiblyUnboundVariable]
+        if driver_clz is webdriver.Chrome:  # type: ignore [reportPossiblyUnboundVariable]
             if driver_options is None:
                 from selenium.webdriver.chrome.options import Options
 
-                driver_options = Options()  # pyright: ignore [reportPossiblyUnboundVariable]
+                driver_options = Options()  # type: ignore [reportPossiblyUnboundVariable]
             driver_options.add_argument("--class=AppHarness")
             if want_headless:
                 driver_options.add_argument("--headless=new")
-        elif driver_clz is webdriver.Firefox:  # pyright: ignore [reportPossiblyUnboundVariable]
+        elif driver_clz is webdriver.Firefox:  # type: ignore [reportPossiblyUnboundVariable]
             if driver_options is None:
                 from selenium.webdriver.firefox.options import Options
 
-                driver_options = Options()  # pyright: ignore [reportPossiblyUnboundVariable]
+                driver_options = Options()  # type: ignore [reportPossiblyUnboundVariable]
             if want_headless:
                 driver_options.add_argument("-headless")
-        elif driver_clz is webdriver.Edge:  # pyright: ignore [reportPossiblyUnboundVariable]
+        elif driver_clz is webdriver.Edge:  # type: ignore [reportPossiblyUnboundVariable]
             if driver_options is None:
                 from selenium.webdriver.edge.options import Options
 
-                driver_options = Options()  # pyright: ignore [reportPossiblyUnboundVariable]
+                driver_options = Options()  # type: ignore [reportPossiblyUnboundVariable]
             if want_headless:
                 driver_options.add_argument("headless")
         if driver_options is None:
@@ -707,7 +707,7 @@ class AppHarness:
                 driver_options.set_capability(key, value)
         if driver_kwargs is None:
             driver_kwargs = {}
-        driver = driver_clz(options=driver_options, **driver_kwargs)  # pyright: ignore [reportOptionalCall, reportArgumentType]
+        driver = driver_clz(options=driver_options, **driver_kwargs)  # type: ignore [reportOptionalCall, reportArgumentType]
         driver.get(self.frontend_url)
         self._frontends.append(driver)
         return driver
@@ -1028,8 +1028,8 @@ class Subdir404TCPServer(socketserver.TCPServer):
             request,
             client_address,
             self,
-            directory=str(self.root),  # pyright: ignore [reportCallIssue]
-            error_page_map=self.error_page_map,  # pyright: ignore [reportCallIssue]
+            directory=str(self.root),  # type: ignore [reportCallIssue]
+            error_page_map=self.error_page_map,  # type: ignore [reportCallIssue]
         )
 
 

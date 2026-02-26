@@ -312,7 +312,7 @@ class EventSpec(EventActionsMixin):
     """
 
     # The event handler.
-    handler: EventHandler = dataclasses.field(default=None)  # pyright: ignore [reportAssignmentType]
+    handler: EventHandler = dataclasses.field(default=None)  # type: ignore [reportAssignmentType]
 
     # The handler on the client to process event.
     client_handler_name: str = dataclasses.field(default="")
@@ -789,7 +789,7 @@ class IdentityEventReturn(Generic[T], Protocol):
 
 
 @overload
-def passthrough_event_spec(  # pyright: ignore [reportOverlappingOverload]
+def passthrough_event_spec(  # type: ignore [reportOverlappingOverload]
     event_type: type[T], /
 ) -> Callable[[Var[T]], tuple[Var[T]]]: ...
 
@@ -804,7 +804,7 @@ def passthrough_event_spec(
 def passthrough_event_spec(*event_types: type[T]) -> IdentityEventReturn[T]: ...
 
 
-def passthrough_event_spec(*event_types: type[T]) -> IdentityEventReturn[T]:  # pyright: ignore [reportInconsistentOverload]
+def passthrough_event_spec(*event_types: type[T]) -> IdentityEventReturn[T]:  # type: ignore [reportInconsistentOverload]
     """A helper function that returns the input event as output.
 
     Args:
@@ -820,7 +820,7 @@ def passthrough_event_spec(*event_types: type[T]) -> IdentityEventReturn[T]:  # 
     inner_type = tuple(Var[event_type] for event_type in event_types)
     return_annotation = tuple[inner_type]
 
-    inner.__signature__ = inspect.signature(inner).replace(  # pyright: ignore [reportFunctionMemberAccess]
+    inner.__signature__ = inspect.signature(inner).replace(  # type: ignore [reportFunctionMemberAccess]
         parameters=[
             inspect.Parameter(
                 f"ev_{i}",
@@ -958,7 +958,7 @@ def server_side(name: str, sig: inspect.Signature, **kwargs) -> EventSpec:
         return None
 
     fn.__qualname__ = name
-    fn.__signature__ = sig  # pyright: ignore [reportFunctionMemberAccess]
+    fn.__signature__ = sig  # type: ignore [reportFunctionMemberAccess]
     return EventSpec(
         handler=EventHandler(fn=fn, state_full_name=FRONTEND_EVENT_STATE),
         args=tuple(
@@ -1954,7 +1954,7 @@ class EventVar(ObjectVar, python_types=(EventSpec, EventHandler)):
 class LiteralEventVar(VarOperationCall, LiteralVar, EventVar):
     """A literal event var."""
 
-    _var_value: EventSpec = dataclasses.field(default=None)  # pyright: ignore [reportAssignmentType]
+    _var_value: EventSpec = dataclasses.field(default=None)  # type: ignore [reportAssignmentType]
 
     def __hash__(self) -> int:
         """Get the hash of the var.
@@ -2041,7 +2041,7 @@ class EventChainVar(BuilderFunctionVar, python_types=EventChain):
 class LiteralEventChainVar(ArgsFunctionOperationBuilder, LiteralVar, EventChainVar):
     """A literal event chain var."""
 
-    _var_value: EventChain = dataclasses.field(default=None)  # pyright: ignore [reportAssignmentType]
+    _var_value: EventChain = dataclasses.field(default=None)  # type: ignore [reportAssignmentType]
 
     def __hash__(self) -> int:
         """Get the hash of the var.
@@ -2074,7 +2074,7 @@ class LiteralEventChainVar(ArgsFunctionOperationBuilder, LiteralVar, EventChainV
             if isinstance(value.args_spec, Sequence)
             else value.args_spec
         )
-        sig = inspect.signature(arg_spec)  # pyright: ignore [reportArgumentType]
+        sig = inspect.signature(arg_spec)  # type: ignore [reportArgumentType]
         if sig.parameters:
             arg_def = tuple(f"_{p}" for p in sig.parameters)
             arg_def_expr = LiteralVar.create([Var(_js_expr=arg) for arg in arg_def])
@@ -2167,7 +2167,7 @@ class EventCallback(Generic[Unpack[P]], EventActionsMixin):
         value4: V4 | Var[V4],
     ) -> "EventCallback[Unpack[Q]]": ...
 
-    def __call__(self, *values) -> "EventCallback":  # pyright: ignore [reportInconsistentOverload]
+    def __call__(self, *values) -> "EventCallback":  # type: ignore [reportInconsistentOverload]
         """Call the function with the values.
 
         Args:
@@ -2176,7 +2176,7 @@ class EventCallback(Generic[Unpack[P]], EventActionsMixin):
         Returns:
             The function with the values.
         """
-        return self.func(*values)  # pyright: ignore [reportArgumentType]
+        return self.func(*values)  # type: ignore [reportArgumentType]
 
     @overload
     def __get__(
@@ -2337,7 +2337,7 @@ class EventNamespace:
         debounce: int | None = None,
         temporal: bool | None = None,
     ) -> Callable[
-        [Callable[[BASE_STATE, Unpack[P]], Any]], EventCallback[Unpack[P]]  # pyright: ignore [reportInvalidTypeVarUse]
+        [Callable[[BASE_STATE, Unpack[P]], Any]], EventCallback[Unpack[P]]  # type: ignore [reportInvalidTypeVarUse]
     ]: ...
 
     @overload
@@ -2464,7 +2464,7 @@ class EventNamespace:
             event_actions = _build_event_actions()
             if event_actions:
                 setattr(func, EVENT_ACTIONS_MARKER, event_actions)
-            return func  # pyright: ignore [reportReturnType]
+            return func  # type: ignore [reportReturnType]
 
         if func is not None:
             return wrapper(func)
@@ -2520,5 +2520,5 @@ class EventNamespace:
 
 
 event = EventNamespace
-event.event = event  # pyright: ignore[reportAttributeAccessIssue]
-sys.modules[__name__] = event  # pyright: ignore[reportArgumentType]
+event.event = event  # type: ignore[reportAttributeAccessIssue]
+sys.modules[__name__] = event  # type: ignore[reportArgumentType]

@@ -171,7 +171,7 @@ class ObjectVar(Var[OBJECT_TYPE], python_types=PYTHON_TYPES):
 
     # NoReturn is used here to catch when key value is Any
     @overload
-    def __getitem__(  # pyright: ignore [reportOverlappingOverload]
+    def __getitem__(  # type: ignore [reportOverlappingOverload]
         self: ObjectVar[Mapping[Any, NoReturn]],
         key: Var | Any,
     ) -> Var: ...
@@ -256,9 +256,9 @@ class ObjectVar(Var[OBJECT_TYPE], python_types=PYTHON_TYPES):
         if default is None:
             default = Var.create(None)
 
-        value = self.__getitem__(key)  # pyright: ignore[reportUnknownVariableType,reportAttributeAccessIssue,reportUnknownMemberType]
+        value = self.__getitem__(key)  # type: ignore[reportUnknownVariableType,reportAttributeAccessIssue,reportUnknownMemberType]
 
-        return cond(  # pyright: ignore[reportUnknownVariableType]
+        return cond(  # type: ignore[reportUnknownVariableType]
             value,
             value,
             default,
@@ -266,7 +266,7 @@ class ObjectVar(Var[OBJECT_TYPE], python_types=PYTHON_TYPES):
 
     # NoReturn is used here to catch when key value is Any
     @overload
-    def __getattr__(  # pyright: ignore [reportOverlappingOverload]
+    def __getattr__(  # type: ignore [reportOverlappingOverload]
         self: ObjectVar[Mapping[Any, NoReturn]],
         name: str,
     ) -> Var: ...
@@ -379,7 +379,7 @@ class LiteralObjectVar(CachedVarOperation, ObjectVar[OBJECT_TYPE], LiteralVar):
             The type of the keys of the object.
         """
         args_list = typing.get_args(self._var_type)
-        return args_list[0] if args_list else Any  # pyright: ignore [reportReturnType]
+        return args_list[0] if args_list else Any  # type: ignore [reportReturnType]
 
     def _value_type(self) -> type:
         """Get the type of the values of the object.
@@ -388,7 +388,7 @@ class LiteralObjectVar(CachedVarOperation, ObjectVar[OBJECT_TYPE], LiteralVar):
             The type of the values of the object.
         """
         args_list = typing.get_args(self._var_type)
-        return args_list[1] if args_list else Any  # pyright: ignore [reportReturnType]
+        return args_list[1] if args_list else Any  # type: ignore [reportReturnType]
 
     @cached_property_no_lock
     def _cached_var_name(self) -> str:

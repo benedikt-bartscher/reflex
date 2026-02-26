@@ -344,7 +344,7 @@ class SharedStateBaseInternal(State):
             # Go through all linked states and patch them in if they are present in the tree
             for linked_state_name, linked_token in self._reflex_internal_links.items():
                 linked_state_cls: type[SharedState] = (
-                    self.get_root_state().get_class_substate(  # pyright: ignore[reportAssignmentType]
+                    self.get_root_state().get_class_substate(  # type: ignore[reportAssignmentType]
                         linked_state_name
                     )
                 )

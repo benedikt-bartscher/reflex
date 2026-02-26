@@ -53,7 +53,7 @@ def TestApp():
             ),
             rx.button(
                 "induce_backend_error",
-                on_click=lambda: TestAppState.divide_by_number(0),  # pyright: ignore [reportCallIssue]
+                on_click=lambda: TestAppState.divide_by_number(0),  # type: ignore [reportCallIssue]
                 id="induce-backend-error-btn",
             ),
             rx.button(

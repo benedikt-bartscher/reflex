@@ -62,7 +62,7 @@ def event_log(state_manager_redis: StateManagerRedis) -> list[dict[str, Any]]:
     Returns:
         The redis event log.
     """
-    return state_manager_redis.redis._internals["event_log"]  # pyright: ignore[reportAttributeAccessIssue]
+    return state_manager_redis.redis._internals["event_log"]  # type: ignore[reportAttributeAccessIssue]
 
 
 @pytest.mark.asyncio

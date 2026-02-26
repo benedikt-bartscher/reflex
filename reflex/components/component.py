@@ -127,7 +127,7 @@ def field(
     if default is not MISSING and default_factory is not None:
         msg = "cannot specify both default and default_factory"
         raise ValueError(msg)
-    return ComponentField(  # pyright: ignore [reportReturnType]
+    return ComponentField(  # type: ignore [reportReturnType]
         default=default,
         default_factory=default_factory,
         is_javascript=is_javascript_property,
@@ -386,7 +386,7 @@ class BaseComponent(metaclass=BaseComponentMeta):
 class ComponentNamespace(SimpleNamespace):
     """A namespace to manage components with subcomponents."""
 
-    def __hash__(self) -> int:  # pyright: ignore [reportIncompatibleVariableOverride]
+    def __hash__(self) -> int:  # type: ignore [reportIncompatibleVariableOverride]
         """Get the hash of the namespace.
 
         Returns:
@@ -533,9 +533,9 @@ def _deterministic_hash(value: object) -> str:
 DEFAULT_TRIGGERS: Mapping[str, types.ArgsSpec | Sequence[types.ArgsSpec]] = {
     EventTriggers.ON_FOCUS: no_args_event_spec,
     EventTriggers.ON_BLUR: no_args_event_spec,
-    EventTriggers.ON_CLICK: pointer_event_spec,  # pyright: ignore [reportAssignmentType]
-    EventTriggers.ON_CONTEXT_MENU: pointer_event_spec,  # pyright: ignore [reportAssignmentType]
-    EventTriggers.ON_DOUBLE_CLICK: pointer_event_spec,  # pyright: ignore [reportAssignmentType]
+    EventTriggers.ON_CLICK: pointer_event_spec,  # type: ignore [reportAssignmentType]
+    EventTriggers.ON_CONTEXT_MENU: pointer_event_spec,  # type: ignore [reportAssignmentType]
+    EventTriggers.ON_DOUBLE_CLICK: pointer_event_spec,  # type: ignore [reportAssignmentType]
     EventTriggers.ON_MOUSE_DOWN: no_args_event_spec,
     EventTriggers.ON_MOUSE_ENTER: no_args_event_spec,
     EventTriggers.ON_MOUSE_LEAVE: no_args_event_spec,
@@ -901,7 +901,7 @@ class Component(BaseComponent, ABC):
         """
         # Look for component specific triggers,
         # e.g. variable declared as EventHandler types.
-        return DEFAULT_TRIGGERS | args_specs_from_fields(cls.get_fields())  # pyright: ignore [reportOperatorIssue]
+        return DEFAULT_TRIGGERS | args_specs_from_fields(cls.get_fields())  # type: ignore [reportOperatorIssue]
 
     def __repr__(self) -> str:
         """Represent the component in React.
@@ -1145,9 +1145,9 @@ class Component(BaseComponent, ABC):
             The style of the component.
         """
         component_style = None
-        if (style := styles.get(type(self))) is not None:  # pyright: ignore [reportArgumentType]
+        if (style := styles.get(type(self))) is not None:  # type: ignore [reportArgumentType]
             component_style = Style(style)
-        if (style := styles.get(self.create)) is not None:  # pyright: ignore [reportArgumentType]
+        if (style := styles.get(self.create)) is not None:  # type: ignore [reportArgumentType]
             component_style = Style(style)
         return component_style
 
@@ -1977,7 +1977,7 @@ class CustomComponent(Component):
         to_camel_cased_props = {
             format.to_camel_case(key): None for key in props if key not in event_types
         }
-        self.get_props = lambda: to_camel_cased_props  # pyright: ignore [reportIncompatibleVariableOverride]
+        self.get_props = lambda: to_camel_cased_props  # type: ignore [reportIncompatibleVariableOverride]
 
         # Unset the style.
         self.style = Style()
@@ -2057,7 +2057,7 @@ class CustomComponent(Component):
                 else event.args_spec[0]
             )
             names = inspect.getfullargspec(arg_spec).args
-            fn.__signature__ = inspect.Signature(  # pyright: ignore[reportFunctionMemberAccess]
+            fn.__signature__ = inspect.Signature(  # type: ignore[reportFunctionMemberAccess]
                 parameters=[
                     inspect.Parameter(
                         name=name,

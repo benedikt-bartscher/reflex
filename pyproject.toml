@@ -119,6 +119,46 @@ require-runtime-dependencies = true
 [tool.pyright]
 reportIncompatibleMethodOverride = false
 
+[tool.ty.environment]
+python-version = "3.12"
+
+[tool.ty.src]
+exclude = [
+    "reflex/.templates/",
+]
+
+[tool.ty.analysis]
+# rxconfig is a generated per-project config module, not present in the repo.
+# typer is conditionally imported behind a find_spec() guard.
+allowed-unresolved-imports = ["rxconfig", "typer.**"]
+
+[tool.ty.rules]
+# Reflex uses EventHandler[fn] and EventHandler[passthrough_event_spec(...)] as
+# a DSL to configure component event specs via __class_getitem__ at runtime.
+# These are intentionally not valid static type forms.
+# See also: https://github.com/astral-sh/ty/issues/388
+invalid-type-form = "ignore"
+
+# ty doesn't yet respect __new__ return types, causing false positives when
+# EventNamespace is used as decorator (@rx.event). Additionally, BaseState's
+# metaclass replaces @event-decorated methods with EventHandler instances at
+# class creation time, which ty cannot track.
+# Upstream: https://github.com/astral-sh/ty/issues/281 (PR: astral-sh/ruff#22317)
+# Upstream: https://github.com/astral-sh/ty/issues/988 (metaclass __call__)
+call-non-callable = "ignore"
+
+# ~50 false positives from auto-generated .pyi stubs that expand **props into
+# explicit keyword parameters, making subclass create() overrides appear
+# incompatible. ~35 are legitimate LSP violations in the Var.create() factory
+# hierarchy. ~12 are _render() overrides dropping the optional props parameter.
+# Mitigations: fix pyi_generator to preserve **props; add props param to _render
+# overrides; use Sequence/Mapping (covariant) for add_imports/add_hooks returns.
+invalid-method-override = "warn"
+
+# type: ignore comments are shared with pyright; many suppress pyright-specific
+# issues that ty doesn't flag, causing "unused" warnings.
+unused-type-ignore-comment = "ignore"
+
 [tool.ruff]
 target-version = "py310"
 output-format = "concise"

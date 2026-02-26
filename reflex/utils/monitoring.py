@@ -16,8 +16,8 @@ try:
     PYLEAK_AVAILABLE = True
 except ImportError:
     PYLEAK_AVAILABLE = False
-    no_event_loop_blocking = no_task_leaks = no_thread_leaks = None  # pyright: ignore[reportAssignmentType]
-    LeakAction = None  # pyright: ignore[reportAssignmentType]
+    no_event_loop_blocking = no_task_leaks = no_thread_leaks = None  # type: ignore[reportAssignmentType]
+    LeakAction = None  # type: ignore[reportAssignmentType]
 
 
 # Thread-local storage to track if monitoring is already active
@@ -53,7 +53,7 @@ def monitor_sync():
         return
 
     config = get_config()
-    action = config.pyleak_action or LeakAction.WARN  # pyright: ignore[reportOptionalMemberAccess]
+    action = config.pyleak_action or LeakAction.WARN  # type: ignore[reportOptionalMemberAccess]
 
     # Mark monitoring as active
     _thread_local.monitoring_active = True
@@ -61,7 +61,7 @@ def monitor_sync():
         with contextlib.ExitStack() as stack:
             # Thread leak detection has issues with background tasks (no_thread_leaks)
             stack.enter_context(
-                no_event_loop_blocking(  # pyright: ignore[reportOptionalCall]
+                no_event_loop_blocking(  # type: ignore[reportOptionalCall]
                     action=action,
                     threshold=config.pyleak_blocking_threshold,
                 )
@@ -88,7 +88,7 @@ async def monitor_async():
         return
 
     config = get_config()
-    action = config.pyleak_action or LeakAction.WARN  # pyright: ignore[reportOptionalMemberAccess]
+    action = config.pyleak_action or LeakAction.WARN  # type: ignore[reportOptionalMemberAccess]
 
     # Mark monitoring as active
     _thread_local.monitoring_active = True
@@ -99,7 +99,7 @@ async def monitor_async():
 
             # Block detection for event loops
             stack.enter_context(
-                no_event_loop_blocking(  # pyright: ignore[reportOptionalCall]
+                no_event_loop_blocking(  # type: ignore[reportOptionalCall]
                     action=action,
                     threshold=config.pyleak_blocking_threshold,
                 )
@@ -176,4 +176,4 @@ def monitor_loopblocks(func: Callable) -> Callable:
         with monitor_sync():
             return func(*args, **kwargs)
 
-    return sync_wrapper  # pyright: ignore[reportReturnType]
+    return sync_wrapper  # type: ignore[reportReturnType]

@@ -5,7 +5,7 @@ from reflex.components.core.upload import (
     StyledUpload,
     Upload,
     UploadNamespace,
-    _on_drop_spec,  # pyright: ignore [reportAttributeAccessIssue]
+    _on_drop_spec,  # type: ignore [reportAttributeAccessIssue]
     cancel_upload,
     get_upload_url,
 )

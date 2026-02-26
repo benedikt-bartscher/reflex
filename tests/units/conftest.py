@@ -63,7 +63,7 @@ def upload_sub_state_event_spec():
     Returns:
         Event Spec.
     """
-    return EventSpec(handler=SubUploadState.handle_upload, upload=True)  # pyright: ignore [reportCallIssue]
+    return EventSpec(handler=SubUploadState.handle_upload, upload=True)  # type: ignore [reportCallIssue]
 
 
 @pytest.fixture
@@ -73,7 +73,7 @@ def upload_event_spec():
     Returns:
         Event Spec.
     """
-    return EventSpec(handler=UploadState.handle_upload1, upload=True)  # pyright: ignore [reportCallIssue]
+    return EventSpec(handler=UploadState.handle_upload1, upload=True)  # type: ignore [reportCallIssue]
 
 
 @pytest.fixture

@@ -36,8 +36,8 @@ def LoginSample():
             yield rx.redirect("/")
 
     def index():
-        return rx.cond(  # pyright: ignore [reportCallIssue]
-            State.is_hydrated & State.auth_token,  # pyright: ignore [reportOperatorIssue]
+        return rx.cond(  # type: ignore [reportCallIssue]
+            State.is_hydrated & State.auth_token,  # type: ignore [reportOperatorIssue]
             rx.vstack(
                 rx.heading(State.auth_token, id="auth-token"),
                 rx.button("Logout", on_click=State.logout, id="logout"),

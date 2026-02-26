@@ -92,7 +92,7 @@ class Cond(Component):
 
 
 @overload
-def cond(condition: Any, c1: Component, c2: Any, /) -> Component: ...  # pyright: ignore [reportOverlappingOverload]
+def cond(condition: Any, c1: Component, c2: Any, /) -> Component: ...  # type: ignore [reportOverlappingOverload]
 
 
 @overload
@@ -100,7 +100,7 @@ def cond(condition: Any, c1: Component, /) -> Component: ...
 
 
 @overload
-def cond(condition: Any, c1: Any, c2: Component, /) -> Component: ...  # pyright: ignore [reportOverlappingOverload]
+def cond(condition: Any, c1: Any, c2: Component, /) -> Component: ...  # type: ignore [reportOverlappingOverload]
 
 
 @overload
@@ -157,7 +157,7 @@ def cond(condition: Any, c1: Any, c2: Any = types.Unset(), /) -> Component | Var
 
 
 @overload
-def color_mode_cond(light: Component, dark: Component | None = None) -> Component: ...  # pyright: ignore [reportOverlappingOverload]
+def color_mode_cond(light: Component, dark: Component | None = None) -> Component: ...  # type: ignore [reportOverlappingOverload]
 
 
 @overload

@@ -24,7 +24,7 @@ def once(f: Callable[[], T]) -> Callable[[], T]:
     def wrapper() -> T:
         nonlocal value
         value = f() if value is unset else value
-        return value  # pyright: ignore[reportReturnType]
+        return value  # type: ignore[reportReturnType]
 
     return wrapper
 

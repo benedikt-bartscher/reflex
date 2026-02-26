@@ -123,7 +123,7 @@ class TestMixin(BaseState, mixin=True):
     _mixin_backend: rx.Field[int] = rx.field(default_factory=lambda: 10)
 
 
-class TestState(TestMixin, BaseState):  # pyright: ignore[reportUnsafeMultipleInheritance]
+class TestState(TestMixin, BaseState):  # type: ignore[reportUnsafeMultipleInheritance]
     """A test state."""
 
     # Set this class as not test one
@@ -252,7 +252,7 @@ def test_state() -> TestState:
     Returns:
         A test state.
     """
-    return TestState()  # pyright: ignore [reportCallIssue]
+    return TestState()  # type: ignore [reportCallIssue]
 
 
 @pytest.fixture
@@ -449,13 +449,13 @@ def test_default_setters(test_state):
 
 def test_class_indexing_with_vars():
     """Test that we can index into a state var with another var."""
-    prop = TestState.array[TestState.num1]  # pyright: ignore [reportCallIssue, reportArgumentType]
+    prop = TestState.array[TestState.num1]  # type: ignore [reportCallIssue, reportArgumentType]
     assert (
         str(prop)
         == f"{TestState.get_name()}.array{FIELD_MARKER}?.at?.({TestState.get_name()}.num1{FIELD_MARKER})"
     )
 
-    prop = TestState.mapping["a"][TestState.num1]  # pyright: ignore [reportCallIssue, reportArgumentType]
+    prop = TestState.mapping["a"][TestState.num1]  # type: ignore [reportCallIssue, reportArgumentType]
     assert (
         str(prop)
         == f'{TestState.get_name()}.mapping{FIELD_MARKER}?.["a"]?.at?.({TestState.get_name()}.num1{FIELD_MARKER})'
@@ -575,11 +575,11 @@ def test_get_class_var():
 def test_set_class_var():
     """Test setting the var of a class."""
     with pytest.raises(AttributeError):
-        TestState.num3  # pyright: ignore [reportAttributeAccessIssue]
+        TestState.num3  # type: ignore [reportAttributeAccessIssue]
     TestState._set_var(
         "num3", Var(_js_expr="num3", _var_type=int)._var_set_state(TestState)
     )
-    var = TestState.num3  # pyright: ignore [reportAttributeAccessIssue]
+    var = TestState.num3  # type: ignore [reportAttributeAccessIssue]
     assert var._js_expr == TestState.get_full_name() + ".num3"
     assert var._var_type is int
     assert var._var_state == TestState.get_full_name()
@@ -880,7 +880,7 @@ async def test_process_event_substate(test_state, child_state, grandchild_state)
 @pytest.mark.asyncio
 async def test_process_event_generator():
     """Test event handlers that generate multiple updates."""
-    gen_state = GenState()  # pyright: ignore [reportCallIssue]
+    gen_state = GenState()  # type: ignore [reportCallIssue]
     event = Event(
         token="t",
         name="go",
@@ -985,22 +985,22 @@ def test_add_var():
     assert not hasattr(ds1, "dynamic_int")
     ds1.add_var("dynamic_int", int, 42)
     # Existing instances get the BaseVar
-    assert ds1.dynamic_int.equals(DynamicState.dynamic_int)  # pyright: ignore [reportAttributeAccessIssue]
+    assert ds1.dynamic_int.equals(DynamicState.dynamic_int)  # type: ignore [reportAttributeAccessIssue]
     # New instances get an actual value with the default
-    assert DynamicState().dynamic_int == 42  # pyright: ignore[reportAttributeAccessIssue]
+    assert DynamicState().dynamic_int == 42  # type: ignore[reportAttributeAccessIssue]
 
     ds1.add_var("dynamic_list", list[int], [5, 10])
-    assert ds1.dynamic_list.equals(DynamicState.dynamic_list)  # pyright: ignore [reportAttributeAccessIssue]
+    assert ds1.dynamic_list.equals(DynamicState.dynamic_list)  # type: ignore [reportAttributeAccessIssue]
     ds2 = DynamicState()
-    assert ds2.dynamic_list == [5, 10]  # pyright: ignore[reportAttributeAccessIssue]
-    ds2.dynamic_list.append(15)  # pyright: ignore[reportAttributeAccessIssue]
-    assert ds2.dynamic_list == [5, 10, 15]  # pyright: ignore[reportAttributeAccessIssue]
-    assert DynamicState().dynamic_list == [5, 10]  # pyright: ignore[reportAttributeAccessIssue]
+    assert ds2.dynamic_list == [5, 10]  # type: ignore[reportAttributeAccessIssue]
+    ds2.dynamic_list.append(15)  # type: ignore[reportAttributeAccessIssue]
+    assert ds2.dynamic_list == [5, 10, 15]  # type: ignore[reportAttributeAccessIssue]
+    assert DynamicState().dynamic_list == [5, 10]  # type: ignore[reportAttributeAccessIssue]
 
     ds1.add_var("dynamic_dict", dict[str, int], {"k1": 5, "k2": 10})
-    assert ds1.dynamic_dict.equals(DynamicState.dynamic_dict)  # pyright: ignore [reportAttributeAccessIssue]
-    assert ds2.dynamic_dict.equals(DynamicState.dynamic_dict)  # pyright: ignore [reportAttributeAccessIssue]
-    assert DynamicState().dynamic_dict == {"k1": 5, "k2": 10}  # pyright: ignore[reportAttributeAccessIssue]
+    assert ds1.dynamic_dict.equals(DynamicState.dynamic_dict)  # type: ignore [reportAttributeAccessIssue]
+    assert ds2.dynamic_dict.equals(DynamicState.dynamic_dict)  # type: ignore [reportAttributeAccessIssue]
+    assert DynamicState().dynamic_dict == {"k1": 5, "k2": 10}  # type: ignore[reportAttributeAccessIssue]
 
 
 def test_add_var_default_handlers(test_state):
@@ -1430,7 +1430,7 @@ def test_cached_var_depends_on_event_handler(use_partial: bool):
             return counter
 
     if use_partial:
-        HandlerState.handler = functools.partial(HandlerState.handler.fn)  # pyright: ignore [reportFunctionMemberAccess]
+        HandlerState.handler = functools.partial(HandlerState.handler.fn)  # type: ignore [reportFunctionMemberAccess]
         assert isinstance(HandlerState.handler, functools.partial)
     else:
         assert isinstance(HandlerState.handler, EventHandler)
@@ -2038,7 +2038,7 @@ def mock_app_simple(monkeypatch) -> rx.App:
 
     setattr(app_module, CompileVars.APP, app)
     app._state = TestState
-    app.event_namespace.emit = CopyingAsyncMock()  # pyright: ignore [reportOptionalMemberAccess]
+    app.event_namespace.emit = CopyingAsyncMock()  # type: ignore [reportOptionalMemberAccess]
 
     def _mock_get_app(*args, **kwargs):
         return app_module
@@ -2219,8 +2219,8 @@ async def test_state_proxy(
 
     # ensure state update was emitted
     assert mock_app.event_namespace is not None
-    mock_app.event_namespace.emit.assert_called_once()  # pyright: ignore [reportAttributeAccessIssue]
-    mcall = mock_app.event_namespace.emit.mock_calls[0]  # pyright: ignore [reportAttributeAccessIssue]
+    mock_app.event_namespace.emit.assert_called_once()  # type: ignore [reportAttributeAccessIssue]
+    mcall = mock_app.event_namespace.emit.mock_calls[0]  # type: ignore [reportAttributeAccessIssue]
     assert mcall.args[0] == str(SocketEvent.EVENT)
     assert mcall.args[1] == StateUpdate(
         delta={
@@ -2433,7 +2433,7 @@ async def test_background_task_no_block(mock_app: rx.App, token: str):
     assert mock_app.event_namespace is not None
     emit_mock = mock_app.event_namespace.emit
 
-    first_ws_message = emit_mock.mock_calls[0].args[1]  # pyright: ignore [reportAttributeAccessIssue]
+    first_ws_message = emit_mock.mock_calls[0].args[1]  # type: ignore [reportAttributeAccessIssue]
     assert (
         first_ws_message.delta[BackgroundTaskState.get_full_name()].pop(
             "router" + FIELD_MARKER
@@ -2450,7 +2450,7 @@ async def test_background_task_no_block(mock_app: rx.App, token: str):
         events=[],
         final=None,
     )
-    for call in emit_mock.mock_calls[1:5]:  # pyright: ignore [reportAttributeAccessIssue]
+    for call in emit_mock.mock_calls[1:5]:  # type: ignore [reportAttributeAccessIssue]
         assert call.args[1] == StateUpdate(
             delta={
                 BackgroundTaskState.get_full_name(): {
@@ -2460,7 +2460,7 @@ async def test_background_task_no_block(mock_app: rx.App, token: str):
             events=[],
             final=None,
         )
-    assert emit_mock.mock_calls[-2].args[1] == StateUpdate(  # pyright: ignore [reportAttributeAccessIssue]
+    assert emit_mock.mock_calls[-2].args[1] == StateUpdate(  # type: ignore [reportAttributeAccessIssue]
         delta={
             BackgroundTaskState.get_full_name(): {
                 "order" + FIELD_MARKER: exp_order,
@@ -2471,7 +2471,7 @@ async def test_background_task_no_block(mock_app: rx.App, token: str):
         events=[],
         final=None,
     )
-    assert emit_mock.mock_calls[-1].args[1] == StateUpdate(  # pyright: ignore [reportAttributeAccessIssue]
+    assert emit_mock.mock_calls[-1].args[1] == StateUpdate(  # type: ignore [reportAttributeAccessIssue]
         delta={
             BackgroundTaskState.get_full_name(): {
                 "computed_order" + FIELD_MARKER: exp_order,
@@ -2562,7 +2562,7 @@ def test_mutable_list(mutable_state: MutableTestState):
     assert_array_dirty()
     mutable_state.array.reverse()
     assert_array_dirty()
-    mutable_state.array.sort()  # pyright: ignore[reportCallIssue]
+    mutable_state.array.sort()  # type: ignore[reportCallIssue]
     assert_array_dirty()
     mutable_state.array[0] = 666
     assert_array_dirty()
@@ -2582,7 +2582,7 @@ def test_mutable_list(mutable_state: MutableTestState):
     assert isinstance(mutable_state.array[0], MutableProxy)
     for item in mutable_state.array:
         assert isinstance(item, MutableProxy)
-        item["foo"] = "bar"  # pyright: ignore[reportArgumentType, reportCallIssue]
+        item["foo"] = "bar"  # type: ignore[reportArgumentType, reportCallIssue]
         assert_array_dirty()
 
 
@@ -2654,10 +2654,10 @@ def test_mutable_dict(mutable_state: MutableTestState):
     mutable_value_third_ref = mutable_state.hashmap.pop("setdefault_mutable_key")
     assert not isinstance(mutable_value_third_ref, MutableProxy)
     assert_hashmap_dirty()
-    mutable_value_third_ref.append("baz")  # pyright: ignore[reportAttributeAccessIssue]
+    mutable_value_third_ref.append("baz")  # type: ignore[reportAttributeAccessIssue]
     assert not mutable_state.dirty_vars
     # Unfortunately previous refs still will mark the state dirty... nothing doing about that
-    assert mutable_value.pop()  # pyright: ignore[reportCallIssue]
+    assert mutable_value.pop()  # type: ignore[reportCallIssue]
     assert_hashmap_dirty()
 
 
@@ -2813,7 +2813,7 @@ def test_duplicate_substate_class(mocker: MockerFixture):
         class TestState(BaseState):
             pass
 
-        class ChildTestState(TestState):  # pyright: ignore [reportRedeclaration]
+        class ChildTestState(TestState):  # type: ignore [reportRedeclaration]
             pass
 
         class ChildTestState(TestState):  # noqa: F811
@@ -2856,21 +2856,21 @@ def test_reset_with_mutables():
         items: list[list[int]] = default
 
     instance = MutableResetState()
-    assert instance.items.__wrapped__ is not default  # pyright: ignore [reportAttributeAccessIssue]
+    assert instance.items.__wrapped__ is not default  # type: ignore [reportAttributeAccessIssue]
     assert instance.items == default == copied_default
     instance.items.append([3, 3])
     assert instance.items != default
     assert instance.items != copied_default
 
     instance.reset()
-    assert instance.items.__wrapped__ is not default  # pyright: ignore [reportAttributeAccessIssue]
+    assert instance.items.__wrapped__ is not default  # type: ignore [reportAttributeAccessIssue]
     assert instance.items == default == copied_default
     instance.items.append([3, 3])
     assert instance.items != default
     assert instance.items != copied_default
 
     instance.reset()
-    assert instance.items.__wrapped__ is not default  # pyright: ignore [reportAttributeAccessIssue]
+    assert instance.items.__wrapped__ is not default  # type: ignore [reportAttributeAccessIssue]
     assert instance.items == default == copied_default
     instance.items.append([3, 3])
     assert instance.items != default
@@ -2932,31 +2932,31 @@ def test_state_union_optional():
         c3r: Custom3 = Custom3(c2r=Custom2(c1r=Custom1(foo="")))
         custom_union: Custom1 | Custom2 | Custom3 = Custom1(foo="")
 
-    assert str(UnionState.c3.c2) == f'{UnionState.c3!s}?.["c2"]'  # pyright: ignore [reportOptionalMemberAccess]
-    assert str(UnionState.c3.c2.c1) == f'{UnionState.c3!s}?.["c2"]?.["c1"]'  # pyright: ignore [reportOptionalMemberAccess]
+    assert str(UnionState.c3.c2) == f'{UnionState.c3!s}?.["c2"]'  # type: ignore [reportOptionalMemberAccess]
+    assert str(UnionState.c3.c2.c1) == f'{UnionState.c3!s}?.["c2"]?.["c1"]'  # type: ignore [reportOptionalMemberAccess]
     assert (
-        str(UnionState.c3.c2.c1.foo) == f'{UnionState.c3!s}?.["c2"]?.["c1"]?.["foo"]'  # pyright: ignore [reportOptionalMemberAccess]
+        str(UnionState.c3.c2.c1.foo) == f'{UnionState.c3!s}?.["c2"]?.["c1"]?.["foo"]'  # type: ignore [reportOptionalMemberAccess]
     )
     assert (
-        str(UnionState.c3.c2.c1r.foo) == f'{UnionState.c3!s}?.["c2"]?.["c1r"]?.["foo"]'  # pyright: ignore [reportOptionalMemberAccess]
+        str(UnionState.c3.c2.c1r.foo) == f'{UnionState.c3!s}?.["c2"]?.["c1r"]?.["foo"]'  # type: ignore [reportOptionalMemberAccess]
     )
-    assert str(UnionState.c3.c2r.c1) == f'{UnionState.c3!s}?.["c2r"]?.["c1"]'  # pyright: ignore [reportOptionalMemberAccess]
+    assert str(UnionState.c3.c2r.c1) == f'{UnionState.c3!s}?.["c2r"]?.["c1"]'  # type: ignore [reportOptionalMemberAccess]
     assert (
-        str(UnionState.c3.c2r.c1.foo) == f'{UnionState.c3!s}?.["c2r"]?.["c1"]?.["foo"]'  # pyright: ignore [reportOptionalMemberAccess]
+        str(UnionState.c3.c2r.c1.foo) == f'{UnionState.c3!s}?.["c2r"]?.["c1"]?.["foo"]'  # type: ignore [reportOptionalMemberAccess]
     )
     assert (
-        str(UnionState.c3.c2r.c1r.foo)  # pyright: ignore [reportOptionalMemberAccess]
+        str(UnionState.c3.c2r.c1r.foo)  # type: ignore [reportOptionalMemberAccess]
         == f'{UnionState.c3!s}?.["c2r"]?.["c1r"]?.["foo"]'
     )
     assert str(UnionState.c3i.c2) == f'{UnionState.c3i!s}?.["c2"]'
     assert str(UnionState.c3r.c2) == f'{UnionState.c3r!s}?.["c2"]'
-    assert UnionState.custom_union.foo is not None  # pyright: ignore [reportAttributeAccessIssue]
-    assert UnionState.custom_union.c1 is not None  # pyright: ignore [reportAttributeAccessIssue]
-    assert UnionState.custom_union.c1r is not None  # pyright: ignore [reportAttributeAccessIssue]
-    assert UnionState.custom_union.c2 is not None  # pyright: ignore [reportAttributeAccessIssue]
-    assert UnionState.custom_union.c2r is not None  # pyright: ignore [reportAttributeAccessIssue]
-    assert types.is_optional(UnionState.opt_int._var_type)  # pyright: ignore [reportAttributeAccessIssue, reportOptionalMemberAccess]
-    assert types.is_union(UnionState.int_float._var_type)  # pyright: ignore [reportAttributeAccessIssue]
+    assert UnionState.custom_union.foo is not None  # type: ignore [reportAttributeAccessIssue]
+    assert UnionState.custom_union.c1 is not None  # type: ignore [reportAttributeAccessIssue]
+    assert UnionState.custom_union.c1r is not None  # type: ignore [reportAttributeAccessIssue]
+    assert UnionState.custom_union.c2 is not None  # type: ignore [reportAttributeAccessIssue]
+    assert UnionState.custom_union.c2r is not None  # type: ignore [reportAttributeAccessIssue]
+    assert types.is_optional(UnionState.opt_int._var_type)  # type: ignore [reportAttributeAccessIssue, reportOptionalMemberAccess]
+    assert types.is_union(UnionState.int_float._var_type)  # type: ignore [reportAttributeAccessIssue]
 
 
 def test_set_base_field_via_setter():
@@ -3555,9 +3555,9 @@ config = rx.Config(
         from reflex.state import State
 
         state_manager = StateManagerRedis(state=State, redis=mock_redis())
-        assert state_manager.lock_expiration == expected_values[0]  # pyright: ignore [reportAttributeAccessIssue]
-        assert state_manager.token_expiration == expected_values[1]  # pyright: ignore [reportAttributeAccessIssue]
-        assert state_manager.lock_warning_threshold == expected_values[2]  # pyright: ignore [reportAttributeAccessIssue]
+        assert state_manager.lock_expiration == expected_values[0]  # type: ignore [reportAttributeAccessIssue]
+        assert state_manager.token_expiration == expected_values[1]  # type: ignore [reportAttributeAccessIssue]
+        assert state_manager.lock_warning_threshold == expected_values[2]  # type: ignore [reportAttributeAccessIssue]
 
 
 @pytest.mark.parametrize(
@@ -3688,7 +3688,7 @@ def test_mixin_state() -> None:
     assert "computed" in UsesMixinState.vars
 
     assert (
-        UsesMixinState(_reflex_internal_init=True)._backend_no_default  # pyright: ignore [reportCallIssue]
+        UsesMixinState(_reflex_internal_init=True)._backend_no_default  # type: ignore [reportCallIssue]
         is not UsesMixinState.backend_vars["_backend_no_default"]
     )
 
@@ -3759,7 +3759,7 @@ def test_assignment_to_undeclared_vars():
     class State(BaseState):
         val: str
         _val: str
-        __val: str  # pyright: ignore [reportGeneralTypeIssues]
+        __val: str  # type: ignore [reportGeneralTypeIssues]
 
         def handle_supported_regular_vars(self):
             self.val = "no underscore"
@@ -3779,8 +3779,8 @@ def test_assignment_to_undeclared_vars():
         def handle_var(self):
             self.value = 20
 
-    state = State()  # pyright: ignore [reportCallIssue]
-    sub_state = Substate()  # pyright: ignore [reportCallIssue]
+    state = State()  # type: ignore [reportCallIssue]
+    sub_state = Substate()  # type: ignore [reportCallIssue]
 
     with pytest.raises(SetUndefinedStateVarError):
         state.handle_regular_var()
@@ -3844,7 +3844,7 @@ def test_fallback_pickle():
         _f: Callable | None = None
         _g: Any = None
 
-    state = DillState(_reflex_internal_init=True)  # pyright: ignore [reportCallIssue]
+    state = DillState(_reflex_internal_init=True)  # type: ignore [reportCallIssue]
     state._o = Obj(_f=lambda: 42)
     state._f = lambda: 420
 
@@ -3858,7 +3858,7 @@ def test_fallback_pickle():
     assert unpickled_state._o._f() == 42
 
     # Threading locks are unpicklable normally, and raise TypeError instead of PicklingError.
-    state2 = DillState(_reflex_internal_init=True)  # pyright: ignore [reportCallIssue]
+    state2 = DillState(_reflex_internal_init=True)  # type: ignore [reportCallIssue]
     state2._g = threading.Lock()
     pk2 = state2._serialize()
     unpickled_state2 = BaseState._deserialize(pk2)
@@ -3866,7 +3866,7 @@ def test_fallback_pickle():
     assert isinstance(unpickled_state2._g, type(threading.Lock()))
 
     # Some object, like generator, are still unpicklable with dill.
-    state3 = DillState(_reflex_internal_init=True)  # pyright: ignore [reportCallIssue]
+    state3 = DillState(_reflex_internal_init=True)  # type: ignore [reportCallIssue]
     state3._g = (i for i in range(10))
 
     with pytest.raises(StateSerializationError):
@@ -4156,7 +4156,7 @@ class UpcastState(rx.State):
         assert isinstance(a, list)
         self.passed = True
 
-    def py_unresolvable(self, u: Unresolvable):  # noqa: D102, F821 # pyright: ignore [reportUndefinedVariable]
+    def py_unresolvable(self, u: Unresolvable):  # noqa: D102, F821 # type: ignore [reportUndefinedVariable]
         assert isinstance(u, list)
         self.passed = True
 

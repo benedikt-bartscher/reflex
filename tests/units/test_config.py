@@ -22,7 +22,7 @@ from reflex.environment import (
 def test_requires_app_name():
     """Test that a config requires an app_name."""
     with pytest.raises(TypeError):
-        rx.Config()  # pyright: ignore[reportCallIssue]
+        rx.Config()  # type: ignore[reportCallIssue]
 
 
 def test_set_app_name(base_config_values):

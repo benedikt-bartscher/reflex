@@ -609,7 +609,7 @@ class ShikiCodeBlock(Component, MarkdownComponentMap):
 
         transformer_styles = {}
         # Collect styles from transformers and wrapper
-        for transformer in code_block.transformers._var_value:  # pyright: ignore [reportAttributeAccessIssue]
+        for transformer in code_block.transformers._var_value:  # type: ignore [reportAttributeAccessIssue]
             if isinstance(transformer, ShikiBaseTransformers) and transformer.style:
                 transformer_styles.update(transformer.style)
         transformer_styles.update(code_wrapper_props.pop("style", {}))
@@ -664,7 +664,7 @@ class ShikiCodeBlock(Component, MarkdownComponentMap):
             raise ValueError(msg)
         return ShikiBaseTransformers(
             library=library,
-            fns=[FunctionStringVar.create(fn) for fn in fns],  # pyright: ignore [reportCallIssue]
+            fns=[FunctionStringVar.create(fn) for fn in fns],  # type: ignore [reportCallIssue]
         )
 
     def _render(self, props: dict[str, Any] | None = None):

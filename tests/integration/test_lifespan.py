@@ -34,7 +34,7 @@ def LifespanApp(
     async def lifespan_context(app, inc: int = 1):  # noqa: RUF029
         global lifespan_context_global
         print(f"Lifespan context entered: {app}.")
-        lifespan_context_global += inc  # pyright: ignore[reportUnboundVariable]
+        lifespan_context_global += inc  # type: ignore[reportUnboundVariable]
         try:
             yield
         finally:
@@ -46,7 +46,7 @@ def LifespanApp(
         print("Lifespan global started.")
         try:
             while True:
-                lifespan_task_global += inc  # pyright: ignore[reportUnboundVariable, reportPossiblyUnboundVariable]
+                lifespan_task_global += inc  # type: ignore[reportUnboundVariable, reportPossiblyUnboundVariable]
                 await asyncio.sleep(0.1)
         except asyncio.CancelledError as ce:
             print(f"Lifespan global cancelled: {ce}.")

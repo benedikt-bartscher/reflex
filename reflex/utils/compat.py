@@ -92,4 +92,4 @@ def sqlmodel_field_has_primary_key(field_info: "FieldInfo") -> bool:
         return True
     if getattr(field_info, "sa_column", None) is None:
         return False
-    return bool(getattr(field_info.sa_column, "primary_key", None))  # pyright: ignore[reportAttributeAccessIssue]
+    return bool(getattr(field_info.sa_column, "primary_key", None))  # type: ignore[reportAttributeAccessIssue]

@@ -249,7 +249,7 @@ def _generate_imports(
     """
     return [
         *[
-            ast.ImportFrom(module=name, names=[ast.alias(name=val) for val in values])  # pyright: ignore [reportCallIssue]
+            ast.ImportFrom(module=name, names=[ast.alias(name=val) for val in values])  # type: ignore [reportCallIssue]
             for name, values in DEFAULT_IMPORTS.items()
         ],
         ast.Import([ast.alias("reflex")]),
@@ -407,7 +407,7 @@ def _extract_class_props_as_ast_nodes(
                         )
                     ),
                 ),
-                ast.Constant(value=default),  # pyright: ignore [reportArgumentType]
+                ast.Constant(value=default),  # type: ignore [reportArgumentType]
             ))
     return kwargs
 
@@ -663,7 +663,7 @@ def _generate_component_create_functiondef(
         defaults=[],
     )
 
-    return ast.FunctionDef(  # pyright: ignore [reportCallIssue]
+    return ast.FunctionDef(  # type: ignore [reportCallIssue]
         name="create",
         args=create_args,
         body=[
@@ -715,7 +715,7 @@ def _generate_staticmethod_call_functiondef(
             else []
         ),
     )
-    return ast.FunctionDef(  # pyright: ignore [reportCallIssue]
+    return ast.FunctionDef(  # type: ignore [reportCallIssue]
         name="__call__",
         args=call_args,
         body=[
@@ -766,7 +766,7 @@ def _generate_namespace_call_functiondef(
     # Determine which class is wrapped by the namespace __call__ method
     component_clz = clz.__call__.__self__
 
-    if clz.__call__.__func__.__name__ != "create":  # pyright: ignore [reportFunctionMemberAccess]
+    if clz.__call__.__func__.__name__ != "create":  # type: ignore [reportFunctionMemberAccess]
         return None
 
     if not issubclass(component_clz, Component):
@@ -857,7 +857,7 @@ class StubGenerator(ast.NodeTransformer):
             The modified Module node.
         """
         self.generic_visit(node)
-        return self._remove_docstring(node)  # pyright: ignore [reportReturnType]
+        return self._remove_docstring(node)  # type: ignore [reportReturnType]
 
     def visit_Import(
         self, node: ast.Import | ast.ImportFrom

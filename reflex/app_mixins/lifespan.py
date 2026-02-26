@@ -33,7 +33,7 @@ class LifespanMixin(AppMixin):
         try:
             async with contextlib.AsyncExitStack() as stack:
                 for task in self.lifespan_tasks:
-                    run_msg = f"Started lifespan task: {task.__name__} as {{type}}"  # pyright: ignore [reportAttributeAccessIssue]
+                    run_msg = f"Started lifespan task: {task.__name__} as {{type}}"  # type: ignore [reportAttributeAccessIssue]
                     if isinstance(task, asyncio.Task):
                         running_tasks.append(task)
                     else:
@@ -62,7 +62,7 @@ class LifespanMixin(AppMixin):
                 task.cancel(msg="lifespan_cleanup")
         # Disassociate sid / token pairings so they can be reconnected properly.
         try:
-            event_namespace = self.event_namespace  # pyright: ignore[reportAttributeAccessIssue]
+            event_namespace = self.event_namespace  # type: ignore[reportAttributeAccessIssue]
         except AttributeError:
             pass
         else:
@@ -73,7 +73,7 @@ class LifespanMixin(AppMixin):
                 console.error(f"Error during lifespan cleanup: {e}")
         # Flush any pending writes from the state manager.
         try:
-            state_manager = self.state_manager  # pyright: ignore[reportAttributeAccessIssue]
+            state_manager = self.state_manager  # type: ignore[reportAttributeAccessIssue]
         except AttributeError:
             pass
         else:
@@ -93,10 +93,10 @@ class LifespanMixin(AppMixin):
             msg = f"Task {task.__name__} of type generator must be decorated with contextlib.asynccontextmanager."
             raise InvalidLifespanTaskTypeError(msg)
 
-        task_name = task.__name__  # pyright: ignore [reportAttributeAccessIssue]
+        task_name = task.__name__  # type: ignore [reportAttributeAccessIssue]
         if task_kwargs:
             original_task = task
-            task = functools.partial(task, **task_kwargs)  # pyright: ignore [reportArgumentType]
-            functools.update_wrapper(task, original_task)  # pyright: ignore [reportArgumentType]
+            task = functools.partial(task, **task_kwargs)  # type: ignore [reportArgumentType]
+            functools.update_wrapper(task, original_task)  # type: ignore [reportArgumentType]
         self.lifespan_tasks.add(task)
         console.debug(f"Registered lifespan task: {task_name}")

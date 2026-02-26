@@ -188,16 +188,16 @@ def test_custom_auth_admin() -> type[AuthProvider]:
         login_path: str = "/login"
         logout_path: str = "/logout"
 
-        def login(self):  # pyright: ignore [reportIncompatibleMethodOverride]
+        def login(self):  # type: ignore [reportIncompatibleMethodOverride]
             """Login."""
 
-        def is_authenticated(self):  # pyright: ignore [reportIncompatibleMethodOverride]
+        def is_authenticated(self):  # type: ignore [reportIncompatibleMethodOverride]
             """Is authenticated."""
 
-        def get_admin_user(self):  # pyright: ignore [reportIncompatibleMethodOverride]
+        def get_admin_user(self):  # type: ignore [reportIncompatibleMethodOverride]
             """Get admin user."""
 
-        def logout(self):  # pyright: ignore [reportIncompatibleMethodOverride]
+        def logout(self):  # type: ignore [reportIncompatibleMethodOverride]
             """Logout."""
 
     return TestAuthProvider
@@ -502,7 +502,7 @@ async def test_dynamic_var_event(test_state: type[ATestState], token: str):
         test_state: State Fixture.
         token: a Token.
     """
-    state = test_state()  # pyright: ignore [reportCallIssue]
+    state = test_state()  # type: ignore [reportCallIssue]
     state.add_var("int_val", int, 0)
     async for result in state._process(
         Event(
@@ -726,7 +726,7 @@ def dict_mutation_state():
 
         def add_age(self):
             """Add an age to the dict."""
-            self.details.update({"age": 20})  # pyright: ignore [reportCallIssue, reportArgumentType]
+            self.details.update({"age": 20})  # type: ignore [reportCallIssue, reportArgumentType]
 
         def change_name(self):
             """Change the name in the dict."""
@@ -950,7 +950,7 @@ async def test_upload_file(tmp_path, state, delta, token: str, mocker: MockerFix
     state._tmp_path = tmp_path
     # The App state must be the "root" of the state tree
     app = App()
-    app.event_namespace.emit = AsyncMock()  # pyright: ignore [reportOptionalMemberAccess]
+    app.event_namespace.emit = AsyncMock()  # type: ignore [reportOptionalMemberAccess]
     current_state = await app.state_manager.get_state(_substate_key(token, state))
     data = b"This is binary data"
 
@@ -1136,9 +1136,9 @@ class DynamicState(BaseState):
         Returns:
             same as self.dynamic
         """
-        return self.dynamic  # pyright: ignore[reportAttributeAccessIssue]
+        return self.dynamic  # type: ignore[reportAttributeAccessIssue]
 
-    on_load_internal = OnLoadInternalState.on_load_internal.fn  # pyright: ignore [reportFunctionMemberAccess]
+    on_load_internal = OnLoadInternalState.on_load_internal.fn  # type: ignore [reportFunctionMemberAccess]
 
 
 def test_dynamic_arg_shadow(
@@ -1224,7 +1224,7 @@ async def test_dynamic_route_var_route_change_completed_on_load(
     client_ip = "127.0.0.1"
     async with app.state_manager.modify_state(substate_token) as state:
         state.router_data = {"simulate": "hydrated"}
-        assert state.dynamic == ""  # pyright: ignore[reportAttributeAccessIssue]
+        assert state.dynamic == ""  # type: ignore[reportAttributeAccessIssue]
     exp_vals = ["foo", "foobar", "baz"]
 
     def _event(name, val, **kwargs):
@@ -1298,7 +1298,7 @@ async def test_dynamic_route_var_route_change_completed_on_load(
         if isinstance(app.state_manager, StateManagerRedis):
             # When redis is used, the state is not updated until the processing is complete
             state = await app.state_manager.get_state(substate_token)
-            assert state.dynamic == prev_exp_val  # pyright: ignore[reportAttributeAccessIssue]
+            assert state.dynamic == prev_exp_val  # type: ignore[reportAttributeAccessIssue]
 
         # complete the processing
         with pytest.raises(StopAsyncIteration):
@@ -1309,7 +1309,7 @@ async def test_dynamic_route_var_route_change_completed_on_load(
 
         # check that router data was written to the state_manager store
         state = await app.state_manager.get_state(substate_token)
-        assert state.dynamic == exp_val  # pyright: ignore[reportAttributeAccessIssue]
+        assert state.dynamic == exp_val  # type: ignore[reportAttributeAccessIssue]
 
         process_coro = process(
             app,
@@ -1424,7 +1424,7 @@ async def test_process_events(mocker: MockerFixture, token: str):
     gen_state = await app.state_manager.get_state(event.substate_token)
     assert isinstance(gen_state, GenState)
     assert gen_state.value == 5
-    assert app._postprocess.call_count == 6  # pyright: ignore [reportAttributeAccessIssue]
+    assert app._postprocess.call_count == 6  # type: ignore [reportAttributeAccessIssue]
 
     await app.state_manager.close()
 
@@ -1481,7 +1481,7 @@ def test_overlay_component(
     if exp_page_child is not None:
         assert len(page.children) == 4
         children_types = (type(child) for child in page.children)
-        assert exp_page_child in children_types  # pyright: ignore [reportOperatorIssue]
+        assert exp_page_child in children_types  # type: ignore [reportOperatorIssue]
     else:
         assert len(page.children) == 3
 
@@ -1593,19 +1593,19 @@ def test_app_wrap_priority(
     class Fragment1(Component):
         tag = "Fragment1"
 
-        def _get_app_wrap_components(self) -> dict[tuple[int, str], Component]:  # pyright: ignore [reportIncompatibleMethodOverride]
+        def _get_app_wrap_components(self) -> dict[tuple[int, str], Component]:  # type: ignore [reportIncompatibleMethodOverride]
             return {(99, "Box"): rx.box()}
 
     class Fragment2(Component):
         tag = "Fragment2"
 
-        def _get_app_wrap_components(self) -> dict[tuple[int, str], Component]:  # pyright: ignore [reportIncompatibleMethodOverride]
+        def _get_app_wrap_components(self) -> dict[tuple[int, str], Component]:  # type: ignore [reportIncompatibleMethodOverride]
             return {(50, "Text"): rx.text()}
 
     class Fragment3(Component):
         tag = "Fragment3"
 
-        def _get_app_wrap_components(self) -> dict[tuple[int, str], Component]:  # pyright: ignore [reportIncompatibleMethodOverride]
+        def _get_app_wrap_components(self) -> dict[tuple[int, str], Component]:  # type: ignore [reportIncompatibleMethodOverride]
             return {(10, "Fragment2"): Fragment2.create()}
 
     def page():

@@ -50,9 +50,9 @@ def LinkedStateApp():
 
         @rx.event
         async def on_load_link_default(self):
-            linked_state = await self._link_to(self.room or "default")  # pyright: ignore[reportAttributeAccessIssue]
-            if self.room:  # pyright: ignore[reportAttributeAccessIssue]
-                assert linked_state._linked_to == self.room  # pyright: ignore[reportAttributeAccessIssue]
+            linked_state = await self._link_to(self.room or "default")  # type: ignore[reportAttributeAccessIssue]
+            if self.room:  # type: ignore[reportAttributeAccessIssue]
+                assert linked_state._linked_to == self.room  # type: ignore[reportAttributeAccessIssue]
             else:
                 assert linked_state._linked_to == "default"
 

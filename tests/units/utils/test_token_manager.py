@@ -629,9 +629,9 @@ async def test_redis_token_manager_lost_and_found(
         event_namespace_factory: Factory fixture for EventNamespace instances.
     """
     event_namespace1 = event_namespace_factory()
-    emit1_mock: Mock = event_namespace1.emit  # pyright: ignore[reportAssignmentType]
+    emit1_mock: Mock = event_namespace1.emit  # type: ignore[reportAssignmentType]
     event_namespace2 = event_namespace_factory()
-    emit2_mock: Mock = event_namespace2.emit  # pyright: ignore[reportAssignmentType]
+    emit2_mock: Mock = event_namespace2.emit  # type: ignore[reportAssignmentType]
 
     await event_namespace1.on_connect(sid="sid1", environ=query_string_for("token1"))
     await event_namespace2.on_connect(sid="sid2", environ=query_string_for("token2"))
@@ -684,9 +684,9 @@ async def test_redis_token_manager_lost_and_found_router_data(
         event_namespace_factory: Factory fixture for EventNamespace instances.
     """
     event_namespace1 = event_namespace_factory()
-    emit1_mock: Mock = event_namespace1.emit  # pyright: ignore[reportAssignmentType]
+    emit1_mock: Mock = event_namespace1.emit  # type: ignore[reportAssignmentType]
     event_namespace2 = event_namespace_factory()
-    emit2_mock: Mock = event_namespace2.emit  # pyright: ignore[reportAssignmentType]
+    emit2_mock: Mock = event_namespace2.emit  # type: ignore[reportAssignmentType]
 
     await event_namespace1.on_connect(sid="sid1", environ=query_string_for("token1"))
     await event_namespace2.on_connect(sid="sid2", environ=query_string_for("token2"))

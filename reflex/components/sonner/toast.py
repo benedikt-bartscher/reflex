@@ -270,7 +270,7 @@ class Toaster(Component):
             raise ValueError(msg)
 
         if props:
-            args = LiteralVar.create(ToastProps(component_name="rx.toast", **props))  # pyright: ignore [reportCallIssue]
+            args = LiteralVar.create(ToastProps(component_name="rx.toast", **props))  # type: ignore [reportCallIssue]
             toast = toast_command.call(message, args)
         else:
             toast = toast_command.call(message)

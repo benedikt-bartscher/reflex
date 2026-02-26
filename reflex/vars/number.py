@@ -294,7 +294,7 @@ class NumberVar(Var[NUMBER_T], python_types=(int, float, decimal.Decimal)):
         Returns:
             The number negation operation.
         """
-        return number_negate_operation(self)  # pyright: ignore [reportReturnType]
+        return number_negate_operation(self)  # type: ignore [reportReturnType]
 
     def __invert__(self):
         """Boolean NOT the number.
@@ -523,7 +523,7 @@ def binary_number_operation(
         Returns:
             The binary number operation.
         """
-        return operation(lhs, rhs)  # pyright: ignore [reportReturnType, reportArgumentType]
+        return operation(lhs, rhs)  # type: ignore [reportReturnType, reportArgumentType]
 
     return wrapper
 

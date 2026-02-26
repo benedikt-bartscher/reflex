@@ -255,7 +255,7 @@ else:
     get_engine = _print_db_not_available
     get_async_engine = _print_db_not_available
     sqla_session = _print_db_not_available
-    ModelRegistry = _ClassThatErrorsOnInit  # pyright: ignore [reportAssignmentType]
+    ModelRegistry = _ClassThatErrorsOnInit  # type: ignore [reportAssignmentType]
 
 if find_spec("sqlmodel") and find_spec("sqlalchemy") and find_spec("pydantic"):
     import alembic.autogenerate
@@ -356,7 +356,7 @@ if find_spec("sqlmodel") and find_spec("sqlalchemy") and find_spec("pydantic"):
         # The primary key for the table.
         id: int | None = sqlmodel.Field(default=None, primary_key=True)
 
-        model_config = {  # pyright: ignore [reportAssignmentType]
+        model_config = {  # type: ignore [reportAssignmentType]
             "arbitrary_types_allowed": True,
             "use_enum_values": True,
             "extra": "allow",
@@ -648,4 +648,4 @@ else:
     get_db_status = _print_db_not_available
     session = _print_db_not_available
     asession = _print_db_not_available
-    Model = _ClassThatErrorsOnInit  # pyright: ignore [reportAssignmentType]
+    Model = _ClassThatErrorsOnInit  # type: ignore [reportAssignmentType]

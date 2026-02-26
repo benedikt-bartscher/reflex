@@ -15,7 +15,7 @@ from reflex.vars.base import LiteralVar, Var, computed_var
 @pytest.fixture
 def cond_state(request):
     class CondState(BaseState):
-        value: request.param["value_type"] = request.param["value"]  # pyright: ignore [reportInvalidTypeForm, reportUndefinedVariable] # noqa: F821
+        value: request.param["value_type"] = request.param["value"]  # type: ignore [reportInvalidTypeForm, reportUndefinedVariable] # noqa: F821
 
     return CondState
 
@@ -42,7 +42,7 @@ def test_validate_cond(cond_state: BaseState):
         cond_state: A fixture.
     """
     cond_component = cond(
-        cond_state.value,  # pyright: ignore[reportAttributeAccessIssue]
+        cond_state.value,  # type: ignore[reportAttributeAccessIssue]
         Text.create("cond is True"),
         Text.create("cond is False"),
     )
@@ -50,7 +50,7 @@ def test_validate_cond(cond_state: BaseState):
     assert cond_dict["name"] == "Fragment"
 
     [condition] = cond_dict["children"]
-    assert condition["cond_state"] == str(cond_state.value.bool())  # pyright: ignore[reportAttributeAccessIssue]
+    assert condition["cond_state"] == str(cond_state.value.bool())  # type: ignore[reportAttributeAccessIssue]
 
     # true value
     true_value = condition["true_value"]
@@ -113,12 +113,12 @@ def test_cond_no_else():
     comp = comp.children[0]
     assert isinstance(comp, Cond)
     assert comp.cond._decode() is True
-    assert comp.children[0].render() == Fragment.create(Text.create("hello")).render()  # pyright: ignore [reportOptionalMemberAccess]
+    assert comp.children[0].render() == Fragment.create(Text.create("hello")).render()  # type: ignore [reportOptionalMemberAccess]
     assert comp.children[1] == Fragment.create()
 
     # Props do not support the use of cond without else
     with pytest.raises(ValueError):
-        cond(True, "hello")  # pyright: ignore [reportArgumentType]
+        cond(True, "hello")  # type: ignore [reportArgumentType]
 
 
 def test_cond_computed_var():

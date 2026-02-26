@@ -796,7 +796,7 @@ class StateManagerRedis(StateManager):
             lock_waiter_key_pattern: self._handle_lock_contention,
         }
         async with self.redis.pubsub() as pubsub:
-            await pubsub.psubscribe(**handlers)  # pyright: ignore[reportArgumentType]
+            await pubsub.psubscribe(**handlers)  # type: ignore[reportArgumentType]
             async for _ in pubsub.listen():
                 pass
 

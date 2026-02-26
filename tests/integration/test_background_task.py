@@ -335,7 +335,7 @@ def test_background_task(
     AppHarness.expect(lambda: counter_async_cv.text == "620", timeout=40)
     # all tasks should have exited and cleaned up
     AppHarness.expect(
-        lambda: not background_task.app_instance._background_tasks  # pyright: ignore [reportOptionalMemberAccess]
+        lambda: not background_task.app_instance._background_tasks  # type: ignore [reportOptionalMemberAccess]
     )
 
 

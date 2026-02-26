@@ -601,7 +601,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
 
     @overload
     @classmethod
-    def create(  # pyright: ignore[reportOverlappingOverload]
+    def create(  # type: ignore[reportOverlappingOverload]
         cls,
         value: NoReturn,
         _var_data: VarData | None = None,
@@ -609,7 +609,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
 
     @overload
     @classmethod
-    def create(  # pyright: ignore[reportOverlappingOverload]
+    def create(  # type: ignore[reportOverlappingOverload]
         cls,
         value: bool,
         _var_data: VarData | None = None,
@@ -641,7 +641,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
 
     @overload
     @classmethod
-    def create(  # pyright: ignore [reportOverlappingOverload]
+    def create(  # type: ignore [reportOverlappingOverload]
         cls,
         value: Color,
         _var_data: VarData | None = None,
@@ -649,7 +649,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
 
     @overload
     @classmethod
-    def create(  # pyright: ignore [reportOverlappingOverload]
+    def create(  # type: ignore [reportOverlappingOverload]
         cls,
         value: str,
         _var_data: VarData | None = None,
@@ -657,7 +657,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
 
     @overload
     @classmethod
-    def create(  # pyright: ignore [reportOverlappingOverload]
+    def create(  # type: ignore [reportOverlappingOverload]
         cls,
         value: STRING_T,
         _var_data: VarData | None = None,
@@ -665,7 +665,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
 
     @overload
     @classmethod
-    def create(  # pyright: ignore[reportOverlappingOverload]
+    def create(  # type: ignore[reportOverlappingOverload]
         cls,
         value: None,
         _var_data: VarData | None = None,
@@ -733,7 +733,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         return f"{constants.REFLEX_VAR_OPENING_TAG}{hashed_var}{constants.REFLEX_VAR_CLOSING_TAG}{self._js_expr}"
 
     @overload
-    def to(self, output: type[str]) -> StringVar: ...  # pyright: ignore[reportOverlappingOverload]
+    def to(self, output: type[str]) -> StringVar: ...  # type: ignore[reportOverlappingOverload]
 
     @overload
     def to(self, output: type[bool]) -> BooleanVar: ...
@@ -805,7 +805,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
                 return self.to(var_subclass.var_subclass, output)
 
         if fixed_output_type is None:
-            return get_to_operation(NoneVar).create(self)  # pyright: ignore [reportReturnType]
+            return get_to_operation(NoneVar).create(self)  # type: ignore [reportReturnType]
 
         # Handle fixed_output_type being Base or a dataclass.
         if can_use_in_object_var(output):
@@ -819,7 +819,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
                         new_var_type = var_type
                     else:
                         new_var_type = var_type or current_var_type
-                    return var_subclass.to_var_subclass.create(  # pyright: ignore [reportReturnType]
+                    return var_subclass.to_var_subclass.create(  # type: ignore [reportReturnType]
                         value=self, _var_type=new_var_type
                     )
 
@@ -840,7 +840,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         return self
 
     @overload
-    def guess_type(self: Var[NoReturn]) -> Var[Any]: ...  # pyright: ignore [reportOverlappingOverload]
+    def guess_type(self: Var[NoReturn]) -> Var[Any]: ...  # type: ignore [reportOverlappingOverload]
 
     @overload
     def guess_type(self: Var[str]) -> StringVar: ...
@@ -987,7 +987,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
             else format_state_name(state.get_full_name())
         )
 
-        return StateOperation.create(  # pyright: ignore [reportReturnType]
+        return StateOperation.create(  # type: ignore [reportReturnType]
             formatted_state_name,
             self,
             _var_data=VarData.merge(
@@ -1387,10 +1387,10 @@ class ToOperation:
             The ToOperation.
         """
         return cls(
-            _js_expr="",  # pyright: ignore [reportCallIssue]
-            _var_data=_var_data,  # pyright: ignore [reportCallIssue]
-            _var_type=_var_type or cls._default_var_type,  # pyright: ignore [reportCallIssue, reportAttributeAccessIssue]
-            _original=value,  # pyright: ignore [reportCallIssue]
+            _js_expr="",  # type: ignore [reportCallIssue]
+            _var_data=_var_data,  # type: ignore [reportCallIssue]
+            _var_type=_var_type or cls._default_var_type,  # type: ignore [reportCallIssue, reportAttributeAccessIssue]
+            _original=value,  # type: ignore [reportCallIssue]
         )
 
 
@@ -1651,7 +1651,7 @@ T = TypeVar("T")
 
 # NoReturn is used to match CustomVarOperationReturn with no type hint.
 @overload
-def var_operation(  # pyright: ignore [reportOverlappingOverload]
+def var_operation(  # type: ignore [reportOverlappingOverload]
     func: Callable[P, CustomVarOperationReturn[NoReturn]],
 ) -> Callable[P, Var]: ...
 
@@ -1663,7 +1663,7 @@ def var_operation(
 
 
 @overload
-def var_operation(  # pyright: ignore [reportOverlappingOverload]
+def var_operation(  # type: ignore [reportOverlappingOverload]
     func: Callable[P, CustomVarOperationReturn[bool]]
     | Callable[P, CustomVarOperationReturn[bool | None]],
 ) -> Callable[P, BooleanVar]: ...
@@ -1713,7 +1713,7 @@ def var_operation(
 ) -> Callable[P, Var[T]]: ...
 
 
-def var_operation(  # pyright: ignore [reportInconsistentOverload]
+def var_operation(  # type: ignore [reportInconsistentOverload]
     func: Callable[P, CustomVarOperationReturn[T]],
 ) -> Callable[P, Var[T]]:
     """Decorator for creating a var operation.
@@ -1747,7 +1747,7 @@ def var_operation(  # pyright: ignore [reportInconsistentOverload]
         return CustomVarOperation.create(
             name=func.__name__,
             args=tuple(list(args_vars.items()) + list(kwargs_vars.items())),
-            return_var=func(*args_vars.values(), **kwargs_vars),  # pyright: ignore [reportCallIssue, reportReturnType]
+            return_var=func(*args_vars.values(), **kwargs_vars),  # type: ignore [reportCallIssue, reportReturnType]
         ).guess_type()
 
     return wrapper
@@ -2075,7 +2075,7 @@ class ComputedVar(Var[RETURN_TYPE]):
 
     _fget: Callable[[BaseState], RETURN_TYPE] = dataclasses.field(
         default_factory=lambda: lambda _: None
-    )  # pyright: ignore [reportAssignmentType]
+    )  # type: ignore [reportAssignmentType]
 
     _name: str = dataclasses.field(default="")
 
@@ -2516,7 +2516,7 @@ class ComputedVar(Var[RETURN_TYPE]):
         hints = get_type_hints(self._fget)
         if "return" in hints:
             return hints["return"]
-        return Any  # pyright: ignore [reportReturnType]
+        return Any  # type: ignore [reportReturnType]
 
     @property
     def __class__(self) -> type:
@@ -3294,7 +3294,7 @@ class Field(Generic[FIELD_TYPE]):
         default: FIELD_TYPE | _MISSING_TYPE = MISSING,
         default_factory: Callable[[], FIELD_TYPE] | None = None,
         is_var: bool = True,
-        annotated_type: GenericType  # pyright: ignore [reportRedeclaration]
+        annotated_type: GenericType  # type: ignore [reportRedeclaration]
         | _MISSING_TYPE = MISSING,
     ) -> None:
         """Initialize the field.
@@ -3329,7 +3329,7 @@ class Field(Generic[FIELD_TYPE]):
             self.outer_type_ = self.annotated_type = annotated_type
 
             if type_origin is Annotated:
-                type_origin = annotated_type.__origin__  # pyright: ignore [reportAttributeAccessIssue]
+                type_origin = annotated_type.__origin__  # type: ignore [reportAttributeAccessIssue]
 
             self.type_ = self.type_origin = type_origin
         else:
@@ -3457,7 +3457,7 @@ class Field(Generic[FIELD_TYPE]):
     @overload
     def __get__(self, instance: Any, owner: Any) -> FIELD_TYPE: ...
 
-    def __get__(self, instance: Any, owner: Any):  # pyright: ignore [reportInconsistentOverload]
+    def __get__(self, instance: Any, owner: Any):  # type: ignore [reportInconsistentOverload]
         """Get the Var.
 
         Args:

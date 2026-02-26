@@ -1461,7 +1461,7 @@ class App(MiddlewareMixin, LifespanMixin):
         )
         if self.theme is not None:
             # Fix #2992 by removing the top-level appearance prop
-            self.theme.appearance = None  # pyright: ignore[reportAttributeAccessIssue]
+            self.theme.appearance = None  # type: ignore[reportAttributeAccessIssue]
         progress.advance(task)
 
         # Compile the app root.

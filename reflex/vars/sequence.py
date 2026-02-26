@@ -145,7 +145,7 @@ class ArrayVar(Var[ARRAY_VAR_TYPE], python_types=(Sequence, set)):
     ) -> NumberVar: ...
 
     @overload
-    def __getitem__(  # pyright: ignore [reportOverlappingOverload]
+    def __getitem__(  # type: ignore [reportOverlappingOverload]
         self: ArrayVar[tuple[str, Any]], i: Literal[0, -2]
     ) -> StringVar: ...
 
@@ -834,7 +834,7 @@ class StringVar(Var[STRING_TYPE], python_types=str):
         return string_ge_operation(self, other)
 
     @overload
-    def replace(  # pyright: ignore [reportOverlappingOverload]
+    def replace(  # type: ignore [reportOverlappingOverload]
         self, search_value: StringVar | str, new_value: StringVar | str
     ) -> StringVar: ...
 
@@ -843,7 +843,7 @@ class StringVar(Var[STRING_TYPE], python_types=str):
         self, search_value: Any, new_value: Any
     ) -> CustomVarOperationReturn[StringVar]: ...
 
-    def replace(self, search_value: Any, new_value: Any) -> StringVar:  # pyright: ignore [reportInconsistentOverload]
+    def replace(self, search_value: Any, new_value: Any) -> StringVar:  # type: ignore [reportInconsistentOverload]
         """Replace a string with a value.
 
         Args:

@@ -357,7 +357,7 @@ def compile_or_validate_app(
 
         try:
             colorize = _can_colorize()
-            traceback.print_exception(e, colorize=colorize)  # pyright: ignore[reportCallIssue]
+            traceback.print_exception(e, colorize=colorize)  # type: ignore[reportCallIssue]
         except Exception:
             traceback.print_exception(e)
         return False

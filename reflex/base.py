@@ -70,4 +70,4 @@ else:
             )
             raise ImportError(msg)
 
-    Base = PydanticNotFoundFallback  # pyright: ignore[reportAssignmentType]
+    Base = PydanticNotFoundFallback  # type: ignore[reportAssignmentType]
