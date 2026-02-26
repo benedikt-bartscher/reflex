@@ -52,7 +52,7 @@ class _ClassThatErrorsOnInit:
         _print_db_not_available(*args, **kwargs)
 
 
-if find_spec("sqlalchemy"):
+if TYPE_CHECKING or find_spec("sqlalchemy"):
     import sqlalchemy
     import sqlalchemy.exc
     import sqlalchemy.ext.asyncio
@@ -257,7 +257,9 @@ else:
     sqla_session = _print_db_not_available
     ModelRegistry = _ClassThatErrorsOnInit  # type: ignore [reportAssignmentType]
 
-if find_spec("sqlmodel") and find_spec("sqlalchemy") and find_spec("pydantic"):
+if TYPE_CHECKING or (
+    find_spec("sqlmodel") and find_spec("sqlalchemy") and find_spec("pydantic")
+):
     import alembic.autogenerate
     import alembic.command
     import alembic.config

@@ -1,8 +1,9 @@
 """Define the base Reflex class."""
 
 from importlib.util import find_spec
+from typing import TYPE_CHECKING
 
-if find_spec("pydantic") and find_spec("pydantic.v1"):
+if TYPE_CHECKING or (find_spec("pydantic") and find_spec("pydantic.v1")):
     from pydantic.v1 import BaseModel
 
     from reflex.utils.compat import ModelMetaclassLazyAnnotations

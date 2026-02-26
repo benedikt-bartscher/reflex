@@ -54,7 +54,7 @@ def annotations_from_namespace(namespace: Mapping[str, Any]) -> dict[str, Any]:
     return namespace.get("__annotations__", {})
 
 
-if find_spec("pydantic") and find_spec("pydantic.v1"):
+if TYPE_CHECKING or (find_spec("pydantic") and find_spec("pydantic.v1")):
     from pydantic.v1.main import ModelMetaclass
 
     class ModelMetaclassLazyAnnotations(ModelMetaclass):

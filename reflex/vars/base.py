@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import builtins
 import contextlib
 import copy
 import dataclasses
@@ -736,7 +737,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
     def to(self, output: type[str]) -> StringVar: ...  # type: ignore[reportOverlappingOverload]
 
     @overload
-    def to(self, output: type[bool]) -> BooleanVar: ...
+    def to(self, output: type[builtins.bool]) -> BooleanVar: ...
 
     @overload
     def to(self, output: type[int]) -> NumberVar[int]: ...
@@ -846,7 +847,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
     def guess_type(self: Var[str]) -> StringVar: ...
 
     @overload
-    def guess_type(self: Var[bool]) -> BooleanVar: ...
+    def guess_type(self: Var[builtins.bool]) -> BooleanVar: ...
 
     @overload
     def guess_type(self: Var[int] | Var[float] | Var[int | float]) -> NumberVar: ...
@@ -2287,7 +2288,7 @@ class ComputedVar(Var[RETURN_TYPE]):
 
     @overload
     def __get__(
-        self: ComputedVar[bool],
+        self: ComputedVar[builtins.bool],
         instance: None,
         owner: type,
     ) -> BooleanVar: ...
@@ -2560,7 +2561,7 @@ class AsyncComputedVar(ComputedVar[RETURN_TYPE]):
 
     @overload
     def __get__(
-        self: AsyncComputedVar[bool],
+        self: AsyncComputedVar[builtins.bool],
         instance: None,
         owner: type,
     ) -> BooleanVar: ...

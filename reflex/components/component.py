@@ -2752,7 +2752,7 @@ def empty_component() -> Component:
     return Bare.create("")
 
 
-def render_dict_to_var(tag: dict | Component | str) -> Var:
+def render_dict_to_var(tag: dict[str, Any] | Component | str) -> Var:
     """Convert a render dict to a Var.
 
     Args:
