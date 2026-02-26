@@ -153,11 +153,11 @@ class ToastProps(NoExtrasAllowedProps):
         if "action" in d:
             d["action"] = self.action
             if isinstance(self.action, dict):
-                d["action"] = ToastAction(**self.action)
+                d["action"] = ToastAction(**self.action)  # type: ignore[invalid-argument-type]  # **self.action dict unpacking
         if "cancel" in d:
             d["cancel"] = self.cancel
             if isinstance(self.cancel, dict):
-                d["cancel"] = ToastAction(**self.cancel)
+                d["cancel"] = ToastAction(**self.cancel)  # type: ignore[invalid-argument-type]  # **self.cancel dict unpacking
         if "onDismiss" in d:
             d["onDismiss"] = format.format_queue_events(
                 self.on_dismiss, _toast_callback_signature

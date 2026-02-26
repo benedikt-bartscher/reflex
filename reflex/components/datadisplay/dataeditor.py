@@ -342,7 +342,7 @@ class DataEditor(NoSSRComponent):
 
     # Fired when editing is finished.
     on_finished_editing: EventHandler[
-        passthrough_event_spec(GridCell | None, tuple[int, int])
+        passthrough_event_spec(GridCell | None, tuple[int, int])  # type: ignore[no-matching-overload]  # passthrough_event_spec
     ]
 
     # Fired when a row is appended.

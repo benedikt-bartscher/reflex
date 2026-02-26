@@ -768,7 +768,7 @@ environment = EnvironmentVariables()
 try:
     from dotenv import load_dotenv
 except ImportError:
-    load_dotenv = None
+    load_dotenv = None  # type: ignore[invalid-assignment]  # fallback when dotenv not installed
 
 
 def _paths_from_env_files(env_files: str) -> list[Path]:

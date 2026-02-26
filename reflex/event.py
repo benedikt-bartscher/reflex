@@ -1676,17 +1676,18 @@ def parse_args_spec(arg_spec: ArgsSpec | Sequence[ArgsSpec]):
     # if there's multiple, the first is the default
     if isinstance(arg_spec, Sequence):
         annotations = [get_type_hints(one_arg_spec) for one_arg_spec in arg_spec]
-        arg_spec = arg_spec[0]
+        default_spec: ArgsSpec = arg_spec[0]  # type: ignore[assignment]  # Sequence.__getitem__ returns object per ty
     else:
         annotations = [get_type_hints(arg_spec)]
+        default_spec = arg_spec
 
-    spec = inspect.getfullargspec(arg_spec)
+    spec = inspect.getfullargspec(default_spec)
 
     return list(
-        arg_spec(*[
+        default_spec(*[
             Var(f"_{l_arg}").to(
                 unwrap_var_annotation(
-                    resolve_annotation(annotations[0], l_arg, spec=arg_spec)
+                    resolve_annotation(annotations[0], l_arg, spec=default_spec)
                 )
             )
             for l_arg in spec.args
@@ -1877,7 +1878,7 @@ def fix_events(
     for e in events:
         if callable(e) and getattr(e, "__name__", "") == "<lambda>":
             # A lambda was returned, assume the user wants to call it with no args.
-            e = e()
+            e = e()  # type: ignore[call-top-callable]  # lambda callable
         if isinstance(e, Event):
             # If the event is already an event, append it to the list.
             out.append(e)
@@ -1983,14 +1984,15 @@ class LiteralEventVar(VarOperationCall, LiteralVar, EventVar):
             EventFnArgMismatchError: If the event handler takes arguments.
         """
         if isinstance(value, EventHandler):
+            handler = value
 
             def no_args():
                 return ()
 
             try:
-                value = call_event_handler(value, no_args)
+                value = call_event_handler(handler, no_args)
             except EventFnArgMismatchError:
-                msg = f"Event handler {value.fn.__qualname__} used inside of a rx.cond() must not take any arguments."
+                msg = f"Event handler {handler.fn.__qualname__} used inside of a rx.cond() must not take any arguments."
                 raise EventFnArgMismatchError(msg) from None
 
         return cls(
@@ -2104,7 +2106,7 @@ class LiteralEventChainVar(ArgsFunctionOperationBuilder, LiteralVar, EventChainV
             _var_type=EventChain,
             _var_data=_var_data,
             _args=FunctionArgs(arg_def),
-            _return_expr=invocation.call(
+            _return_expr=invocation.call(  # type: ignore[no-matching-overload]  # FunctionVar.call complex overloads
                 LiteralVar.create([LiteralVar.create(event) for event in value.events]),
                 arg_def_expr,
                 value.event_actions,
@@ -2131,7 +2133,7 @@ class EventCallback(Generic[Unpack[P]], EventActionsMixin):
         Args:
             func: The function to be wrapped.
         """
-        self.func = func
+        self.func = func  # type: ignore[invalid-assignment]  # EventActionsMixin dataclass __setattr__ override
 
     @overload
     def __call__(
@@ -2438,7 +2440,7 @@ class EventNamespace:
                 types = get_type_hints(func)
                 state_arg_name = next(iter(inspect.signature(func).parameters), None)
                 state_cls = state_arg_name and types.get(state_arg_name)
-                if state_cls and issubclass(state_cls, BaseState):
+                if isinstance(state_cls, type) and issubclass(state_cls, BaseState):
                     name = (
                         (func.__module__ + "." + qualname)
                         .replace(".", "_")

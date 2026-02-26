@@ -201,7 +201,7 @@ class FunctionStringVar(FunctionVar[CALLABLE_TYPE]):
     def create(
         cls,
         func: str,
-        _var_type: type[OTHER_CALLABLE_TYPE] = ReflexCallable[Any, Any],
+        _var_type: type[OTHER_CALLABLE_TYPE] = ReflexCallable[Any, Any],  # type: ignore[invalid-parameter-default]  # generic default for type[OTHER_CALLABLE_TYPE]
         _var_data: VarData | None = None,
     ) -> FunctionStringVar[OTHER_CALLABLE_TYPE]:
         """Create a new function var from a string.

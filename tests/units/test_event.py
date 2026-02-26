@@ -559,7 +559,7 @@ def test_event_decorator_with_event_actions():
 
     # Test no event actions (existing behavior preserved)
     no_actions_handler = MyTestState.handle_no_actions
-    assert no_actions_handler.event_actions == {}
+    assert no_actions_handler.event_actions == {}  # type: ignore[unresolved-attribute]  # EventNamespace.event_actions ty#988
 
 
 def test_event_decorator_actions_can_be_overridden():

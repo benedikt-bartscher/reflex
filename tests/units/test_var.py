@@ -1148,7 +1148,7 @@ def test_nested_dict():
     arr = LiteralArrayVar.create([{"bar": ["foo", "bar"]}], list[dict[str, list[str]]])
 
     assert (
-        str(arr[0]["bar"][0])
+        str(arr[0]["bar"][0])  # type: ignore[invalid-argument-type]  # ArrayVar subscript
         == '[({ ["bar"] : ["foo", "bar"] })]?.at?.(0)?.["bar"]?.at?.(0)'  # type: ignore [reportIndexIssue]
     )
 

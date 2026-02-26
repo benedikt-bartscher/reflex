@@ -100,7 +100,7 @@ class ArrayVar(Var[ARRAY_VAR_TYPE], python_types=(Sequence, set)):
         Returns:
             The reversed array.
         """
-        return array_reverse_operation(self)
+        return array_reverse_operation(self)  # type: ignore[invalid-return-type]  # var operation type inference
 
     def __add__(self, other: ArrayVar[ARRAY_VAR_TYPE]) -> ArrayVar[ARRAY_VAR_TYPE]:
         """Concatenate two arrays.
@@ -114,7 +114,7 @@ class ArrayVar(Var[ARRAY_VAR_TYPE], python_types=(Sequence, set)):
         if not isinstance(other, ArrayVar):
             raise_unsupported_operand_types("+", (type(self), type(other)))
 
-        return array_concat_operation(self, other)
+        return array_concat_operation(self, other)  # type: ignore[invalid-return-type]  # var operation type inference
 
     @overload
     def __getitem__(self, i: slice) -> ArrayVar[ARRAY_VAR_TYPE]: ...
@@ -323,7 +323,7 @@ class ArrayVar(Var[ARRAY_VAR_TYPE], python_types=(Sequence, set)):
         Returns:
             The array pluck operation.
         """
-        return array_pluck_operation(self, field)
+        return array_pluck_operation(self, field)  # type: ignore[invalid-return-type]  # var operation type inference
 
     def __mul__(self, other: NumberVar | int) -> ArrayVar[ARRAY_VAR_TYPE]:
         """Multiply the sequence by a number or integer.
@@ -339,7 +339,7 @@ class ArrayVar(Var[ARRAY_VAR_TYPE], python_types=(Sequence, set)):
         ):
             raise_unsupported_operand_types("*", (type(self), type(other)))
 
-        return repeat_array_operation(self, other)
+        return repeat_array_operation(self, other)  # type: ignore[invalid-return-type]  # var operation type inference
 
     __rmul__ = __mul__
 

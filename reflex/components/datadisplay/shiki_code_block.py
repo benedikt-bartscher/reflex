@@ -834,7 +834,7 @@ class ShikiHighLevelCodeBlock(ShikiCodeBlock):
             )
         if isinstance(code, str):
             return re.sub(regex_pattern, "", code)
-        return None
+        raise AssertionError("unreachable: code must be StringVar or str")
 
 
 class TransformerNamespace(ComponentNamespace):

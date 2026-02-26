@@ -154,14 +154,14 @@ class AppHarness:
             elif isinstance(app_source, functools.partial):
                 keywords = app_source.keywords
                 slug_suffix = "_".join([str(v) for v in keywords.values()])
-                func_name = app_source.func.__name__
+                func_name = app_source.func.__name__  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
                 app_name = f"{func_name}_{slug_suffix}"
                 app_name = re.sub(r"[^a-zA-Z0-9_]", "_", app_name)
             elif isinstance(app_source, str):
                 msg = "app_name must be provided when app_source is a string."
                 raise ValueError(msg)
             else:
-                app_name = app_source.__name__
+                app_name = app_source.__name__  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
 
             app_name = app_name.lower()
             while "__" in app_name:
@@ -248,7 +248,7 @@ class AppHarness:
         if self.app_source is not None:
             app_globals = self._get_globals_from_signature(self.app_source)
             if isinstance(self.app_source, functools.partial):
-                self.app_source = self.app_source.func
+                self.app_source = self.app_source.func  # type: ignore[invalid-assignment]  # Top[Callable] to app_source
             # get the source from a function or module object
             source_code = "\n".join([
                 "\n".join([

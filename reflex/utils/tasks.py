@@ -46,10 +46,10 @@ async def _run_forever(
                 exception_count += 1
                 if exception_count >= exception_limit:
                     console.error(
-                        f"{coro_function.__name__}: task exceeded exception limit {exception_limit} within {exception_limit_window}s: {e}"
+                        f"{coro_function.__name__}: task exceeded exception limit {exception_limit} within {exception_limit_window}s: {e}"  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
                     )
                     raise
-                console.error(f"{coro_function.__name__}: task error suppressed: {e}")
+                console.error(f"{coro_function.__name__}: task error suppressed: {e}")  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
                 await asyncio.sleep(exception_delay)
                 continue
             raise
@@ -103,7 +103,7 @@ def ensure_task(
                 exception_limit_window=exception_limit_window,
                 **kwargs,
             ),
-            name=f"reflex_ensure_task|{type(owner).__name__}.{task_attribute}={coro_function.__name__}|{time.time()}",
+            name=f"reflex_ensure_task|{type(owner).__name__}.{task_attribute}={coro_function.__name__}|{time.time()}",  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
         )
         setattr(owner, task_attribute, task)
     return task

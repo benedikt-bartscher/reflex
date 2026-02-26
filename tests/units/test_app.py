@@ -764,7 +764,7 @@ def dict_mutation_state():
 
         def change_friend_name(self):
             """Change the friend's name in the nested dict."""
-            self.friend_in_nested_dict["friend"]["name"] = "Tommy"
+            self.friend_in_nested_dict["friend"]["name"] = "Tommy"  # type: ignore[invalid-assignment]  # nested dict subscript
 
         def remove_friend(self):
             """Remove the friend from the nested dict."""
@@ -772,7 +772,7 @@ def dict_mutation_state():
 
         def add_friend_age(self):
             """Add an age to the friend in the nested dict."""
-            self.friend_in_nested_dict["friend"]["age"] = 30
+            self.friend_in_nested_dict["friend"]["age"] = 30  # type: ignore[invalid-assignment]  # nested dict subscript
 
     return DictMutationTestState()
 
@@ -1515,7 +1515,7 @@ module.exports = {
 """,
     )
     app = App(theme=None)
-    app._get_frontend_packages = unittest.mock.Mock()
+    app._get_frontend_packages = unittest.mock.Mock()  # type: ignore[invalid-assignment]  # Mock monkey-patch
     with chdir(app_path):
         yield app, web_dir
 
@@ -1665,7 +1665,7 @@ def test_raise_on_state():
 def test_call_app():
     """Test that the app can be called."""
     app = App()
-    app._compile = unittest.mock.Mock()
+    app._compile = unittest.mock.Mock()  # type: ignore[invalid-assignment]  # Mock monkey-patch
     api = app()
     assert isinstance(api, Starlette)
 

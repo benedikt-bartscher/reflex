@@ -66,7 +66,7 @@ def debug(f: Callable[P, T]) -> Callable[P, T]:
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         result = f(*args, **kwargs)
         print(  # noqa: T201
-            f"Calling {f.__name__} with args: {args} and kwargs: {kwargs}, result: {result}"
+            f"Calling {f.__name__} with args: {args} and kwargs: {kwargs}, result: {result}"  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
         )
         return result
 
@@ -123,7 +123,7 @@ def cached_procedure(
             from reflex.utils import console
 
             console.debug(
-                f"Using cached value for {func.__name__} with payload: {new_payload}"
+                f"Using cached value for {func.__name__} with payload: {new_payload}"  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
             )
             return cast("Picklable", value)
 

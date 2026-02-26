@@ -103,8 +103,8 @@ def TestEventAction():
             rx.link(
                 "Link Stop Propagation",
                 href="?link-stop-propagation",
-                on_click=EventActionState.on_click(  # type: ignore [reportCallIssue]
-                    "link_stop_propagation"
+                on_click=EventActionState.on_click(  # type: ignore[missing-argument]  # ty#988 EventHandler descriptor
+                    "link_stop_propagation"  # type: ignore[invalid-argument-type]  # ty#988 EventHandler descriptor
                 ).stop_propagation,
                 id="link-stop-propagation",
             ),
@@ -117,29 +117,29 @@ def TestEventAction():
             rx.link(
                 "Link Prevent Default",
                 href="/invalid",
-                on_click=EventActionState.on_click(  # type: ignore [reportCallIssue]
-                    "link_prevent_default"
+                on_click=EventActionState.on_click(  # type: ignore[missing-argument]  # ty#988 EventHandler descriptor
+                    "link_prevent_default"  # type: ignore[invalid-argument-type]  # ty#988 EventHandler descriptor
                 ).prevent_default,
                 id="link-prevent-default",
             ),
             rx.link(
                 "Link Both",
                 href="/invalid",
-                on_click=EventActionState.on_click(  # type: ignore [reportCallIssue]
-                    "link_both"
+                on_click=EventActionState.on_click(  # type: ignore[missing-argument]  # ty#988 EventHandler descriptor
+                    "link_both"  # type: ignore[invalid-argument-type]  # ty#988 EventHandler descriptor
                 ).stop_propagation.prevent_default,
                 id="link-stop-propagation-prevent-default",
             ),
             EventFiringComponent.create(
                 id="custom-stop-propagation",
-                on_click=EventActionState.on_click(  # type: ignore [reportCallIssue]
-                    "custom-stop-propagation"
+                on_click=EventActionState.on_click(  # type: ignore[missing-argument]  # ty#988 EventHandler descriptor
+                    "custom-stop-propagation"  # type: ignore[invalid-argument-type]  # ty#988 EventHandler descriptor
                 ).stop_propagation,
             ),
             EventFiringComponent.create(
                 id="custom-prevent-default",
-                on_click=EventActionState.on_click(  # type: ignore [reportCallIssue]
-                    "custom-prevent-default"
+                on_click=EventActionState.on_click(  # type: ignore[missing-argument]  # ty#988 EventHandler descriptor
+                    "custom-prevent-default"  # type: ignore[invalid-argument-type]  # ty#988 EventHandler descriptor
                 ).prevent_default,
             ),
             rx.button(

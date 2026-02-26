@@ -1983,7 +1983,7 @@ class CustomComponent(Component):
         self.style = Style()
 
         # Set the tag to the name of the function.
-        self.tag = format.to_title_case(self.component_fn.__name__)
+        self.tag = format.to_title_case(self.component_fn.__name__)  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
 
         for key, value in props.items():
             # Skip kwargs that are not props.
@@ -2753,6 +2753,22 @@ def empty_component() -> Component:
 
 
 def render_dict_to_var(tag: dict[str, Any] | Component | str) -> Var:
+    """Convert a render dict, Component, or string to a Var.
+
+    Args:
+        tag: The render dict, Component, or string.
+
+    Returns:
+        The Var.
+    """
+    if isinstance(tag, Component):
+        return _render_dict_to_var(tag.render())
+    if isinstance(tag, dict):
+        return _render_dict_to_var(tag)
+    return Var.create(tag)
+
+
+def _render_dict_to_var(tag: dict[str, Any]) -> Var:
     """Convert a render dict to a Var.
 
     Args:
@@ -2761,11 +2777,6 @@ def render_dict_to_var(tag: dict[str, Any] | Component | str) -> Var:
     Returns:
         The Var.
     """
-    if not isinstance(tag, dict):
-        if isinstance(tag, Component):
-            return render_dict_to_var(tag.render())
-        return Var.create(tag)
-
     if "contents" in tag:
         return Var(tag["contents"])
 

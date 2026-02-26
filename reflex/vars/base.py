@@ -179,7 +179,7 @@ class VarData:
 
         if hooks and any(hooks.values()):
             # Merge our dependencies first, so they can be referenced.
-            merged_var_data = VarData.merge(*hooks.values(), self)
+            merged_var_data = VarData.merge(*hooks.values(), self)  # type: ignore[invalid-argument-type]  # VarData.merge receives object from hooks.values()
             if merged_var_data is not None:
                 object.__setattr__(self, "state", merged_var_data.state)
                 object.__setattr__(self, "field_name", merged_var_data.field_name)
@@ -456,7 +456,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
                 frozen=True,
                 slots=True,
             )
-            class ToVarOperation(ToOperation, cls):
+            class ToVarOperation(ToOperation, cls):  # type: ignore[invalid-generic-class]  # Self type variable in ToVarOperation
                 """Base class of converting a var to another var type."""
 
                 _original: Var = dataclasses.field(
@@ -713,7 +713,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         """
         # If the value is already a var, do nothing.
         if isinstance(value, Var):
-            return value
+            return value  # type: ignore[invalid-return-type]  # Var.create return type narrowing
 
         return LiteralVar.create(value, _var_data=_var_data)
 
@@ -1746,7 +1746,7 @@ def var_operation(  # type: ignore [reportInconsistentOverload]
         }
 
         return CustomVarOperation.create(
-            name=func.__name__,
+            name=func.__name__,  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
             args=tuple(list(args_vars.items()) + list(kwargs_vars.items())),
             return_var=func(*args_vars.values(), **kwargs_vars),  # type: ignore [reportCallIssue, reportReturnType]
         ).guess_type()
@@ -1915,7 +1915,7 @@ class CachedVarOperation:
 
         next_class = parent_classes[parent_classes.index(CachedVarOperation) + 1]
 
-        return next_class.__getattr__(self, name)
+        return next_class.__getattr__(self, name)  # type: ignore[unresolved-attribute]  # type.__getattr__ metaclass dynamic attribute
 
     def _get_all_var_data(self) -> VarData | None:
         """Get all VarData associated with the Var.
@@ -2112,9 +2112,9 @@ class ComputedVar(Var[RETURN_TYPE]):
         )
 
         if hint is Any:
-            raise UntypedComputedVarError(var_name=fget.__name__)
+            raise UntypedComputedVarError(var_name=fget.__name__)  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
         is_using_fget_name = "_js_expr" not in kwargs
-        js_expr = kwargs.pop("_js_expr", fget.__name__ + FIELD_MARKER)
+        js_expr = kwargs.pop("_js_expr", fget.__name__ + FIELD_MARKER)  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
         kwargs.setdefault("_var_type", hint)
 
         Var.__init__(
@@ -2123,7 +2123,7 @@ class ComputedVar(Var[RETURN_TYPE]):
             _var_type=kwargs.pop("_var_type"),
             _var_data=kwargs.pop(
                 "_var_data",
-                VarData(field_name=fget.__name__) if is_using_fget_name else None,
+                VarData(field_name=fget.__name__) if is_using_fget_name else None,  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
             ),
         )
 
@@ -2132,12 +2132,12 @@ class ComputedVar(Var[RETURN_TYPE]):
             raise TypeError(msg)
 
         if backend is None:
-            backend = fget.__name__.startswith("_")
+            backend = fget.__name__.startswith("_")  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
 
         object.__setattr__(self, "_backend", backend)
         object.__setattr__(self, "_initial_value", initial_value)
         object.__setattr__(self, "_cache", cache)
-        object.__setattr__(self, "_name", fget.__name__)
+        object.__setattr__(self, "_name", fget.__name__)  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
 
         if isinstance(interval, int):
             interval = datetime.timedelta(seconds=interval)
@@ -2369,18 +2369,18 @@ class ComputedVar(Var[RETURN_TYPE]):
         """
         if instance is None:
             state_where_defined = owner
-            while self._name in state_where_defined.inherited_vars:
-                state_where_defined = state_where_defined.get_parent_state()
+            while self._name in state_where_defined.inherited_vars:  # type: ignore[unresolved-attribute]  # owner: type should be type[BaseState]
+                state_where_defined = state_where_defined.get_parent_state()  # type: ignore[unresolved-attribute]  # owner: type should be type[BaseState]
 
             field_name = (
-                format_state_name(state_where_defined.get_full_name())
+                format_state_name(state_where_defined.get_full_name())  # type: ignore[unresolved-attribute]  # owner: type should be type[BaseState]
                 + "."
                 + self._js_expr
             )
 
             return dispatch(
                 field_name,
-                var_data=VarData.from_state(state_where_defined, self._name),
+                var_data=VarData.from_state(state_where_defined, self._name),  # type: ignore[invalid-argument-type]  # owner: type should be type[BaseState]
                 result_var_type=self._var_type,
                 existing_var=self,
             )
@@ -2786,7 +2786,7 @@ def computed_var(
     if fget is not None:
         sign = inspect.signature(fget)
         if len(sign.parameters) != 1:
-            raise ComputedVarSignatureError(fget.__name__, signature=str(sign))
+            raise ComputedVarSignatureError(fget.__name__, signature=str(sign))  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
 
         if inspect.iscoroutinefunction(fget):
             computed_var_cls = AsyncComputedVar
@@ -3157,13 +3157,13 @@ def transform(fn: Callable[[Var], Var]) -> Callable[[Var], Var]:
     origin = get_origin(return_type)
 
     if origin is not Var:
-        msg = f"Expected return type of {fn.__name__} to be a Var, got {origin}."
+        msg = f"Expected return type of {fn.__name__} to be a Var, got {origin}."  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
         raise TypeError(msg)
 
     generic_args = get_args(return_type)
 
     if not generic_args:
-        msg = f"Expected Var return type of {fn.__name__} to have a generic type."
+        msg = f"Expected Var return type of {fn.__name__} to have a generic type."  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
         raise TypeError(msg)
 
     generic_type = get_origin(generic_args[0]) or generic_args[0]
@@ -3214,7 +3214,7 @@ def dispatch(
         fn_return_origin = get_origin(fn_return) or fn_return
 
         if fn_return_origin is not Var:
-            msg = f"Expected return type of {fn.__name__} to be a Var, got {fn_return}."
+            msg = f"Expected return type of {fn.__name__} to be a Var, got {fn_return}."  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
             raise TypeError(msg)
 
         fn_return_generic_args = get_args(fn_return)
@@ -3226,7 +3226,7 @@ def dispatch(
         arg_origin = get_origin(fn_first_arg_type) or fn_first_arg_type
 
         if arg_origin is not Var:
-            msg = f"Expected first argument of {fn.__name__} to be a Var, got {fn_first_arg_type}."
+            msg = f"Expected first argument of {fn.__name__} to be a Var, got {fn_first_arg_type}."  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
             raise TypeError(msg)
 
         arg_generic_args = get_args(fn_first_arg_type)
@@ -3320,7 +3320,7 @@ class Field(Generic[FIELD_TYPE]):
             if self.default is MISSING and self.default_factory is None:
                 default_value = types.get_default_value_for_type(annotated_type)
                 if default_value is None and not types.is_optional(annotated_type):
-                    annotated_type = annotated_type | None
+                    annotated_type = annotated_type | None  # type: ignore[conflicting-declarations]  # narrowing type within branch
                 if types.is_immutable(default_value):
                     self.default = default_value
                 else:

@@ -365,7 +365,7 @@ def _extract_class_props_as_ast_nodes(
     all_props = []
     kwargs = []
     for target_class in clzs:
-        event_triggers = target_class.get_event_triggers()
+        event_triggers = target_class.get_event_triggers()  # type: ignore[unresolved-attribute]  # type.get_event_triggers
         # Import from the target class to ensure type hints are resolvable.
         exec(f"from {target_class.__module__} import *", type_hint_globals)
         for name, value in target_class.__annotations__.items():
@@ -385,7 +385,7 @@ def _extract_class_props_as_ast_nodes(
                 #       with the annotation in some cases.
                 with contextlib.suppress(AttributeError, KeyError):
                     # Try to get default from pydantic field definition.
-                    default = target_class.__fields__[name].default
+                    default = target_class.__fields__[name].default  # type: ignore[unresolved-attribute]  # type.__fields__
                     if isinstance(default, Var):
                         default = default._decode()
 
@@ -461,7 +461,7 @@ def type_to_ast(typ: Any, cls: type) -> ast.expr:
         return ast.Name(id=str(typ))
 
     # Get the base type name (List, Dict, Optional, etc.)
-    base_name = getattr(origin, "_name", origin.__name__)
+    base_name = getattr(origin, "_name", origin.__name__)  # type: ignore[unresolved-attribute]  # typing special forms: ty FAQ
 
     # Get type arguments
     args = get_args(typ)
@@ -638,7 +638,7 @@ def _generate_component_create_functiondef(
                                 ast.Name("Union"),
                                 ast.Tuple([
                                     figure_out_return_type(
-                                        inspect.signature(event_spec).return_annotation
+                                        inspect.signature(event_spec).return_annotation  # type: ignore[invalid-argument-type]  # inspect.signature with object
                                     )
                                     for event_spec in event_specs
                                 ]),

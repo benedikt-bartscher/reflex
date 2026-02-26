@@ -476,11 +476,11 @@ class AccordionContent(AccordionComponent):
         Returns:
             The style of the component.
         """
-        slide_down = SLIDE_DOWN.to(str) + Var.create(
+        slide_down = SLIDE_DOWN.to(str) + Var.create(  # type: ignore[unsupported-operator]  # StringVar + BooleanVar
             " var(--animation-duration) var(--animation-easing)",
         )
 
-        slide_up = SLIDE_UP.to(str) + Var.create(
+        slide_up = SLIDE_UP.to(str) + Var.create(  # type: ignore[unsupported-operator]  # StringVar + BooleanVar
             " var(--animation-duration) var(--animation-easing)",
         )
 

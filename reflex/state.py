@@ -356,6 +356,9 @@ CLASS_VAR_NAMES = frozenset({
 class BaseState(EvenMoreBasicBaseState):
     """The state of the app."""
 
+    # Whether this state class is a mixin and should not be instantiated.
+    _mixin: ClassVar[builtins.bool] = False
+
     # A map from the var name to the var.
     vars: ClassVar[builtins.dict[str, Var]] = {}
 
@@ -620,7 +623,7 @@ class BaseState(EvenMoreBasicBaseState):
                 if name in cls.inherited_vars:
                     continue
                 if is_computed_var(value):
-                    fget = cls._copy_fn(value.fget)
+                    fget = cls._copy_fn(value.fget)  # type: ignore[invalid-argument-type]  # fget is always a real function
                     newcv = value._replace(fget=fget, _var_data=VarData.from_state(cls))
                     # cleanup refs to mixin cls in var_data
                     setattr(cls, name, newcv)
@@ -668,7 +671,7 @@ class BaseState(EvenMoreBasicBaseState):
         setattr(cls, name, handler)
 
     @staticmethod
-    def _copy_fn(fn: Callable) -> Callable:
+    def _copy_fn(fn: FunctionType) -> FunctionType:
         """Copy a function. Used to copy ComputedVars and EventHandlers from mixins.
 
         Args:
@@ -729,7 +732,7 @@ class BaseState(EvenMoreBasicBaseState):
         of_type = of_type or Component
 
         unique_var_name = (
-            ("dynamic_" + f.__module__ + "_" + f.__qualname__)
+            ("dynamic_" + f.__module__ + "_" + f.__qualname__)  # type: ignore[unresolved-attribute]  # Callable.__qualname__: ty FAQ
             .replace("<", "")
             .replace(">", "")
             .replace(".", "_")
@@ -1392,7 +1395,7 @@ class BaseState(EvenMoreBasicBaseState):
             else:
                 fn = functools.partial(handler.fn, self)
             fn.__module__ = handler.fn.__module__
-            fn.__qualname__ = handler.fn.__qualname__
+            fn.__qualname__ = handler.fn.__qualname__  # type: ignore[invalid-assignment]  # Callable.__qualname__ on partial: ty FAQ
             return fn
 
         backend_vars = super().__getattribute__("_backend_vars") or {}

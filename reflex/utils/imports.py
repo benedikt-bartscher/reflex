@@ -49,7 +49,7 @@ def merge_imports(
             )
             if isinstance(fields, (list, tuple, set)):
                 all_imports[lib].extend(
-                    ImportVar(field) if isinstance(field, str) else field
+                    ImportVar(field) if isinstance(field, str) else field  # type: ignore[invalid-argument-type]  # generator type mismatch
                     for field in fields
                 )
             else:

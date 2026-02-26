@@ -215,7 +215,7 @@ def compile_state(state: type[BaseState]) -> dict:
             resolved_initial_state = pool.submit(
                 asyncio.run, _resolve_delta(initial_state)
             ).result()
-            return _sorted_keys(resolved_initial_state)
+            return _sorted_keys(resolved_initial_state)  # type: ignore[invalid-argument-type]  # _T@run from executor
 
     # Normally the compile runs before any event loop starts, we asyncio.run is available for calling.
     return _sorted_keys(asyncio.run(_resolve_delta(initial_state)))

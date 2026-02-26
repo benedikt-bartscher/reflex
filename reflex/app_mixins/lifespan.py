@@ -37,7 +37,7 @@ class LifespanMixin(AppMixin):
                     if isinstance(task, asyncio.Task):
                         running_tasks.append(task)
                     else:
-                        task_name = task.__name__
+                        task_name = task.__name__  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
                         signature = inspect.signature(task)
                         if "app" in signature.parameters:
                             task = functools.partial(task, app=app)
@@ -90,7 +90,7 @@ class LifespanMixin(AppMixin):
             InvalidLifespanTaskTypeError: If the task is a generator function.
         """
         if inspect.isgeneratorfunction(task) or inspect.isasyncgenfunction(task):
-            msg = f"Task {task.__name__} of type generator must be decorated with contextlib.asynccontextmanager."
+            msg = f"Task {task.__name__} of type generator must be decorated with contextlib.asynccontextmanager."  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
             raise InvalidLifespanTaskTypeError(msg)
 
         task_name = task.__name__  # type: ignore [reportAttributeAccessIssue]

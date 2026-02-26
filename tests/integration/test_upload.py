@@ -115,9 +115,9 @@ def UploadFile():
             rx.button(
                 "Upload",
                 on_click=UploadState.handle_upload_secondary(
-                    rx.upload_files(  # type: ignore [reportArgumentType]
+                    rx.upload_files(
                         upload_id="secondary",
-                        on_upload_progress=UploadState.upload_progress,
+                        on_upload_progress=UploadState.upload_progress,  # type: ignore[invalid-argument-type]  # EventNamespace ty#988
                     ),
                 ),
                 id="upload_button_secondary",

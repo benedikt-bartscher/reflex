@@ -128,12 +128,12 @@ class DebounceInput(Component):
         )
 
         component = super().create(**props)
-        component._get_style = child._get_style
+        component._get_style = child._get_style  # type: ignore[invalid-assignment]  # implicit method shadowing (intentional)
         component.event_triggers.update(child.event_triggers)
         component.children = child.children
         component._rename_props = child._rename_props  # type: ignore[reportAttributeAccessIssue]
         outer_get_all_custom_code = component._get_all_custom_code
-        component._get_all_custom_code = lambda: (
+        component._get_all_custom_code = lambda: (  # type: ignore[invalid-assignment]  # implicit method shadowing (intentional)
             outer_get_all_custom_code() | (child._get_all_custom_code())
         )
         return component

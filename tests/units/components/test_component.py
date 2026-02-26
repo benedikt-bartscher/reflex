@@ -836,7 +836,7 @@ def test_create_custom_component(my_component):
     """
     component = rx.memo(my_component)(prop1="test", prop2=1)
     assert component.tag == "MyComponent"
-    assert set(component.get_props()) == {"prop1", "prop2"}
+    assert set(component.get_props()) == {"prop1", "prop2"}  # type: ignore[missing-argument]  # get_props union
     assert component.tag in CUSTOM_COMPONENTS
 
 
@@ -1323,7 +1323,7 @@ class EventState(rx.State):
         ),
         pytest.param(
             rx.fragment(class_name=[TEST_VAR, "other-class"]),
-            [Var.create([TEST_VAR, "other-class"]).join(" ")],
+            [Var.create([TEST_VAR, "other-class"]).join(" ")],  # type: ignore[unresolved-attribute]  # LiteralBooleanVar.join
             id="fstring-dual-class_name",
         ),
         pytest.param(

@@ -885,7 +885,7 @@ class StateManagerRedis(StateManager):
         res = self.redis.scard(lock_key + b"_waiters")
         if inspect.isawaitable(res):
             res = await res
-        return res
+        return int(res)  # type: ignore[invalid-argument-type]  # int(res) with object
 
     @contextlib.asynccontextmanager
     async def _request_lock_release(

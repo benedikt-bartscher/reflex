@@ -307,7 +307,7 @@ def has_args(cls: type) -> bool:
 
     # Check if the class inherits from a generic class (using __orig_bases__)
     if hasattr(cls, "__orig_bases__"):
-        for base in cls.__orig_bases__:
+        for base in cls.__orig_bases__:  # type: ignore[not-iterable]  # cls.__orig_bases__
             if get_args(base):
                 return True
 
@@ -1012,20 +1012,19 @@ def validate_literal(key: str, value: Any, expected_type: type, comp_name: str):
     """
     from reflex.vars import Var
 
+    allowed_values = get_args(expected_type)
     if (
         is_literal(expected_type)
         and not isinstance(value, Var)  # validating vars is not supported yet.
         and not is_encoded_fstring(value)  # f-strings are not supported.
-        and value not in expected_type.__args__
+        and value not in allowed_values
     ):
-        allowed_values = expected_type.__args__
-        if value not in allowed_values:
-            allowed_value_str = ",".join([
-                str(v) if not isinstance(v, str) else f"'{v}'" for v in allowed_values
-            ])
-            value_str = f"'{value}'" if isinstance(value, str) else value
-            msg = f"prop value for {key!s} of the `{comp_name}` component should be one of the following: {allowed_value_str}. Got {value_str} instead"
-            raise ValueError(msg)
+        allowed_value_str = ",".join([
+            str(v) if not isinstance(v, str) else f"'{v}'" for v in allowed_values
+        ])
+        value_str = f"'{value}'" if isinstance(value, str) else value
+        msg = f"prop value for {key!s} of the `{comp_name}` component should be one of the following: {allowed_value_str}. Got {value_str} instead"
+        raise ValueError(msg)
 
 
 def safe_issubclass(cls: Any, cls_check: Any | tuple[Any, ...]):

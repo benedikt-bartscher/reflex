@@ -1137,7 +1137,7 @@ def ternary_operation(
     Returns:
         The ternary operation.
     """
-    type_value: type[T] | type[U] = unionize(if_true._var_type, if_false._var_type)
+    type_value: type[T] | type[U] = unionize(if_true._var_type, if_false._var_type)  # type: ignore[invalid-assignment]  # unionize() returns type not type[T] | type[U]
     value: CustomVarOperationReturn[T | U] = var_operation_return(
         js_expression=f"({condition} ? {if_true} : {if_false})",
         var_type=type_value,

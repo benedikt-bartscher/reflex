@@ -154,7 +154,7 @@ def convert_list(
     for responsive_item in responsive_list:
         if isinstance(responsive_item, dict):
             # Recursively format nested style dictionaries.
-            item, item_var_data = convert(responsive_item)
+            item, item_var_data = convert(responsive_item)  # type: ignore[invalid-argument-type]  # convert() dict type
         else:
             item, item_var_data = convert_item(responsive_item)
         converted_value.append(item)
@@ -365,7 +365,7 @@ def format_as_emotion(style_dict: dict[str, Any]) -> Style | None:
             else:
                 # Apply media queries from responsive value list.
                 mbps = {
-                    media_query([0, *breakpoints_values][bp]): (
+                    media_query([0, *breakpoints_values][bp]): (  # type: ignore[invalid-argument-type]  # media_query str type
                         bp_value if isinstance(bp_value, dict) else {key: bp_value}
                     )
                     for bp, bp_value in enumerate(value)

@@ -646,7 +646,7 @@ class App(MiddlewareMixin, LifespanMixin):
             )
 
         if self.api_transformer is not None:
-            api_transformers: Sequence[Starlette | Callable[[ASGIApp], ASGIApp]] = (
+            api_transformers: Sequence[Starlette | Callable[[ASGIApp], ASGIApp]] = (  # type: ignore[invalid-assignment]  # Sequence type narrowing
                 [self.api_transformer]
                 if not isinstance(self.api_transformer, Sequence)
                 else self.api_transformer
@@ -728,7 +728,7 @@ class App(MiddlewareMixin, LifespanMixin):
             api: The Starlette app to add CORS middleware to.
         """
         api.add_middleware(
-            cors.CORSMiddleware,
+            cors.CORSMiddleware,  # type: ignore[invalid-argument-type]  # Starlette CORSMiddleware ParamSpec
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
@@ -800,7 +800,7 @@ class App(MiddlewareMixin, LifespanMixin):
                 msg = "Route must be set if component is not a callable."
                 raise exceptions.RouteValueError(msg)
             # Format the route.
-            route = format.format_route(format.to_kebab_case(component.__name__))
+            route = format.format_route(format.to_kebab_case(component.__name__))  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
         else:
             route = format.format_route(route)
 
