@@ -3,6 +3,7 @@
 import functools
 from collections.abc import Callable
 from pathlib import Path
+from types import FunctionType
 from typing import ParamSpec, TypeVar, cast
 
 T = TypeVar("T")
@@ -61,12 +62,13 @@ def debug(f: Callable[P, T]) -> Callable[P, T]:
     Returns:
         A function that prints the function name, arguments, and result.
     """
+    assert isinstance(f, FunctionType)  # always a def function
 
     @functools.wraps(f)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         result = f(*args, **kwargs)
         print(  # noqa: T201
-            f"Calling {f.__name__} with args: {args} and kwargs: {kwargs}, result: {result}"  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
+            f"Calling {f.__name__} with args: {args} and kwargs: {kwargs}, result: {result}"
         )
         return result
 
@@ -109,6 +111,8 @@ def cached_procedure(
     """
 
     def _inner_decorator(func: Callable[P, Picklable]) -> Callable[P, Picklable]:
+        assert isinstance(func, FunctionType)  # always a def function
+
         def _inner(*args: P.args, **kwargs: P.kwargs) -> Picklable:
             cache_file = cache_file_path()
 
@@ -123,7 +127,7 @@ def cached_procedure(
             from reflex.utils import console
 
             console.debug(
-                f"Using cached value for {func.__name__} with payload: {new_payload}"  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
+                f"Using cached value for {func.__name__} with payload: {new_payload}"
             )
             return cast("Picklable", value)
 

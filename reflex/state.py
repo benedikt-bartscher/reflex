@@ -714,7 +714,7 @@ class BaseState(EvenMoreBasicBaseState):
         )
 
     @classmethod
-    def _evaluate(cls, f: Callable[[Self], Any], of_type: type | None = None) -> Var:
+    def _evaluate(cls, f: FunctionType, of_type: type | None = None) -> Var:
         """Evaluate a function to a ComputedVar. Experimental.
 
         Args:
@@ -732,7 +732,7 @@ class BaseState(EvenMoreBasicBaseState):
         of_type = of_type or Component
 
         unique_var_name = (
-            ("dynamic_" + f.__module__ + "_" + f.__qualname__)  # type: ignore[unresolved-attribute]  # Callable.__qualname__: ty FAQ
+            ("dynamic_" + f.__module__ + "_" + f.__qualname__)
             .replace("<", "")
             .replace(">", "")
             .replace(".", "_")

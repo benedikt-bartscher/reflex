@@ -3134,10 +3134,10 @@ _decode_var_pattern = re.compile(_decode_var_pattern_re, flags=re.DOTALL)
 _global_vars: dict[int, Var] = {}
 
 
-dispatchers: dict[GenericType, Callable[[Var], Var]] = {}
+dispatchers: dict[GenericType, FunctionType] = {}
 
 
-def transform(fn: Callable[[Var], Var]) -> Callable[[Var], Var]:
+def transform(fn: FunctionType) -> FunctionType:
     """Register a function to transform a Var.
 
     Args:
@@ -3157,13 +3157,13 @@ def transform(fn: Callable[[Var], Var]) -> Callable[[Var], Var]:
     origin = get_origin(return_type)
 
     if origin is not Var:
-        msg = f"Expected return type of {fn.__name__} to be a Var, got {origin}."  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
+        msg = f"Expected return type of {fn.__name__} to be a Var, got {origin}."
         raise TypeError(msg)
 
     generic_args = get_args(return_type)
 
     if not generic_args:
-        msg = f"Expected Var return type of {fn.__name__} to have a generic type."  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
+        msg = f"Expected Var return type of {fn.__name__} to have a generic type."
         raise TypeError(msg)
 
     generic_type = get_origin(generic_args[0]) or generic_args[0]
@@ -3214,7 +3214,7 @@ def dispatch(
         fn_return_origin = get_origin(fn_return) or fn_return
 
         if fn_return_origin is not Var:
-            msg = f"Expected return type of {fn.__name__} to be a Var, got {fn_return}."  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
+            msg = f"Expected return type of {fn.__name__} to be a Var, got {fn_return}."
             raise TypeError(msg)
 
         fn_return_generic_args = get_args(fn_return)
@@ -3226,7 +3226,7 @@ def dispatch(
         arg_origin = get_origin(fn_first_arg_type) or fn_first_arg_type
 
         if arg_origin is not Var:
-            msg = f"Expected first argument of {fn.__name__} to be a Var, got {fn_first_arg_type}."  # type: ignore[unresolved-attribute]  # Callable.__name__: ty FAQ
+            msg = f"Expected first argument of {fn.__name__} to be a Var, got {fn_first_arg_type}."
             raise TypeError(msg)
 
         arg_generic_args = get_args(fn_first_arg_type)

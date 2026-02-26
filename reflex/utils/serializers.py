@@ -83,7 +83,7 @@ def serializer(
         # Make sure the type is not already registered.
         registered_fn = SERIALIZERS.get(type_)
         if registered_fn is not None and registered_fn != fn and overwrite is not True:
-            message = f"Overwriting serializer for type {type_} from {registered_fn.__module__}:{registered_fn.__qualname__} to {fn.__module__}:{fn.__qualname__}."  # type: ignore[unresolved-attribute]  # Callable.__qualname__: ty FAQ
+            message = f"Overwriting serializer for type {type_} from {registered_fn.__module__}:{registered_fn.__qualname__} to {fn.__module__}:{fn.__qualname__}."  # type: ignore[unresolved-attribute]  # Callable.__qualname__: ty FAQ https://github.com/astral-sh/ty/issues/2375
             if overwrite is False:
                 raise ValueError(message)
             caller_frame = next(
