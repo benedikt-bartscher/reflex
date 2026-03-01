@@ -1,6 +1,7 @@
 """Tests for MutableProxy behavior."""
 
 import dataclasses
+import math
 import pickle
 
 import reflex as rx
@@ -206,7 +207,7 @@ def test_unwrap_proxy_arg_passthrough():
     assert MutableProxy._unwrap_proxy_arg(42) == 42
     assert MutableProxy._unwrap_proxy_arg("hello") == "hello"
     assert MutableProxy._unwrap_proxy_arg(None) is None
-    assert MutableProxy._unwrap_proxy_arg(3.14) == 3.14
+    assert MutableProxy._unwrap_proxy_arg(math.pi) == math.pi
 
 
 def test_unwrap_proxy_arg_tuple():
