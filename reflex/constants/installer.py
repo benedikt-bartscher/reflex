@@ -106,7 +106,8 @@ class PackageJson(SimpleNamespace):
 
         DEV = "react-router dev --host"
         EXPORT = "react-router build"
-        PROD = "sirv ./build/client --single 404.html --host"
+        PROD_STATIC = "sirv ./build/client --single 404.html --host"
+        PROD_SSR = "node ssr-serve.js"
 
     PATH = "package.json"
 
@@ -127,6 +128,10 @@ class PackageJson(SimpleNamespace):
             "react-router": cls._react_router_version,
             "react-router-dom": cls._react_router_version,
             "@react-router/node": cls._react_router_version,
+            "@react-router/serve": cls._react_router_version,
+            "@react-router/express": cls._react_router_version,
+            "express": "4.21.2",
+            "compression": "1.8.0",
             "sirv-cli": "3.0.1",
             "react": cls._react_version,
             "react-helmet": "6.1.0",
