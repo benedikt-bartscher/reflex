@@ -386,6 +386,9 @@ class BaseState(EvenMoreBasicBaseState):
     # Set of vars which always need to be recomputed
     _always_dirty_computed_vars: ClassVar[set[str]] = set()
 
+    # Frontend computed var names (computed vars that are not backend-only)
+    _frontend_computed_vars: ClassVar[set[str]] = set()
+
     # Set of substates which always need to be recomputed
     _always_dirty_substates: ClassVar[set[str]] = set()
 
@@ -760,6 +763,7 @@ class BaseState(EvenMoreBasicBaseState):
         cls.vars[unique_var_name] = computed_var_func_arg
         cls._update_substate_inherited_vars({unique_var_name: computed_var_func_arg})
         cls._always_dirty_computed_vars.add(unique_var_name)
+        cls._frontend_computed_vars.add(unique_var_name)
 
         return getattr(cls, unique_var_name)
 
@@ -852,6 +856,13 @@ class BaseState(EvenMoreBasicBaseState):
             cvar_name
             for cvar_name, cvar in cls.computed_vars.items()
             if not cvar._cache
+        }
+
+        # Frontend computed vars (not backend-only) - cached for get_delta() performance
+        cls._frontend_computed_vars = {
+            cvar_name
+            for cvar_name, cvar in cls.computed_vars.items()
+            if not cvar._backend
         }
 
         # Any substate containing a ComputedVar with cache=False always needs to be recomputed
@@ -2068,9 +2079,7 @@ class BaseState(EvenMoreBasicBaseState):
         delta = {}
 
         self._mark_dirty_computed_vars()
-        frontend_computed_vars: set[str] = {
-            name for name, cv in self.computed_vars.items() if not cv._backend
-        }
+        frontend_computed_vars = self._frontend_computed_vars
 
         # Return the dirty vars for this instance, any cached/dependent computed vars,
         # and always dirty computed vars (cache=False)
