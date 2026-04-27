@@ -1763,7 +1763,7 @@ class PyiGenerator:
 
                 pyi_hashes_file = pyi_hashes_parent / PYI_HASHES
                 if pyi_hashes_file.exists():
-                    pyi_hashes = orjson_loads(pyi_hashes_file.read_text())
+                    pyi_hashes = orjson_loads(pyi_hashes_file.read_bytes())
                     for file_path, hashed_content in zip(
                         file_paths, hashes, strict=False
                     ):

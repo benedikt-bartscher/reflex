@@ -113,7 +113,7 @@ def get_or_set_last_reflex_version_check_datetime():
     if not reflex_json_file.exists():
         return None
     # Open and read the file
-    data = orjson_loads(reflex_json_file.read_text())
+    data = orjson_loads(reflex_json_file.read_bytes())
     last_version_check_datetime = data.get("last_version_check_datetime")
     if not last_version_check_datetime:
         data.update({"last_version_check_datetime": str(datetime.now())})
@@ -496,7 +496,7 @@ def get_project_hash(raise_on_fail: bool = False) -> int | None:
     json_file = get_web_dir() / constants.Reflex.JSON
     if not json_file.exists() and not raise_on_fail:
         return None
-    data = orjson_loads(json_file.read_text())
+    data = orjson_loads(json_file.read_bytes())
     return data.get("project_hash")
 
 
@@ -566,7 +566,7 @@ def _is_app_compiled_with_same_reflex_version() -> bool:
     json_file = get_web_dir() / constants.Reflex.JSON
     if not json_file.exists():
         return False
-    app_version = orjson_loads(json_file.read_text()).get("version")
+    app_version = orjson_loads(json_file.read_bytes()).get("version")
     return app_version == constants.Reflex.VERSION
 
 

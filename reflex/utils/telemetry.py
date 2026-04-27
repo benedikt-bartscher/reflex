@@ -111,7 +111,9 @@ def get_cpu_info() -> CpuInfo | None:
         The CPU info.
     """
     cpu_info_file = environment.REFLEX_DIR.get() / "cpu_info.json"
-    if cpu_info_file.exists() and (cpu_info := orjson_loads(cpu_info_file.read_text())):
+    if cpu_info_file.exists() and (
+        cpu_info := orjson_loads(cpu_info_file.read_bytes())
+    ):
         return CpuInfo(**cpu_info)
     cpu_info = _retrieve_cpu_info()
     if cpu_info:

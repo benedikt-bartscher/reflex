@@ -685,8 +685,9 @@ def orjson_dumps(obj: Any, **kwargs) -> str:
     """Serialize obj to a JSON string, using orjson when available.
 
     Translates common json.dumps kwargs (indent, sort_keys) into orjson
-    option flags.  Falls back to stdlib json if orjson is not installed,
-    an unsupported kwarg is passed, or orjson raises TypeError.
+    option flags.  Falls back to ``json_dumps`` (which has the
+    ``serializers.serialize`` default) if orjson is not installed, an
+    unsupported kwarg is passed, or orjson raises TypeError.
 
     Args:
         obj: The object to serialize.
@@ -698,7 +699,7 @@ def orjson_dumps(obj: Any, **kwargs) -> str:
     try:
         import orjson  # pyright: ignore[reportMissingImports]
     except ImportError:
-        return json.dumps(obj, **kwargs)
+        return json_dumps(obj, **kwargs)
 
     option = 0
     if kwargs.pop("indent", None):
@@ -709,13 +710,14 @@ def orjson_dumps(obj: Any, **kwargs) -> str:
 
     if kwargs:
         # Fall back to stdlib json for unsupported kwargs.
-        return json.dumps(obj, **kwargs)
+        return json_dumps(obj, **kwargs)
 
     try:
         return orjson.dumps(obj, option=option or None).decode()
     except TypeError:
-        # Fallback for types orjson can't handle (e.g. int > 64-bit).
-        return json.dumps(obj)
+        # Fallback for types orjson can't handle (e.g. int > 64-bit, or
+        # custom types). ``json_dumps`` carries the serializer default.
+        return json_dumps(obj)
 
 
 def orjson_loads(data: str | bytes) -> Any:
