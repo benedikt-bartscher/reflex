@@ -3629,6 +3629,11 @@ class BaseStateMeta(ABCMeta):
 class EvenMoreBasicBaseState(metaclass=BaseStateMeta):
     """A simplified base state class that provides basic functionality."""
 
+    if TYPE_CHECKING:
+        # Whether this state class is a mixin and should not be instantiated.
+        # Set by ``BaseStateMeta.__new__`` as a class attribute.
+        _mixin: ClassVar[bool] = False
+
     def __init__(
         self,
         **kwargs,

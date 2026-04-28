@@ -6,6 +6,7 @@ import dataclasses
 import inspect
 from collections.abc import Callable
 from functools import cache, update_wrapper
+from types import FunctionType
 from typing import Any, get_args, get_origin, get_type_hints
 
 from reflex_base import constants
@@ -50,7 +51,7 @@ class MemoParam:
 class ExperimentalMemoDefinition:
     """Base metadata for an experimental memo."""
 
-    fn: Callable[..., Any]
+    fn: FunctionType
     python_name: str
     params: tuple[MemoParam, ...]
 
@@ -172,7 +173,7 @@ def _is_memo_reregistration(
         type(existing) is type(definition)
         and existing.python_name == definition.python_name
         and existing.fn.__module__ == definition.fn.__module__
-        and existing.fn.__qualname__ == definition.fn.__qualname__  # ty:ignore[unresolved-attribute]
+        and existing.fn.__qualname__ == definition.fn.__qualname__
     )
 
 
@@ -409,7 +410,7 @@ def _placeholder_for_param(param: MemoParam) -> Var:
 
 
 def _evaluate_memo_function(
-    fn: Callable[..., Any],
+    fn: FunctionType,
     params: tuple[MemoParam, ...],
 ) -> Any:
     """Evaluate a memo function with placeholder vars.
@@ -485,7 +486,7 @@ def _lift_rest_props(component: Component) -> Component:
 
 
 def _analyze_params(
-    fn: Callable[..., Any],
+    fn: FunctionType,
     *,
     for_component: bool,
 ) -> tuple[MemoParam, ...]:
@@ -503,28 +504,29 @@ def _analyze_params(
     """
     signature = inspect.signature(fn)
     hints = get_type_hints(fn)
+    fn_name = fn.__name__
 
     params: list[MemoParam] = []
     rest_count = 0
 
     for parameter in signature.parameters.values():
         if parameter.kind is inspect.Parameter.VAR_POSITIONAL:
-            msg = f"`@rx._x.memo` does not support `*args` in `{fn.__name__}`."  # ty:ignore[unresolved-attribute]
+            msg = f"`@rx._x.memo` does not support `*args` in `{fn_name}`."
             raise TypeError(msg)
         if parameter.kind is inspect.Parameter.VAR_KEYWORD:
-            msg = f"`@rx._x.memo` does not support `**kwargs` in `{fn.__name__}`."  # ty:ignore[unresolved-attribute]
+            msg = f"`@rx._x.memo` does not support `**kwargs` in `{fn_name}`."
             raise TypeError(msg)
         if parameter.kind is inspect.Parameter.POSITIONAL_ONLY:
             msg = (
                 f"`@rx._x.memo` does not support positional-only parameters in "
-                f"`{fn.__name__}`."  # ty:ignore[unresolved-attribute]
+                f"`{fn_name}`."
             )
             raise TypeError(msg)
 
         annotation = hints.get(parameter.name, parameter.annotation)
         if annotation is inspect.Parameter.empty:
             msg = (
-                f"All parameters of `{fn.__name__}` must be annotated as `rx.Var[...]` "  # ty:ignore[unresolved-attribute]
+                f"All parameters of `{fn_name}` must be annotated as `rx.Var[...]` "
                 f"or `rx.RestProp`. Missing annotation for `{parameter.name}`."
             )
             raise TypeError(msg)
@@ -536,14 +538,14 @@ def _analyze_params(
 
         if parameter.name == "children" and not is_children:
             msg = (
-                f"`children` in `{fn.__name__}` must be annotated as "  # ty:ignore[unresolved-attribute]
+                f"`children` in `{fn_name}` must be annotated as "
                 "`rx.Var[rx.Component]`."
             )
             raise TypeError(msg)
 
         if not is_rest and not _is_var_annotation(annotation):
             msg = (
-                f"All parameters of `{fn.__name__}` must be annotated as `rx.Var[...]` "  # ty:ignore[unresolved-attribute]
+                f"All parameters of `{fn_name}` must be annotated as `rx.Var[...]` "
                 f"or `rx.RestProp`, got `{annotation}` for `{parameter.name}`."
             )
             raise TypeError(msg)
@@ -551,9 +553,7 @@ def _analyze_params(
         if is_rest:
             rest_count += 1
             if rest_count > 1:
-                msg = (
-                    f"`@rx._x.memo` only supports one `rx.RestProp` in `{fn.__name__}`."  # ty:ignore[unresolved-attribute]
-                )
+                msg = f"`@rx._x.memo` only supports one `rx.RestProp` in `{fn_name}`."
                 raise TypeError(msg)
 
         js_prop_name = format.to_camel_case(parameter.name)
@@ -580,7 +580,7 @@ def _analyze_params(
 
 
 def _create_function_definition(
-    fn: Callable[..., Any],
+    fn: FunctionType,
     return_annotation: Any,
 ) -> ExperimentalMemoFunctionDefinition:
     """Create a definition for a var-returning memo.
@@ -594,7 +594,7 @@ def _create_function_definition(
     """
     params = _analyze_params(fn, for_component=False)
     return_expr = Var.create(_evaluate_memo_function(fn, params))
-    _validate_var_return_expr(return_expr, fn.__name__)  # ty:ignore[unresolved-attribute]
+    _validate_var_return_expr(return_expr, fn.__name__)
 
     children_param = _get_children_param(params)
     rest_param = _get_rest_param(params)
@@ -620,18 +620,18 @@ def _create_function_definition(
 
     return ExperimentalMemoFunctionDefinition(
         fn=fn,
-        python_name=fn.__name__,  # ty:ignore[unresolved-attribute]
+        python_name=fn.__name__,
         params=params,
         function=function,
         imported_var=_imported_function_var(
-            fn.__name__,  # ty:ignore[unresolved-attribute]
+            fn.__name__,
             _annotation_inner_type(return_annotation),
         ),
     )
 
 
 def _create_component_definition(
-    fn: Callable[..., Any],
+    fn: FunctionType,
     return_annotation: Any,
 ) -> ExperimentalMemoComponentDefinition:
     """Create a definition for a component-returning memo.
@@ -650,16 +650,16 @@ def _create_component_definition(
     component = _normalize_component_return(_evaluate_memo_function(fn, params))
     if component is None:
         msg = (
-            f"Component-returning `@rx._x.memo` `{fn.__name__}` must return an "  # ty:ignore[unresolved-attribute]
+            f"Component-returning `@rx._x.memo` `{fn.__name__}` must return an "
             "`rx.Component` or `rx.Var[rx.Component]`."
         )
         raise TypeError(msg)
 
     return ExperimentalMemoComponentDefinition(
         fn=fn,
-        python_name=fn.__name__,  # ty:ignore[unresolved-attribute]
+        python_name=fn.__name__,
         params=params,
-        export_name=format.to_title_case(fn.__name__),  # ty:ignore[unresolved-attribute]
+        export_name=format.to_title_case(fn.__name__),
         component=_lift_rest_props(component),
     )
 
@@ -951,7 +951,7 @@ def _create_component_wrapper(
     return _ExperimentalMemoComponentWrapper(definition)
 
 
-def memo(fn: Callable[..., Any]) -> Callable[..., Any]:
+def memo(fn: FunctionType) -> Callable[..., Any]:
     """Create an experimental memo from a function.
 
     Args:
@@ -967,7 +967,7 @@ def memo(fn: Callable[..., Any]) -> Callable[..., Any]:
     return_annotation = hints.get("return", inspect.Signature.empty)
     if return_annotation is inspect.Signature.empty:
         msg = (
-            f"`@rx._x.memo` requires a return annotation on `{fn.__name__}`. "  # ty:ignore[unresolved-attribute]
+            f"`@rx._x.memo` requires a return annotation on `{fn.__name__}`. "
             "Use `-> rx.Component` or `-> rx.Var[...]`."
         )
         raise TypeError(msg)
@@ -983,7 +983,7 @@ def memo(fn: Callable[..., Any]) -> Callable[..., Any]:
         return _create_function_wrapper(definition)
 
     msg = (
-        f"`@rx._x.memo` on `{fn.__name__}` must return `rx.Component` or `rx.Var[...]`, "  # ty:ignore[unresolved-attribute]
+        f"`@rx._x.memo` on `{fn.__name__}` must return `rx.Component` or `rx.Var[...]`, "
         f"got `{return_annotation}`."
     )
     raise TypeError(msg)
