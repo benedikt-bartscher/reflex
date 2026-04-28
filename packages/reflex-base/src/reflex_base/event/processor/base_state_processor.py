@@ -5,6 +5,7 @@ from __future__ import annotations
 import dataclasses
 import functools
 import inspect
+import traceback
 import warnings
 from collections.abc import Mapping, Sequence
 from enum import Enum
@@ -360,20 +361,76 @@ class BaseStateEventProcessor(EventProcessor):
 
             # Process non-background events while holding the lock.
             if not registered_handler.handler.is_background:
-                await process_event(
-                    handler=registered_handler.handler,
-                    payload=event.payload,
-                    state=substate,
-                    root_state=root_state,
-                )
+                try:
+                    await process_event(
+                        handler=registered_handler.handler,
+                        payload=event.payload,
+                        state=substate,
+                        root_state=root_state,
+                    )
+                except Exception as ex:
+                    # Handle in-context so the enclosing modify_state block exits
+                    # cleanly and partial mutations made before the raise persist.
+                    await self._handle_backend_exception_inline(
+                        ex, root_state=root_state
+                    )
                 return
         # Otherwise drop the state lock and start processing the background task with a proxy state.
-        await process_event(
-            handler=registered_handler.handler,
-            state=StateProxy(substate),
-            payload=event.payload,
-            root_state=root_state,
-        )
+        try:
+            await process_event(
+                handler=registered_handler.handler,
+                state=StateProxy(substate),
+                payload=event.payload,
+                root_state=root_state,
+            )
+        except Exception as ex:
+            await self._handle_backend_exception_inline(ex, root_state=None)
+
+    async def _handle_backend_exception_inline(
+        self, ex: Exception, *, root_state: BaseState | None
+    ) -> None:
+        """Invoke ``backend_exception_handler`` from within an active ``except`` block.
+
+        Called from inside ``_execute_event`` while the ``modify_state_with_links``
+        block is still open, so:
+
+        * partial state mutations made before the raise are committed when the
+          block exits normally,
+        * ``traceback.format_exc()`` inside the user handler returns the real
+          handler traceback rather than ``"NoneType: None"``.
+
+        Args:
+            ex: The exception raised by the event handler.
+            root_state: Root state for chaining handler-returned events; ``None``
+                for background tasks where the proxy emits its own delta.
+
+        Raises:
+            Exception: Re-raises ``ex`` when no ``backend_exception_handler`` is
+                configured so ``EventProcessor._finish_task`` records it on the
+                future and logs.
+        """
+        from reflex.utils import telemetry
+
+        if self.backend_exception_handler is None:
+            raise ex
+        try:
+            events = self.backend_exception_handler(ex)
+        except Exception:
+            console.error(
+                f"backend_exception_handler raised while handling "
+                f"{type(ex).__name__}:\n{traceback.format_exc()}\n"
+                f"Original exception:\n"
+                f"{''.join(traceback.format_exception(type(ex), ex, ex.__traceback__))}"
+            )
+            telemetry.send_error(ex, context="backend")
+            return
+        telemetry.send_error(ex, context="backend")
+        if events:
+            await chain_updates(
+                events=events,
+                handler_name=self.backend_exception_handler.__qualname__,
+                root_state=root_state,
+            )
 
     async def _handle_backend_exception(
         self, ex: Exception, ev_ctx: EventContext | None = None
