@@ -51,7 +51,7 @@ class Text(elements.Span, RadixThemesComponent, MarkdownComponentMap):
     as_: Var[LiteralType] = field(
         default=Var.create("p"),
         doc="Change the default rendered element into a semantically appropriate alternative (cannot be used with asChild)",
-    )  # ty:ignore[invalid-assignment]
+    )
 
     size: Var[Responsive[LiteralTextSize]] = field(doc='Text size: "1" - "9"')
 

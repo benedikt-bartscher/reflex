@@ -40,7 +40,7 @@ class SimpleComponent(Component):
     label: Var[str] = field(
         default=Var.create("default"),
         doc="An optional label with a default value.",
-    )  # ty:ignore[invalid-assignment]
+    )
 
     description: Var[str]
     """A detailed description of the component."""

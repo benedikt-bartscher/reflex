@@ -56,7 +56,7 @@ class Slider(RadixThemesComponent):
 
     width: Var[str | None] = field(
         default=Var.create("100%"), doc="The width of the slider."
-    )  # ty:ignore[invalid-assignment]
+    )
 
     min: Var[float | int] = field(doc="The minimum value of the slider.")
 

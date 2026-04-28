@@ -123,7 +123,7 @@ class AccordionRoot(AccordionComponent):
     easing: Var[str] = field(
         default=LiteralVar.create(DEFAULT_ANIMATION_EASING),
         doc="The easing function to use for the animation.",
-    )  # ty:ignore[invalid-assignment]
+    )
 
     show_dividers: Var[bool] = field(doc="Whether to show divider lines between items.")
 
@@ -203,7 +203,7 @@ class AccordionItem(AccordionComponent):
 
     content: Var[Component | str | None] = field(
         default=Var.create(None), doc="The content of the accordion item."
-    )  # ty:ignore[invalid-assignment]
+    )
 
     _valid_children: ClassVar[list[str]] = [
         "AccordionHeader",

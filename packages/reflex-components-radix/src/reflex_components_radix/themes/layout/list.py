@@ -48,11 +48,11 @@ class BaseList(BaseHTML, MarkdownComponentMap):
         LiteralListStyleTypeUnordered | LiteralListStyleTypeOrdered
     ] = field(
         default=Var.create("none"), doc='The style of the list. Default to "none".'
-    )  # ty:ignore[invalid-assignment]
+    )
 
     items: Var[Iterable] = field(
         default=Var.create([]), doc="A list of items to add to the list."
-    )  # ty:ignore[invalid-assignment]
+    )
 
     @classmethod
     def create(

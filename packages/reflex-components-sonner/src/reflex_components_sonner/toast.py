@@ -191,7 +191,7 @@ class Toaster(Component):
 
     position: Var[LiteralPosition] = field(
         default=LiteralVar.create("bottom-right"), doc="the position of the toast"
-    )  # ty:ignore[invalid-assignment]
+    )
 
     close_button: Var[bool] = field(
         default=LiteralVar.create(False), doc="whether to show the close button"

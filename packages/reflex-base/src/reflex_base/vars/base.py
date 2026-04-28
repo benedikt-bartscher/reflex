@@ -3447,7 +3447,7 @@ def field(
     *,
     is_var: Literal[False],
     default_factory: Callable[[], FIELD_TYPE] | None = None,
-) -> FIELD_TYPE: ...
+) -> Any: ...
 
 
 @overload
@@ -3456,7 +3456,7 @@ def field(
     *,
     default_factory: Callable[[], FIELD_TYPE] | None = None,
     is_var: Literal[True] = True,
-) -> Field[FIELD_TYPE]: ...
+) -> Any: ...
 
 
 def field(

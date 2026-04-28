@@ -83,12 +83,12 @@ class Pie(Recharts):
     stroke: Var[str | Color] = field(
         default=LiteralVar.create(Color("accent", 9)),
         doc='Stoke color. Default: rx.color("accent", 9)',
-    )  # ty:ignore[invalid-assignment]
+    )
 
     fill: Var[str | Color] = field(
         default=LiteralVar.create(Color("accent", 3)),
         doc='Fill color. Default: rx.color("accent", 3)',
-    )  # ty:ignore[invalid-assignment]
+    )
 
     is_animation_active: Var[bool] = field(
         doc="If set false, animation of tooltip will be disabled. Default: true in CSR, and false in SSR"
@@ -151,12 +151,12 @@ class Radar(Recharts):
     stroke: Var[str | Color] = field(
         default=LiteralVar.create(Color("accent", 9)),
         doc='Stoke color. Default: rx.color("accent", 9)',
-    )  # ty:ignore[invalid-assignment]
+    )
 
     fill: Var[str | Color] = field(
         default=LiteralVar.create(Color("accent", 3)),
         doc='Fill color. Default: rx.color("accent", 3)',
-    )  # ty:ignore[invalid-assignment]
+    )
 
     fill_opacity: Var[float] = field(
         default=LiteralVar.create(0.6),
@@ -321,7 +321,7 @@ class PolarAngleAxis(Recharts):
     stroke: Var[str | Color] = field(
         default=LiteralVar.create(Color("gray", 10)),
         doc='The stroke color of axis. Default: rx.color("gray", 10)',
-    )  # ty:ignore[invalid-assignment]
+    )
 
     allow_duplicated_category: Var[bool] = field(
         doc='Allow the axis has duplicated categorys or not when the type of axis is "category". Default: True'
@@ -393,7 +393,7 @@ class PolarGrid(Recharts):
     stroke: Var[str | Color] = field(
         default=LiteralVar.create(Color("gray", 10)),
         doc='The stroke color of grid. Default: rx.color("gray", 10)',
-    )  # ty:ignore[invalid-assignment]
+    )
 
     # Valid children components
     _valid_children: ClassVar[list[str]] = ["RadarChart", "RadiarBarChart"]
@@ -456,7 +456,7 @@ class PolarRadiusAxis(Recharts):
     stroke: Var[str | Color] = field(
         default=LiteralVar.create(Color("gray", 10)),
         doc='The stroke color of axis. Default: rx.color("gray", 10)',
-    )  # ty:ignore[invalid-assignment]
+    )
 
     @classmethod
     def get_event_triggers(cls) -> dict[str, Var | Any]:

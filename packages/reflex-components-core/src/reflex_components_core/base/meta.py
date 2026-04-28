@@ -36,7 +36,7 @@ class Description(elements.Meta):
 
     name: Var[str] = field(
         default=Var.create("description"), doc="The type of the description."
-    )  # ty:ignore[invalid-assignment]
+    )
 
 
 class Image(elements.Meta):
@@ -44,4 +44,4 @@ class Image(elements.Meta):
 
     property: Var[str] = field(
         default=Var.create("og:image"), doc="The type of the image."
-    )  # ty:ignore[invalid-assignment]
+    )

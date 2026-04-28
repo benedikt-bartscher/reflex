@@ -16,11 +16,11 @@ class Stack(Flex):
 
     spacing: Var[Responsive[LiteralSpacing]] = field(
         default=Var.create("3"), doc="The spacing between each stack item."
-    )  # ty:ignore[invalid-assignment]
+    )
 
     align: Var[Responsive[LiteralAlign]] = field(
         default=Var.create("start"), doc="The alignment of the stack items."
-    )  # ty:ignore[invalid-assignment]
+    )
 
     @classmethod
     def create(
@@ -54,7 +54,7 @@ class VStack(Stack):
 
     direction: Var[Responsive[LiteralFlexDirection]] = field(
         default=Var.create("column"), doc="The direction of the stack."
-    )  # ty:ignore[invalid-assignment]
+    )
 
 
 class HStack(Stack):
@@ -62,7 +62,7 @@ class HStack(Stack):
 
     direction: Var[Responsive[LiteralFlexDirection]] = field(
         default=Var.create("row"), doc="The direction of the stack."
-    )  # ty:ignore[invalid-assignment]
+    )
 
 
 stack = Stack.create

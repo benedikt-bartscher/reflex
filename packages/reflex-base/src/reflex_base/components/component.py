@@ -121,7 +121,7 @@ def field(
     default_factory: Callable[[], FIELD_TYPE] | None = None,
     is_javascript_property: bool | None = None,
     doc: str | None = None,
-) -> FIELD_TYPE:
+) -> Any:
     """Create a field for a component.
 
     Args:
@@ -144,7 +144,7 @@ def field(
         default_factory=default_factory,
         is_javascript=is_javascript_property,
         doc=doc,
-    )  # ty:ignore[invalid-return-type]
+    )
 
 
 @dataclass_transform(kw_only_default=True, field_specifiers=(field,))

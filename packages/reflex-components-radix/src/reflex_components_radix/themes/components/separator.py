@@ -19,7 +19,7 @@ class Separator(RadixThemesComponent):
     size: Var[Responsive[LiteralSeparatorSize]] = field(
         default=LiteralVar.create("4"),
         doc='The size of the separator: "1" | "2" | "3" | "4"',
-    )  # ty:ignore[invalid-assignment]
+    )
 
     color_scheme: Var[LiteralAccentColor] = field(doc="The color of the separator")
 
