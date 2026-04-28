@@ -133,7 +133,7 @@ def test_state_to_operation(type_: GenericType) -> None:
 def test_typing() -> None:
     # Bare
     var = ObjectState.bare.to(ObjectVar)
-    _ = assert_type(var, ObjectVar[Bare])  # ty:ignore[type-assertion-failure]
+    _ = assert_type(var, ObjectVar[Bare])
 
     # Base
     var = ObjectState.base

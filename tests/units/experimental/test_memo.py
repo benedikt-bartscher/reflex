@@ -141,7 +141,7 @@ def test_var_returning_memo_with_rest_props():
         base: rx.Var[dict[str, str]],
         overrides: rx.RestProp,
     ) -> rx.Var[Any]:
-        return base.to(dict).merge(overrides)  # ty:ignore[unresolved-attribute]
+        return base.to(dict).merge(overrides)
 
     base = Var(_js_expr="base", _var_type=dict[str, str])
     merged = merge_styles(base=base, color="red", class_name="primary")

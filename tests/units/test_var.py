@@ -358,10 +358,10 @@ def test_basic_operations(TestObj):
         == '["1", "2", "3"].slice().reverse()'
     )
     assert (
-        str(Var(_js_expr="foo")._var_set_state("state").to(list).reverse())  # ty:ignore[unresolved-attribute]
+        str(Var(_js_expr="foo")._var_set_state("state").to(list).reverse())
         == "state.foo.slice().reverse()"
     )
-    assert str(Var(_js_expr="foo").to(list).reverse()) == "foo.slice().reverse()"  # ty:ignore[unresolved-attribute]
+    assert str(Var(_js_expr="foo").to(list).reverse()) == "foo.slice().reverse()"
     assert str(Var(_js_expr="foo", _var_type=str).js_type()) == "(typeof(foo))"
 
 

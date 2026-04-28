@@ -38,7 +38,7 @@ def make_var(value) -> Var:
 def make_timeout_logger() -> EventChainVar:
     return rx.vars.FunctionStringVar.create(
         "(...args) => { setTimeout(() => console.log('Timeout reached!', args), 1000); }"
-    ).to(EventChain)  # ty:ignore[invalid-return-type]
+    ).to(EventChain)
 
 
 def test_create_event():

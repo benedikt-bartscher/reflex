@@ -260,7 +260,7 @@ class Toaster(Component):
             ValueError: If the Toaster component is not created.
         """
         toast_command = (
-            ObjectVar.__getattr__(toast_ref.to(dict), level) if level else toast_ref  # ty:ignore[no-matching-overload]
+            ObjectVar.__getattr__(toast_ref.to(dict), level) if level else toast_ref
         ).to(FunctionVar)
 
         if isinstance(message, Var):
@@ -272,9 +272,9 @@ class Toaster(Component):
 
         if props:
             args = LiteralVar.create(ToastProps(component_name="rx.toast", **props))  # ty:ignore[unknown-argument]
-            toast = toast_command.call(message, args)  # ty:ignore[unresolved-attribute]
+            toast = toast_command.call(message, args)
         else:
-            toast = toast_command.call(message)  # ty:ignore[unresolved-attribute]
+            toast = toast_command.call(message)
 
         if fallback_to_alert:
             toast = ternary_operation(

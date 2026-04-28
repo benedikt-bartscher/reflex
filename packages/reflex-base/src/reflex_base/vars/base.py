@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import builtins
 import contextlib
 import copy
 import dataclasses
@@ -737,7 +738,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
     def to(self, output: type[str]) -> StringVar: ...
 
     @overload
-    def to(self, output: type[bool]) -> BooleanVar: ...  # ty:ignore[invalid-type-form]
+    def to(self, output: type[builtins.bool]) -> BooleanVar: ...
 
     @overload
     def to(self, output: type[int]) -> NumberVar[int]: ...
@@ -1124,7 +1125,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         return (
             JSON_STRINGIFY.call(self).to(StringVar)
             if use_json
-            else PROTOTYPE_TO_STRING.call(self).to(StringVar)  # ty:ignore[invalid-return-type]
+            else PROTOTYPE_TO_STRING.call(self).to(StringVar)
         )
 
     def _as_ref(self) -> Var:

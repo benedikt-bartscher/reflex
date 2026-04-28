@@ -68,7 +68,7 @@ def set_color_mode(
     ).to(FunctionVar)
 
     return run_script(
-        base_setter.call(new_color_mode),  # ty:ignore[unresolved-attribute]
+        base_setter.call(new_color_mode),
     )
 
 

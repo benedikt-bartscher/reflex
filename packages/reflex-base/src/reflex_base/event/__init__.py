@@ -786,7 +786,7 @@ def int_input_event(e: ObjectVar[JavascriptInputEvent]) -> tuple[Var[int]]:
     Returns:
         The value from the input event as an int.
     """
-    return (Var("Number").to(FunctionVar).call(e.target.value).to(int),)  # ty:ignore[unresolved-attribute]
+    return (Var("Number").to(FunctionVar).call(e.target.value).to(int),)
 
 
 def float_input_event(e: ObjectVar[JavascriptInputEvent]) -> tuple[Var[float]]:
@@ -798,7 +798,7 @@ def float_input_event(e: ObjectVar[JavascriptInputEvent]) -> tuple[Var[float]]:
     Returns:
         The value from the input event as a float.
     """
-    return (Var("Number").to(FunctionVar).call(e.target.value).to(float),)  # ty:ignore[unresolved-attribute]
+    return (Var("Number").to(FunctionVar).call(e.target.value).to(float),)
 
 
 def checked_input_event(e: ObjectVar[JavascriptInputEvent]) -> tuple[Var[bool]]:
@@ -864,7 +864,7 @@ def key_event(
                 "shift_key": e.shiftKey,
             },
         ).to(KeyInputInfo),
-    )  # ty:ignore[invalid-return-type]
+    )
 
 
 @dataclasses.dataclass(
@@ -932,7 +932,7 @@ def pointer_event_spec(
                 "shift_key": e.shiftKey,
             },
         ).to(PointerEventInfo),
-    )  # ty:ignore[invalid-return-type]
+    )
 
 
 def no_args_event_spec() -> tuple[()]:
@@ -1063,7 +1063,7 @@ class FileUpload:
             _js_expr="filesById",
             _var_type=dict[str, Any],
             _var_data=VarData.merge(upload_files_context_var_data),
-        ).to(ObjectVar)[LiteralVar.create(upload_id)]  # ty:ignore[not-subscriptable]
+        ).to(ObjectVar)[LiteralVar.create(upload_id)]
         spec_args = [
             (
                 Var(_js_expr="files"),
@@ -1271,7 +1271,7 @@ def console_log(message: str | Var[str]) -> EventSpec:
     Returns:
         An event to log the message.
     """
-    return run_script(Var("console").to(dict).log.to(FunctionVar).call(message))  # ty:ignore[unresolved-attribute]
+    return run_script(Var("console").to(dict).log.to(FunctionVar).call(message))
 
 
 @once
@@ -1291,7 +1291,7 @@ def back() -> EventSpec:
         An event to go back one page.
     """
     return run_script(
-        Var("window").to(dict).history.to(dict).back.to(FunctionVar).call()  # ty:ignore[unresolved-attribute]
+        Var("window").to(dict).history.to(dict).back.to(FunctionVar).call()
     )
 
 
@@ -1304,7 +1304,7 @@ def window_alert(message: str | Var[str]) -> EventSpec:
     Returns:
         An event to alert the message.
     """
-    return run_script(Var("window").to(dict).alert.to(FunctionVar).call(message))  # ty:ignore[unresolved-attribute]
+    return run_script(Var("window").to(dict).alert.to(FunctionVar).call(message))
 
 
 def set_focus(ref: str) -> EventSpec:
@@ -1466,7 +1466,7 @@ def set_clipboard(content: str | Var[str]) -> EventSpec:
     return run_script(
         Var("navigator")
         .to(dict)
-        .clipboard.to(dict)  # ty:ignore[unresolved-attribute]
+        .clipboard.to(dict)
         .writeText.to(FunctionVar)
         .call(content)
     )

@@ -581,23 +581,23 @@ def VarOperations():
             rx.box(
                 # Test that foreach works with various non-array inputs without throwing
                 rx.foreach(
-                    rx.Var("undefined").to(list),  # ty:ignore[invalid-argument-type]
+                    rx.Var("undefined").to(list),
                     rx.text.span,
                 ),
                 rx.foreach(
-                    rx.Var("null").to(list),  # ty:ignore[invalid-argument-type]
+                    rx.Var("null").to(list),
                     rx.text.span,
                 ),
                 rx.foreach(
-                    rx.Var("({})").to(list),  # ty:ignore[invalid-argument-type]
+                    rx.Var("({})").to(list),
                     rx.text.span,
                 ),
                 rx.foreach(
-                    rx.Var("2").to(list),  # ty:ignore[invalid-argument-type]
+                    rx.Var("2").to(list),
                     rx.text.span,
                 ),
                 rx.foreach(
-                    rx.Var("false").to(list),  # ty:ignore[invalid-argument-type]
+                    rx.Var("false").to(list),
                     rx.text.span,
                 ),
             ),

@@ -136,11 +136,11 @@ class ClientStateVar(Var):
                 args_names=(arg_name,),
                 return_expr=Var("Array.prototype.forEach.call")
                 .to(FunctionVar)
-                .call(  # ty:ignore[unresolved-attribute]
+                .call(
                     (
                         Var("Object.values")
                         .to(FunctionVar)
-                        .call(Var(_client_state_ref_dict(setter_name)))  # ty:ignore[unresolved-attribute]
+                        .call(Var(_client_state_ref_dict(setter_name)))
                         .to(list)
                         .to(list)
                     )
@@ -149,7 +149,7 @@ class ClientStateVar(Var):
                     ]).to(list),
                     ArgsFunctionOperationBuilder.create(
                         args_names=("setter",),
-                        return_expr=Var("setter").to(FunctionVar).call(Var(arg_name)),  # ty:ignore[unresolved-attribute]
+                        return_expr=Var("setter").to(FunctionVar).call(Var(arg_name)),
                     ),
                 ),
             )
@@ -238,7 +238,7 @@ class ClientStateVar(Var):
                 args_names=(re.sub(r"(\?\.)?\[\".*\"\]", "", value_str),)
                 if value_str.startswith("_")
                 else (),
-                return_expr=setter.call(value_var),  # ty:ignore[unresolved-attribute]
+                return_expr=setter.call(value_var),
             )
 
         return setter.to(FunctionVar, EventChain)
