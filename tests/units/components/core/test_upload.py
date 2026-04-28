@@ -74,7 +74,7 @@ def test_get_upload_url():
 
 
 def test__on_drop_spec():
-    assert isinstance(_on_drop_spec(LiteralVar.create([])), tuple)  # ty:ignore[invalid-argument-type]
+    assert isinstance(_on_drop_spec(LiteralVar.create([])), tuple)
 
 
 @pytest.mark.parametrize("component", [Upload, GhostUpload])

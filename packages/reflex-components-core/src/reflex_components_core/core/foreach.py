@@ -72,9 +72,9 @@ class Foreach(Component):
             LiteralVar.create(iterable).guess_type()
             if not isinstance(iterable, Var)
             else iterable.guess_type()
-        )  # ty:ignore[invalid-assignment]
+        )
 
-        if iterable._var_type == Any:  # ty:ignore[unresolved-attribute]
+        if iterable._var_type == Any:
             msg = (
                 f"Could not foreach over var `{iterable!s}` of type Any. "
                 "(If you are trying to foreach over a state var, add a type annotation to the var). "
@@ -97,7 +97,7 @@ class Foreach(Component):
 
         if not isinstance(iterable, ArrayVar):
             msg = (
-                f"Could not foreach over var `{iterable!s}` of type {iterable._var_type}. "  # ty:ignore[unresolved-attribute]
+                f"Could not foreach over var `{iterable!s}` of type {iterable._var_type}. "
                 "See https://reflex.dev/docs/library/dynamic-rendering/foreach/"
             )
             raise ForeachVarError(msg)

@@ -483,11 +483,11 @@ class AccordionContent(AccordionComponent):
         """
         slide_down = SLIDE_DOWN.to(str) + Var.create(
             " var(--animation-duration) var(--animation-easing)",
-        )  # ty:ignore[unsupported-operator]
+        )
 
         slide_up = SLIDE_UP.to(str) + Var.create(
             " var(--animation-duration) var(--animation-easing)",
-        )  # ty:ignore[unsupported-operator]
+        )
 
         return {
             "overflow": "hidden",

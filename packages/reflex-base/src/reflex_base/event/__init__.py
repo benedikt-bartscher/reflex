@@ -1580,8 +1580,8 @@ def call_script(
         javascript_code, original_code = (
             LiteralVar.create(javascript_code),
             javascript_code,
-        )  # ty:ignore[invalid-assignment]
-        if not javascript_code._get_all_var_data():  # ty:ignore[unresolved-attribute]
+        )
+        if not javascript_code._get_all_var_data():
             # Without VarData, cast to string and eval the code in the event loop.
             javascript_code = str(Var(_js_expr=original_code))
 

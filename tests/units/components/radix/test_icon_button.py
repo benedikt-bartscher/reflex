@@ -25,5 +25,5 @@ def test_icon_button_size_prop():
     ib1 = IconButton.create("activity", size="2")
     assert isinstance(ib1, IconButton)
 
-    ib2 = IconButton.create("activity", size=LiteralVar.create("2"))  # ty:ignore[invalid-argument-type]
+    ib2 = IconButton.create("activity", size=LiteralVar.create("2"))
     assert isinstance(ib2, IconButton)

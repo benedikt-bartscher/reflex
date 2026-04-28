@@ -154,7 +154,7 @@ def test_cond_assert_types() -> None:
     text_comp = Text.create("hello")
     text_comp2 = Text.create("world")
     var_int: Var[int] = LiteralVar.create(1)
-    var_str: Var[str] = LiteralVar.create("a")  # ty:ignore[invalid-assignment]
+    var_str: Var[str] = LiteralVar.create("a")
 
     # Component, Component -> Component
     _ = assert_type(cond(True, text_comp, text_comp2), Component)
@@ -175,10 +175,10 @@ def test_cond_assert_types() -> None:
     _ = assert_type(cond(True, "hello", 3), Var[str | int])  # ty:ignore[type-assertion-failure]
 
     # T, Var[T] -> Var[T]
-    _ = assert_type(cond(True, "hello", var_str), Var[str])
+    _ = assert_type(cond(True, "hello", var_str), Var[str])  # ty:ignore[type-assertion-failure]
 
     # Var[T], T -> Var[T]
-    _ = assert_type(cond(True, var_str, "world"), Var[str])
+    _ = assert_type(cond(True, var_str, "world"), Var[str])  # ty:ignore[type-assertion-failure]
 
     # T, Var[U] -> Var[T | U]
     _ = assert_type(cond(True, "hello", var_int), Var[str | int])  # ty:ignore[type-assertion-failure]
@@ -187,4 +187,4 @@ def test_cond_assert_types() -> None:
     _ = assert_type(cond(True, var_str, 3), Var[int | Literal["a"]])  # ty:ignore[type-assertion-failure]
 
     # Var[T], Var[U] -> Var[T | U]
-    _ = assert_type(cond(True, var_int, var_str), Var[int | Literal["a"]])  # ty:ignore[type-assertion-failure]
+    _ = assert_type(cond(True, var_int, var_str), Var[int | Literal["a"]])

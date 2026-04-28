@@ -79,7 +79,7 @@ class Text(elements.Span, RadixThemesComponent, MarkdownComponentMap):
 class Span(Text):
     """A variant of text rendering as <span> element."""
 
-    as_: Var[LiteralType] = Var.create("span")  # ty:ignore[invalid-assignment]
+    as_: Var[LiteralType] = Var.create("span")
 
 
 class Em(elements.Em, RadixThemesComponent):

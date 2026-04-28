@@ -197,13 +197,13 @@ def test_memo_requires_var_annotations():
 
         @rx._x.memo
         def bad_annotation(value: int) -> rx.Var[str]:
-            return rx.Var.create("x")  # ty:ignore[invalid-return-type]
+            return rx.Var.create("x")
 
     with pytest.raises(TypeError, match="Missing annotation"):
 
         @rx._x.memo
         def missing_annotation(value) -> rx.Var[str]:
-            return rx.Var.create("x")  # ty:ignore[invalid-return-type]
+            return rx.Var.create("x")
 
 
 def test_memo_rejects_invalid_children_annotation():
@@ -240,7 +240,7 @@ def test_memo_rejects_component_and_function_name_collision():
 
         @rx._x.memo
         def FooBar() -> rx.Var[str]:
-            return rx.Var.create("x")  # ty:ignore[invalid-return-type]
+            return rx.Var.create("x")
 
 
 def test_memo_rejects_component_export_name_collision():
@@ -263,13 +263,13 @@ def test_memo_rejects_varargs():
 
         @rx._x.memo
         def bad_args(*values: rx.Var[str]) -> rx.Var[str]:
-            return rx.Var.create("x")  # ty:ignore[invalid-return-type]
+            return rx.Var.create("x")
 
     with pytest.raises(TypeError, match=r"\*\*kwargs"):
 
         @rx._x.memo
         def bad_kwargs(**values: rx.Var[str]) -> rx.Var[str]:
-            return rx.Var.create("x")  # ty:ignore[invalid-return-type]
+            return rx.Var.create("x")
 
 
 def test_component_memo_rejects_invalid_positional_usage():

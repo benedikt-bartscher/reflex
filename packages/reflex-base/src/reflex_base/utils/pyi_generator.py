@@ -682,7 +682,8 @@ def _get_visible_type_name(
     type_name = getattr(typ, "__name__", None)
 
     if type_name is not None and (
-        type_hint_globals.get(type_name) is typ
+        type_module in ("builtins", "__builtins__")
+        or type_hint_globals.get(type_name) is typ
         or type_name in DEFAULT_IMPORTS.get(str(type_module), set())
         or type_name in EXCLUDED_IMPORTS.get(str(type_module), set())
     ):

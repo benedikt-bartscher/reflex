@@ -411,7 +411,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         return self._js_expr
 
     @property
-    def _var_is_local(self) -> bool:  # ty:ignore[invalid-type-form]
+    def _var_is_local(self) -> builtins.bool:
         """Whether this is a local javascript variable.
 
         Returns:
@@ -420,7 +420,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         return False
 
     @property
-    def _var_is_string(self) -> bool:  # ty:ignore[invalid-type-form]
+    def _var_is_string(self) -> builtins.bool:
         """Whether the var is a string literal.
 
         Returns:
@@ -526,7 +526,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         """
         return self
 
-    def equals(self, other: Var) -> bool:  # ty:ignore[invalid-type-form]
+    def equals(self, other: Var) -> builtins.bool:
         """Check if two vars are equal.
 
         Args:
@@ -613,7 +613,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
     @classmethod
     def create(
         cls,
-        value: bool,  # ty:ignore[invalid-type-form]
+        value: builtins.bool,
         _var_data: VarData | None = None,
     ) -> LiteralBooleanVar: ...
 
@@ -716,7 +716,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         if isinstance(value, Var):
             return value  # ty:ignore[invalid-return-type]
 
-        return LiteralVar.create(value, _var_data=_var_data)  # ty:ignore[invalid-return-type]
+        return LiteralVar.create(value, _var_data=_var_data)
 
     def __format__(self, format_spec: str) -> str:
         """Format the var into a Javascript equivalent to an f-string.
@@ -848,7 +848,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
     def guess_type(self: Var[str]) -> StringVar: ...
 
     @overload
-    def guess_type(self: Var[bool]) -> BooleanVar: ...  # ty:ignore[invalid-type-form]
+    def guess_type(self: Var[builtins.bool]) -> BooleanVar: ...
 
     @overload
     def guess_type(self: Var[int] | Var[float] | Var[int | float]) -> NumberVar: ...
@@ -1110,7 +1110,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         """
         return ~self.bool()
 
-    def to_string(self, use_json: bool = True) -> StringVar:  # ty:ignore[invalid-type-form]
+    def to_string(self, use_json: builtins.bool = True) -> StringVar:
         """Convert the var to a string.
 
         Args:

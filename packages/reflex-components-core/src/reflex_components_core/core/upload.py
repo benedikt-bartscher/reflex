@@ -169,7 +169,7 @@ def get_upload_url(file_path: str | Var[str]) -> Var[str]:
     """
     Upload.is_used = True
 
-    return Var.create(f"{uploaded_files_url_prefix}/{file_path}")  # ty:ignore[invalid-return-type]
+    return Var.create(f"{uploaded_files_url_prefix}/{file_path}")
 
 
 _on_drop_spec = passthrough_event_spec(list[UploadFile])

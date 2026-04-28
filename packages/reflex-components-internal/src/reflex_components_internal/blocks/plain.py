@@ -18,27 +18,27 @@ class PlainChat(rx.Component):
 
     tag = "PlainChat"
 
-    full_name: rx.Var[str] = rx.Var.create("User")  # ty:ignore[invalid-assignment]
-    short_name: rx.Var[str] = rx.Var.create("User")  # ty:ignore[invalid-assignment]
-    chat_avatar_url: rx.Var[str] = rx.Var.create("")  # ty:ignore[invalid-assignment]
-    external_id: rx.Var[str] = rx.Var.create("")  # ty:ignore[invalid-assignment]
+    full_name: rx.Var[str] = rx.Var.create("User")
+    short_name: rx.Var[str] = rx.Var.create("User")
+    chat_avatar_url: rx.Var[str] = rx.Var.create("")
+    external_id: rx.Var[str] = rx.Var.create("")
     hide_launcher: rx.Var[bool] = rx.Var.create(True)
 
     # Optional email authentication
-    email: rx.Var[str] = rx.Var.create("")  # ty:ignore[invalid-assignment]
-    email_hash: rx.Var[str] = rx.Var.create("")  # ty:ignore[invalid-assignment]
+    email: rx.Var[str] = rx.Var.create("")
+    email_hash: rx.Var[str] = rx.Var.create("")
 
     # Optional built-in email verification
     require_authentication: rx.Var[bool] = rx.Var.create(False)
 
     # Optional tier ID for thread details
-    tier_id: rx.Var[str] = rx.Var.create("")  # ty:ignore[invalid-assignment]
+    tier_id: rx.Var[str] = rx.Var.create("")
 
     # Entry point options
     # Type is either 'default' or 'chat'. 'default' opens intro screen, 'chat' opens straight into chat
-    entry_point_type: rx.Var[str] = rx.Var.create("")  # ty:ignore[invalid-assignment]
+    entry_point_type: rx.Var[str] = rx.Var.create("")
     # The external ID of which chat to open. If not provided it defaults to the last conversation
-    entry_point_external_id: rx.Var[str] = rx.Var.create("")  # ty:ignore[invalid-assignment]
+    entry_point_external_id: rx.Var[str] = rx.Var.create("")
     # Prevents the user from going back to the intro screen to start a new chat
     single_chat_mode: rx.Var[bool] = rx.Var.create(False)
 

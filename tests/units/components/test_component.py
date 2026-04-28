@@ -1313,7 +1313,7 @@ class EventState(rx.State):
             id="fstring-bare",
         ),
         pytest.param(
-            rx.text(as_=TEST_VAR),  # ty:ignore[invalid-argument-type]
+            rx.text(as_=TEST_VAR),
             [TEST_VAR],
             id="direct-prop",
         ),
@@ -1359,7 +1359,7 @@ class EventState(rx.State):
         ),
         pytest.param(
             rx.fragment(class_name=[TEST_VAR, "other-class"]),
-            [Var.create([TEST_VAR, "other-class"]).join(" ")],  # ty:ignore[unresolved-attribute]
+            [Var.create([TEST_VAR, "other-class"]).join(" ")],
             id="fstring-dual-class_name",
         ),
         pytest.param(
@@ -1584,7 +1584,7 @@ def test_validate_valid_children():
             True,
             rx.fragment(valid_component2()),
             rx.fragment(
-                rx.foreach(LiteralVar.create([1, 2, 3]), lambda x: valid_component2(x))  # ty:ignore[invalid-argument-type]
+                rx.foreach(LiteralVar.create([1, 2, 3]), lambda x: valid_component2(x))
             ),
         )
     )
@@ -1644,7 +1644,7 @@ def test_validate_valid_parents():
             rx.fragment(valid_component3()),
             rx.fragment(
                 rx.foreach(
-                    LiteralVar.create([1, 2, 3]),  # ty:ignore[invalid-argument-type]
+                    LiteralVar.create([1, 2, 3]),
                     lambda x: valid_component2(valid_component3(x)),
                 )
             ),
@@ -1730,7 +1730,7 @@ def test_validate_invalid_children():
                 rx.fragment(invalid_component()),
                 rx.fragment(
                     rx.foreach(
-                        LiteralVar.create([1, 2, 3]),  # ty:ignore[invalid-argument-type]
+                        LiteralVar.create([1, 2, 3]),
                         lambda x: invalid_component(x),
                     )
                 ),
