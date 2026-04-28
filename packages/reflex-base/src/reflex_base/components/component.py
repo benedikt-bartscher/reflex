@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import builtins
 import contextlib
 import copy
 import dataclasses
@@ -385,7 +386,7 @@ class BaseComponent(metaclass=BaseComponentMeta):
         """
 
     @abstractmethod
-    def _get_all_dynamic_imports(self) -> set[str]:  # ty:ignore[invalid-type-form]
+    def _get_all_dynamic_imports(self) -> builtins.set[str]:
         """Get dynamic imports for the component.
 
         Returns:
@@ -2866,7 +2867,7 @@ def empty_component() -> Component:
     return Bare.create("")
 
 
-def render_dict_to_var(tag: dict | Component | str) -> Var:
+def render_dict_to_var(tag: dict[str, Any] | Component | str) -> Var:
     """Convert a render dict to a Var.
 
     Args:
