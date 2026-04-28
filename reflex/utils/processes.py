@@ -255,7 +255,7 @@ def new_process(
     fn: Callable[..., subprocess.CompletedProcess[str] | subprocess.Popen[str]] = (
         subprocess.run if run else subprocess_p_open
     )
-    return fn(non_empty_args, **kwargs)
+    return fn(non_empty_args, **kwargs)  # ty:ignore[no-matching-overload]
 
 
 @contextlib.contextmanager
@@ -283,7 +283,7 @@ def run_concurrently_context(
     try:
         executor = futures.ThreadPoolExecutor(max_workers=len(fns))
         # Submit the tasks.
-        tasks = [executor.submit(*fn) for fn in fns]
+        tasks = [executor.submit(*fn) for fn in fns]  # ty:ignore[invalid-argument-type]
 
         # Yield control back to the main thread while tasks are running.
         yield tasks

@@ -93,7 +93,6 @@ dev = [
   "psutil",
   "psycopg[binary]",
   "pydantic",
-  "pyright",
   "pytest-asyncio",
   "pytest-benchmark",
   "pytest-codspeed",
@@ -111,6 +110,7 @@ dev = [
   "sqlmodel",
   "starlette-admin",
   "toml",
+  "ty",
   "typer",
   "uvicorn",
 ]
@@ -136,25 +136,7 @@ path = "scripts/hatch_build.py"
 dependencies = ["plotly", "ruff"]
 require-runtime-dependencies = true
 
-[tool.pyright]
-extraPaths = [
-  "packages/reflex-code/src",
-  "packages/reflex-components/src",
-  "packages/reflex-dataeditor/src",
-  "packages/reflex-gridjs/src",
-  "packages/reflex-lucide/src",
-  "packages/reflex-markdown/src",
-  "packages/reflex-moment/src",
-  "packages/reflex-plotly/src",
-  "packages/reflex-radix/src",
-  "packages/reflex-react-player/src",
-  "packages/reflex-react-router/src",
-  "packages/reflex-recharts/src",
-  "packages/reflex-sonner/src",
-  "packages/reflex-components-internal/src",
-  "packages/reflex-site-shared/src",
-  "packages/integrations-docs/src",
-]
+[tool.ty.src]
 exclude = [
   ".venv",
   "**/__pycache__",
@@ -164,9 +146,11 @@ exclude = [
   "docs",
   "packages/reflex-site-shared",
   "packages/integrations-docs",
-  "packages/reflex-ui-shared",
 ]
-reportIncompatibleMethodOverride = false
+
+[tool.ty.rules]
+invalid-method-override = "ignore"
+unsupported-base = "ignore"
 
 [tool.ruff]
 target-version = "py310"

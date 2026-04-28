@@ -184,7 +184,7 @@ class GraphingTooltip(Recharts):
             "color": Color("gray", 12),
         }),
         doc='The style of default tooltip content item which is a li element. Default: {"color": rx.color("gray", 12)}',
-    )
+    )  # ty:ignore[invalid-assignment]
 
     wrapper_style: Var[dict[str, Any]] = field(
         doc="The style of tooltip wrapper which is a dom element. Default: {}"
@@ -197,12 +197,12 @@ class GraphingTooltip(Recharts):
             "borderRadius": "8px",
         }),
         doc='The style of tooltip content which is a dom element. Default: {"background": rx.color("gray", 1), "borderColor": rx.color("gray", 4), "borderRadius": "8px"}',
-    )
+    )  # ty:ignore[invalid-assignment]
 
     label_style: Var[dict[str, Any]] = field(
         default=LiteralVar.create({"color": Color("gray", 11)}),
         doc='The style of default tooltip label which is a p element. Default: {"color": rx.color("gray", 11)}',
-    )
+    )  # ty:ignore[invalid-assignment]
 
     allow_escape_view_box: Var[dict[str, bool]] = field(
         doc='This option allows the tooltip to extend beyond the viewBox of the chart itself. Default: {"x": False, "y": False}'
@@ -275,12 +275,12 @@ class LabelList(Recharts):
     fill: Var[str | Color] = field(
         default=LiteralVar.create(Color("gray", 10)),
         doc='The fill color of each label. Default: rx.color("gray", 10)',
-    )
+    )  # ty:ignore[invalid-assignment]
 
     stroke: Var[str | Color] = field(
         default=LiteralVar.create("none"),
         doc='The stroke color of each label. Default: "none"',
-    )
+    )  # ty:ignore[invalid-assignment]
 
 
 class Cell(Recharts):

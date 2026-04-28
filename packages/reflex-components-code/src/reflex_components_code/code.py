@@ -393,7 +393,7 @@ class CodeBlock(Component, MarkdownComponentMap):
 
     language: Var[LiteralCodeLanguage] = field(
         default=Var.create("python"), doc="The language to use."
-    )
+    )  # ty:ignore[invalid-assignment]
 
     code: Var[str] = field(doc="The code to display.")
 

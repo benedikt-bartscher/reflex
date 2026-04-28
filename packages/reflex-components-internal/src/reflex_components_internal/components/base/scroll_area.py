@@ -103,7 +103,7 @@ class ScrollAreaScrollbar(ScrollAreaBaseComponent):
     tag = "ScrollArea.Scrollbar"
 
     # Orientation of the scrollbar
-    orientation: Var[LiteralOrientation] = Var.create("vertical")
+    orientation: Var[LiteralOrientation] = Var.create("vertical")  # ty:ignore[invalid-assignment]
 
     # Whether to keep the HTML element in the DOM when the viewport isn't scrollable
     keep_mounted: Var[bool] = Var.create(False)
@@ -178,7 +178,7 @@ class HighLevelScrollArea(ScrollAreaRoot):
     """High level wrapper for the Scroll Area component."""
 
     # Orientation of the scroll area
-    orientation: Var[LiteralOrientation] = Var.create("vertical")
+    orientation: Var[LiteralOrientation] = Var.create("vertical")  # ty:ignore[invalid-assignment]
 
     # Whether to keep the HTML element in the DOM when the viewport isn't scrollable
     keep_mounted: Var[bool] = Var.create(False)

@@ -34,7 +34,7 @@ def _get_task_name(task: asyncio.Task | Callable) -> str:
     """
     if isinstance(task, asyncio.Task):
         return task.get_name()
-    return task.__name__  # pyright: ignore[reportAttributeAccessIssue]
+    return task.__name__  # ty:ignore[unresolved-attribute]
 
 
 @dataclasses.dataclass
@@ -122,7 +122,7 @@ class LifespanMixin(AppMixin):
                 task.cancel(msg="lifespan_cleanup")
         # Disassociate sid / token pairings so they can be reconnected properly.
         try:
-            event_namespace = self.event_namespace  # pyright: ignore[reportAttributeAccessIssue]
+            event_namespace = self.event_namespace  # ty:ignore[unresolved-attribute]
         except AttributeError:
             pass
         else:
@@ -133,7 +133,7 @@ class LifespanMixin(AppMixin):
                 console.error(f"Error during lifespan cleanup: {e}")
         # Flush any pending writes from the state manager.
         try:
-            state_manager = self.state_manager  # pyright: ignore[reportAttributeAccessIssue]
+            state_manager = self.state_manager  # ty:ignore[unresolved-attribute]
         except AttributeError:
             pass
         else:
@@ -183,7 +183,7 @@ class LifespanMixin(AppMixin):
             )
             raise RuntimeError(msg)
         if inspect.isgeneratorfunction(task) or inspect.isasyncgenfunction(task):
-            msg = f"Task {task.__name__} of type generator must be decorated with contextlib.asynccontextmanager."
+            msg = f"Task {task.__name__} of type generator must be decorated with contextlib.asynccontextmanager."  # ty:ignore[unresolved-attribute]
             raise InvalidLifespanTaskTypeError(msg)
 
         task_name = _get_task_name(task)

@@ -179,7 +179,7 @@ class VarData:
 
         if hooks and any(hooks.values()):
             # Merge our dependencies first, so they can be referenced.
-            merged_var_data = VarData.merge(*hooks.values(), self)
+            merged_var_data = VarData.merge(*hooks.values(), self)  # ty:ignore[invalid-argument-type]
             if merged_var_data is not None:
                 object.__setattr__(self, "state", merged_var_data.state)
                 object.__setattr__(self, "field_name", merged_var_data.field_name)
@@ -410,7 +410,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         return self._js_expr
 
     @property
-    def _var_is_local(self) -> bool:
+    def _var_is_local(self) -> bool:  # ty:ignore[invalid-type-form]
         """Whether this is a local javascript variable.
 
         Returns:
@@ -419,7 +419,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         return False
 
     @property
-    def _var_is_string(self) -> bool:
+    def _var_is_string(self) -> bool:  # ty:ignore[invalid-type-form]
         """Whether the var is a string literal.
 
         Returns:
@@ -456,7 +456,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
                 frozen=True,
                 slots=True,
             )
-            class ToVarOperation(ToOperation, cls):
+            class ToVarOperation(ToOperation, cls):  # ty:ignore[shadowed-type-variable]
                 """Base class of converting a var to another var type."""
 
                 _original: Var = dataclasses.field(
@@ -525,7 +525,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         """
         return self
 
-    def equals(self, other: Var) -> bool:
+    def equals(self, other: Var) -> bool:  # ty:ignore[invalid-type-form]
         """Check if two vars are equal.
 
         Args:
@@ -602,7 +602,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
 
     @overload
     @classmethod
-    def create(  # pyright: ignore[reportOverlappingOverload]
+    def create(
         cls,
         value: NoReturn,
         _var_data: VarData | None = None,
@@ -610,9 +610,9 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
 
     @overload
     @classmethod
-    def create(  # pyright: ignore[reportOverlappingOverload]
+    def create(
         cls,
-        value: bool,
+        value: bool,  # ty:ignore[invalid-type-form]
         _var_data: VarData | None = None,
     ) -> LiteralBooleanVar: ...
 
@@ -642,7 +642,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
 
     @overload
     @classmethod
-    def create(  # pyright: ignore [reportOverlappingOverload]
+    def create(
         cls,
         value: Color,
         _var_data: VarData | None = None,
@@ -650,7 +650,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
 
     @overload
     @classmethod
-    def create(  # pyright: ignore [reportOverlappingOverload]
+    def create(
         cls,
         value: LITERAL_STRING_T,
         _var_data: VarData | None = None,
@@ -658,7 +658,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
 
     @overload
     @classmethod
-    def create(  # pyright: ignore [reportOverlappingOverload]
+    def create(
         cls,
         value: STRING_T,
         _var_data: VarData | None = None,
@@ -666,7 +666,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
 
     @overload
     @classmethod
-    def create(  # pyright: ignore[reportOverlappingOverload]
+    def create(
         cls,
         value: None,
         _var_data: VarData | None = None,
@@ -713,9 +713,9 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         """
         # If the value is already a var, do nothing.
         if isinstance(value, Var):
-            return value
+            return value  # ty:ignore[invalid-return-type]
 
-        return LiteralVar.create(value, _var_data=_var_data)
+        return LiteralVar.create(value, _var_data=_var_data)  # ty:ignore[invalid-return-type]
 
     def __format__(self, format_spec: str) -> str:
         """Format the var into a Javascript equivalent to an f-string.
@@ -734,10 +734,10 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         return f"{constants.REFLEX_VAR_OPENING_TAG}{hashed_var}{constants.REFLEX_VAR_CLOSING_TAG}{self._js_expr}"
 
     @overload
-    def to(self, output: type[str]) -> StringVar: ...  # pyright: ignore[reportOverlappingOverload]
+    def to(self, output: type[str]) -> StringVar: ...
 
     @overload
-    def to(self, output: type[bool]) -> BooleanVar: ...
+    def to(self, output: type[bool]) -> BooleanVar: ...  # ty:ignore[invalid-type-form]
 
     @overload
     def to(self, output: type[int]) -> NumberVar[int]: ...
@@ -806,7 +806,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
                 return self.to(var_subclass.var_subclass, output)
 
         if fixed_output_type is None:
-            return get_to_operation(NoneVar).create(self)  # pyright: ignore [reportReturnType]
+            return get_to_operation(NoneVar).create(self)
 
         # Handle fixed_output_type being Base or a dataclass.
         if can_use_in_object_var(output):
@@ -820,7 +820,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
                         new_var_type = var_type
                     else:
                         new_var_type = var_type or current_var_type
-                    return var_subclass.to_var_subclass.create(  # pyright: ignore [reportReturnType]
+                    return var_subclass.to_var_subclass.create(
                         value=self, _var_type=new_var_type
                     )
 
@@ -841,13 +841,13 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         return self
 
     @overload
-    def guess_type(self: Var[NoReturn]) -> Var[Any]: ...  # pyright: ignore [reportOverlappingOverload]
+    def guess_type(self: Var[NoReturn]) -> Var[Any]: ...
 
     @overload
     def guess_type(self: Var[str]) -> StringVar: ...
 
     @overload
-    def guess_type(self: Var[bool]) -> BooleanVar: ...
+    def guess_type(self: Var[bool]) -> BooleanVar: ...  # ty:ignore[invalid-type-form]
 
     @overload
     def guess_type(self: Var[int] | Var[float] | Var[int | float]) -> NumberVar: ...
@@ -985,13 +985,13 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
             else format_state_name(state.get_full_name())
         )
 
-        return StateOperation.create(  # pyright: ignore [reportReturnType]
+        return StateOperation.create(
             formatted_state_name,
             self,
             _var_data=VarData.merge(
                 VarData.from_state(state, self._js_expr), self._var_data
             ),
-        ).guess_type()
+        ).guess_type()  # ty:ignore[invalid-return-type]
 
     def __eq__(self, other: Var | Any) -> BooleanVar:
         """Check if the current variable is equal to the given variable.
@@ -1109,7 +1109,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         """
         return ~self.bool()
 
-    def to_string(self, use_json: bool = True) -> StringVar:
+    def to_string(self, use_json: bool = True) -> StringVar:  # ty:ignore[invalid-type-form]
         """Convert the var to a string.
 
         Args:
@@ -1124,7 +1124,7 @@ class Var(Generic[VAR_TYPE], metaclass=MetaclassVar):
         return (
             JSON_STRINGIFY.call(self).to(StringVar)
             if use_json
-            else PROTOTYPE_TO_STRING.call(self).to(StringVar)
+            else PROTOTYPE_TO_STRING.call(self).to(StringVar)  # ty:ignore[invalid-return-type]
         )
 
     def _as_ref(self) -> Var:
@@ -1385,10 +1385,10 @@ class ToOperation:
             The ToOperation.
         """
         return cls(
-            _js_expr="",  # pyright: ignore [reportCallIssue]
-            _var_data=_var_data,  # pyright: ignore [reportCallIssue]
-            _var_type=_var_type or cls._default_var_type,  # pyright: ignore [reportCallIssue, reportAttributeAccessIssue]
-            _original=value,  # pyright: ignore [reportCallIssue]
+            _js_expr="",  # ty:ignore[unknown-argument]
+            _var_data=_var_data,  # ty:ignore[unknown-argument]
+            _var_type=_var_type or cls._default_var_type,  # ty:ignore[unknown-argument, unresolved-attribute]
+            _original=value,  # ty:ignore[unknown-argument]
         )
 
 
@@ -1649,7 +1649,7 @@ T = TypeVar("T")
 
 # NoReturn is used to match CustomVarOperationReturn with no type hint.
 @overload
-def var_operation(  # pyright: ignore [reportOverlappingOverload]
+def var_operation(
     func: Callable[P, CustomVarOperationReturn[NoReturn]],
 ) -> Callable[P, Var]: ...
 
@@ -1661,7 +1661,7 @@ def var_operation(
 
 
 @overload
-def var_operation(  # pyright: ignore [reportOverlappingOverload]
+def var_operation(
     func: Callable[P, CustomVarOperationReturn[bool]]
     | Callable[P, CustomVarOperationReturn[bool | None]],
 ) -> Callable[P, BooleanVar]: ...
@@ -1711,7 +1711,7 @@ def var_operation(
 ) -> Callable[P, Var[T]]: ...
 
 
-def var_operation(  # pyright: ignore [reportInconsistentOverload]
+def var_operation(
     func: Callable[P, CustomVarOperationReturn[T]],
 ) -> Callable[P, Var[T]]:
     """Decorator for creating a var operation.
@@ -1743,9 +1743,9 @@ def var_operation(  # pyright: ignore [reportInconsistentOverload]
         }
 
         return CustomVarOperation.create(
-            name=func.__name__,
+            name=func.__name__,  # ty:ignore[unresolved-attribute]
             args=tuple(list(args_vars.items()) + list(kwargs_vars.items())),
-            return_var=func(*args_vars.values(), **kwargs_vars),  # pyright: ignore [reportCallIssue, reportReturnType]
+            return_var=func(*args_vars.values(), **kwargs_vars),  # ty:ignore[invalid-argument-type]
         ).guess_type()
 
     return wrapper
@@ -1768,21 +1768,21 @@ def figure_out_type(value: Any) -> types.GenericType:
         if isinstance(value, list):
             if not value:
                 return Sequence[NoReturn]
-            return Sequence[unionize(*{figure_out_type(v) for v in value[:100]})]
+            return Sequence[unionize(*{figure_out_type(v) for v in value[:100]})]  # ty:ignore[invalid-type-form]
         if isinstance(value, set):
-            return set[unionize(*{figure_out_type(v) for v in value})]
+            return set[unionize(*{figure_out_type(v) for v in value})]  # ty:ignore[invalid-type-form]
         if isinstance(value, tuple):
             if not value:
                 return tuple[NoReturn, ...]
             if len(value) <= 5:
-                return tuple[tuple(figure_out_type(v) for v in value)]
-            return tuple[unionize(*{figure_out_type(v) for v in value[:100]}), ...]
+                return tuple[tuple(figure_out_type(v) for v in value)]  # ty:ignore[invalid-type-form]
+            return tuple[unionize(*{figure_out_type(v) for v in value[:100]}), ...]  # ty:ignore[invalid-type-form]
         if isinstance(value, Mapping):
             if not value:
                 return Mapping[NoReturn, NoReturn]
             return Mapping[
-                unionize(*{figure_out_type(k) for k in list(value.keys())[:100]}),
-                unionize(*{figure_out_type(v) for v in list(value.values())[:100]}),
+                unionize(*{figure_out_type(k) for k in list(value.keys())[:100]}),  # ty:ignore[invalid-type-form]
+                unionize(*{figure_out_type(v) for v in list(value.values())[:100]}),  # ty:ignore[invalid-type-form]
             ]
     return type(value)
 
@@ -1912,7 +1912,7 @@ class CachedVarOperation:
 
         next_class = parent_classes[parent_classes.index(CachedVarOperation) + 1]
 
-        return next_class.__getattr__(self, name)
+        return next_class.__getattr__(self, name)  # ty:ignore[unresolved-attribute]
 
     def _get_all_var_data(self) -> VarData | None:
         """Get all VarData associated with the Var.
@@ -2073,7 +2073,7 @@ class ComputedVar(Var[RETURN_TYPE]):
 
     _fget: Callable[[BaseState], RETURN_TYPE] = dataclasses.field(
         default_factory=lambda: lambda _: None
-    )  # pyright: ignore [reportAssignmentType]
+    )  # ty:ignore[invalid-assignment]
 
     _name: str = dataclasses.field(default="")
 
@@ -2109,9 +2109,9 @@ class ComputedVar(Var[RETURN_TYPE]):
         )
 
         if hint is Any:
-            raise UntypedComputedVarError(var_name=fget.__name__)
+            raise UntypedComputedVarError(var_name=fget.__name__)  # ty:ignore[unresolved-attribute]
         is_using_fget_name = "_js_expr" not in kwargs
-        js_expr = kwargs.pop("_js_expr", fget.__name__ + FIELD_MARKER)
+        js_expr = kwargs.pop("_js_expr", fget.__name__ + FIELD_MARKER)  # ty:ignore[unresolved-attribute]
         kwargs.setdefault("_var_type", hint)
 
         Var.__init__(
@@ -2120,7 +2120,7 @@ class ComputedVar(Var[RETURN_TYPE]):
             _var_type=kwargs.pop("_var_type"),
             _var_data=kwargs.pop(
                 "_var_data",
-                VarData(field_name=fget.__name__) if is_using_fget_name else None,
+                VarData(field_name=fget.__name__) if is_using_fget_name else None,  # ty:ignore[unresolved-attribute]
             ),
         )
 
@@ -2129,12 +2129,12 @@ class ComputedVar(Var[RETURN_TYPE]):
             raise TypeError(msg)
 
         if backend is None:
-            backend = fget.__name__.startswith("_")
+            backend = fget.__name__.startswith("_")  # ty:ignore[unresolved-attribute]
 
         object.__setattr__(self, "_backend", backend)
         object.__setattr__(self, "_initial_value", initial_value)
         object.__setattr__(self, "_cache", cache)
-        object.__setattr__(self, "_name", fget.__name__)
+        object.__setattr__(self, "_name", fget.__name__)  # ty:ignore[unresolved-attribute]
 
         if isinstance(interval, int):
             interval = datetime.timedelta(seconds=interval)
@@ -2359,18 +2359,18 @@ class ComputedVar(Var[RETURN_TYPE]):
         """
         if instance is None:
             state_where_defined = owner
-            while self._name in state_where_defined.inherited_vars:
-                state_where_defined = state_where_defined.get_parent_state()
+            while self._name in state_where_defined.inherited_vars:  # ty:ignore[unresolved-attribute]
+                state_where_defined = state_where_defined.get_parent_state()  # ty:ignore[unresolved-attribute]
 
             field_name = (
-                format_state_name(state_where_defined.get_full_name())
+                format_state_name(state_where_defined.get_full_name())  # ty:ignore[unresolved-attribute]
                 + "."
                 + self._js_expr
             )
 
             return dispatch(
                 field_name,
-                var_data=VarData.from_state(state_where_defined, self._name),
+                var_data=VarData.from_state(state_where_defined, self._name),  # ty:ignore[invalid-argument-type]
                 result_var_type=self._var_type,
                 existing_var=self,
             )
@@ -2507,7 +2507,7 @@ class ComputedVar(Var[RETURN_TYPE]):
         hints = get_type_hints(self._fget)
         if "return" in hints:
             return hints["return"]
-        return Any  # pyright: ignore [reportReturnType]
+        return Any
 
     @property
     def __class__(self) -> type:
@@ -2769,7 +2769,7 @@ def computed_var(
     if fget is not None:
         sign = inspect.signature(fget)
         if len(sign.parameters) != 1:
-            raise ComputedVarSignatureError(fget.__name__, signature=str(sign))
+            raise ComputedVarSignatureError(fget.__name__, signature=str(sign))  # ty:ignore[unresolved-attribute]
 
         if inspect.iscoroutinefunction(fget):
             computed_var_cls = AsyncComputedVar
@@ -3140,13 +3140,13 @@ def transform(fn: Callable[[Var], Var]) -> Callable[[Var], Var]:
     origin = get_origin(return_type)
 
     if origin is not Var:
-        msg = f"Expected return type of {fn.__name__} to be a Var, got {origin}."
+        msg = f"Expected return type of {fn.__name__} to be a Var, got {origin}."  # ty:ignore[unresolved-attribute]
         raise TypeError(msg)
 
     generic_args = get_args(return_type)
 
     if not generic_args:
-        msg = f"Expected Var return type of {fn.__name__} to have a generic type."
+        msg = f"Expected Var return type of {fn.__name__} to have a generic type."  # ty:ignore[unresolved-attribute]
         raise TypeError(msg)
 
     generic_type = get_origin(generic_args[0]) or generic_args[0]
@@ -3197,7 +3197,7 @@ def dispatch(
         fn_return_origin = get_origin(fn_return) or fn_return
 
         if fn_return_origin is not Var:
-            msg = f"Expected return type of {fn.__name__} to be a Var, got {fn_return}."
+            msg = f"Expected return type of {fn.__name__} to be a Var, got {fn_return}."  # ty:ignore[unresolved-attribute]
             raise TypeError(msg)
 
         fn_return_generic_args = get_args(fn_return)
@@ -3209,7 +3209,7 @@ def dispatch(
         arg_origin = get_origin(fn_first_arg_type) or fn_first_arg_type
 
         if arg_origin is not Var:
-            msg = f"Expected first argument of {fn.__name__} to be a Var, got {fn_first_arg_type}."
+            msg = f"Expected first argument of {fn.__name__} to be a Var, got {fn_first_arg_type}."  # ty:ignore[unresolved-attribute]
             raise TypeError(msg)
 
         arg_generic_args = get_args(fn_first_arg_type)
@@ -3275,8 +3275,7 @@ class Field(Generic[FIELD_TYPE]):
         default: FIELD_TYPE | _MISSING_TYPE = MISSING,
         default_factory: Callable[[], FIELD_TYPE] | None = None,
         is_var: bool = True,
-        annotated_type: GenericType  # pyright: ignore [reportRedeclaration]
-        | _MISSING_TYPE = MISSING,
+        annotated_type: GenericType | _MISSING_TYPE = MISSING,
     ) -> None:
         """Initialize the field.
 
@@ -3300,7 +3299,7 @@ class Field(Generic[FIELD_TYPE]):
             if self.default is MISSING and self.default_factory is None:
                 default_value = types.get_default_value_for_type(annotated_type)
                 if default_value is None and not types.is_optional(annotated_type):
-                    annotated_type = annotated_type | None
+                    annotated_type = annotated_type | None  # ty:ignore[conflicting-declarations]
                 if types.is_immutable(default_value):
                     self.default = default_value
                 else:
@@ -3310,7 +3309,7 @@ class Field(Generic[FIELD_TYPE]):
             self.outer_type_ = self.annotated_type = annotated_type
 
             if type_origin is Annotated:
-                type_origin = annotated_type.__origin__  # pyright: ignore [reportAttributeAccessIssue]
+                type_origin = annotated_type.__origin__
 
             self.type_ = self.type_origin = type_origin
         else:
@@ -3433,7 +3432,7 @@ class Field(Generic[FIELD_TYPE]):
     @overload
     def __get__(self, instance: Any, owner: Any) -> FIELD_TYPE: ...
 
-    def __get__(self, instance: Any, owner: Any):  # pyright: ignore [reportInconsistentOverload]
+    def __get__(self, instance: Any, owner: Any):
         """Get the Var.
 
         Args:

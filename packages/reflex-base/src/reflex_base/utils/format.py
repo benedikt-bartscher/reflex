@@ -404,7 +404,7 @@ def format_prop(
 
         # For dictionaries, convert any properties to strings.
         if isinstance(prop, dict):
-            prop = serializers.serialize_dict(prop)  # pyright: ignore [reportAttributeAccessIssue]
+            prop = serializers.serialize_dict(prop)  # ty:ignore[unresolved-attribute]
 
         else:
             # Dump the prop as JSON.
@@ -577,7 +577,7 @@ def format_queue_events(
         if isinstance(spec, (EventHandler, EventSpec)):
             specs = [call_event_handler(spec, args_spec or _default_args_spec)]
         elif isinstance(spec, type(lambda: None)):
-            specs = call_event_fn(spec, args_spec or _default_args_spec)  # pyright: ignore [reportAssignmentType, reportArgumentType]
+            specs = call_event_fn(spec, args_spec or _default_args_spec)  # ty:ignore[invalid-assignment]
             if isinstance(specs, Var):
                 msg = f"Invalid event spec: {specs}. Expected a list of EventSpecs."
                 raise ValueError(msg)

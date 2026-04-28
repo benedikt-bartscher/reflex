@@ -22,7 +22,7 @@ class Section(elements.Section, RadixThemesComponent):
     size: Var[Responsive[LiteralSectionSize]] = field(
         default=LiteralVar.create("2"),
         doc='The size of the section: "1" - "3" (default "2")',
-    )
+    )  # ty:ignore[invalid-assignment]
 
 
 section = Section.create

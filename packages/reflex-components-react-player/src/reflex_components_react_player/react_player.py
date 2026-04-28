@@ -56,7 +56,7 @@ def _on_progress_signature(event: ReactPlayerEvent) -> list[Var[Progress]]:
                 "duration": 0.0,
             },
         ).to(Progress)
-    ]
+    ]  # ty:ignore[invalid-return-type]
 
 
 def _player_info_key_or_zero(event: ReactPlayerEvent, key: str) -> Var[float]:

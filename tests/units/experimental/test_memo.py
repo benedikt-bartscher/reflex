@@ -141,7 +141,7 @@ def test_var_returning_memo_with_rest_props():
         base: rx.Var[dict[str, str]],
         overrides: rx.RestProp,
     ) -> rx.Var[Any]:
-        return base.to(dict).merge(overrides)
+        return base.to(dict).merge(overrides)  # ty:ignore[unresolved-attribute]
 
     base = Var(_js_expr="base", _var_type=dict[str, str])
     merged = merge_styles(base=base, color="red", class_name="primary")
@@ -197,13 +197,13 @@ def test_memo_requires_var_annotations():
 
         @rx._x.memo
         def bad_annotation(value: int) -> rx.Var[str]:
-            return rx.Var.create("x")
+            return rx.Var.create("x")  # ty:ignore[invalid-return-type]
 
     with pytest.raises(TypeError, match="Missing annotation"):
 
         @rx._x.memo
         def missing_annotation(value) -> rx.Var[str]:
-            return rx.Var.create("x")
+            return rx.Var.create("x")  # ty:ignore[invalid-return-type]
 
 
 def test_memo_rejects_invalid_children_annotation():
@@ -240,7 +240,7 @@ def test_memo_rejects_component_and_function_name_collision():
 
         @rx._x.memo
         def FooBar() -> rx.Var[str]:
-            return rx.Var.create("x")
+            return rx.Var.create("x")  # ty:ignore[invalid-return-type]
 
 
 def test_memo_rejects_component_export_name_collision():
@@ -263,13 +263,13 @@ def test_memo_rejects_varargs():
 
         @rx._x.memo
         def bad_args(*values: rx.Var[str]) -> rx.Var[str]:
-            return rx.Var.create("x")
+            return rx.Var.create("x")  # ty:ignore[invalid-return-type]
 
     with pytest.raises(TypeError, match=r"\*\*kwargs"):
 
         @rx._x.memo
         def bad_kwargs(**values: rx.Var[str]) -> rx.Var[str]:
-            return rx.Var.create("x")
+            return rx.Var.create("x")  # ty:ignore[invalid-return-type]
 
 
 def test_component_memo_rejects_invalid_positional_usage():

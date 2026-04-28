@@ -47,10 +47,10 @@ async def _run_forever(
                 exception_count += 1
                 if exception_count >= exception_limit:
                     console.error(
-                        f"{coro_function.__name__}: task exceeded exception limit {exception_limit} within {exception_limit_window}s: {e}"
+                        f"{coro_function.__name__}: task exceeded exception limit {exception_limit} within {exception_limit_window}s: {e}"  # ty:ignore[unresolved-attribute]
                     )
                     raise
-                console.error(f"{coro_function.__name__}: task error suppressed: {e}")
+                console.error(f"{coro_function.__name__}: task error suppressed: {e}")  # ty:ignore[unresolved-attribute]
                 await asyncio.sleep(exception_delay)
                 continue
             raise
@@ -105,7 +105,7 @@ def ensure_task(
             exception_limit_window=exception_limit_window,
             **kwargs,
         )
-        task_name = f"reflex_ensure_task|{type(owner).__name__}.{task_attribute}={coro_function.__name__}|{time.time()}"
+        task_name = f"reflex_ensure_task|{type(owner).__name__}.{task_attribute}={coro_function.__name__}|{time.time()}"  # ty:ignore[unresolved-attribute]
         if task_context is not None:
             # Run the task in the given context (not needed after Python 3.11+ which supports passing context to create_task directly).
             task = task_context.run(asyncio.create_task, rf_coro, name=task_name)

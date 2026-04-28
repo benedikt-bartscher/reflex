@@ -24,7 +24,7 @@ from reflex.environment import (
 def test_requires_app_name():
     """Test that a config requires an app_name."""
     with pytest.raises(TypeError):
-        rx.Config()  # pyright: ignore[reportCallIssue]
+        rx.Config()  # ty:ignore[missing-argument]
 
 
 def test_set_app_name(base_config_values):
@@ -341,7 +341,7 @@ def test_replace_defaults(
         exp_config_values: The expected config values.
     """
     mock_os_env = os.environ.copy()
-    monkeypatch.setattr(reflex_base.config.os, "environ", mock_os_env)  # pyright: ignore[reportPrivateImportUsage]
+    monkeypatch.setattr(reflex_base.config.os, "environ", mock_os_env)
     mock_os_env.update({k: str(v) for k, v in env_vars.items()})
     c = rx.Config(app_name="a", **config_kwargs)
     c._set_persistent(**set_persistent_vars)
@@ -511,14 +511,14 @@ class TestDisablePlugins:
 
     def test_disable_with_plugin_instance_backward_compat(self):
         """Test disabling a plugin by passing an instance (deprecated)."""
-        config = rx.Config(app_name="test", disable_plugins=[SitemapPlugin()])  # pyright: ignore[reportArgumentType]
+        config = rx.Config(app_name="test", disable_plugins=[SitemapPlugin()])  # ty:ignore[invalid-argument-type]
         assert not any(isinstance(p, SitemapPlugin) for p in config.plugins)
 
     def test_disable_with_string_backward_compat(self):
         """Test disabling a plugin by passing a string (deprecated)."""
         config = rx.Config(
             app_name="test",
-            disable_plugins=["reflex.plugins.sitemap.SitemapPlugin"],  # pyright: ignore[reportArgumentType]
+            disable_plugins=["reflex.plugins.sitemap.SitemapPlugin"],  # ty:ignore[invalid-argument-type]
         )
         assert not any(isinstance(p, SitemapPlugin) for p in config.plugins)
 
@@ -532,14 +532,14 @@ class TestDisablePlugins:
 
     def test_disable_instance_normalized_to_class(self):
         """Test that a Plugin instance in disable_plugins is normalized to its class."""
-        config = rx.Config(app_name="test", disable_plugins=[SitemapPlugin()])  # pyright: ignore[reportArgumentType]
+        config = rx.Config(app_name="test", disable_plugins=[SitemapPlugin()])  # ty:ignore[invalid-argument-type]
         assert config.disable_plugins == [SitemapPlugin]
 
     def test_disable_string_normalized_to_class(self):
         """Test that a string in disable_plugins is normalized to the class."""
         config = rx.Config(
             app_name="test",
-            disable_plugins=["reflex.plugins.sitemap.SitemapPlugin"],  # pyright: ignore[reportArgumentType]
+            disable_plugins=["reflex.plugins.sitemap.SitemapPlugin"],  # ty:ignore[invalid-argument-type]
         )
         assert config.disable_plugins == [SitemapPlugin]
 

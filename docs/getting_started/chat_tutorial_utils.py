@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 
-import openai  # pyright: ignore[reportMissingImports]
+import openai  # ty: ignore[unresolved-import]
 
 import reflex as rx
 

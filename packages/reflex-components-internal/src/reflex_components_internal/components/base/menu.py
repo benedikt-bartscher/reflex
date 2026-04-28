@@ -461,7 +461,7 @@ class MenuRadioGroup(MenuBaseComponent):
     value: Var[str | int]
 
     # Function called when the selected value changes.
-    on_value_change: EventHandler[passthrough_event_spec(str | int, dict)]
+    on_value_change: EventHandler[passthrough_event_spec(str | int, dict)]  # ty:ignore[no-matching-overload]
 
     # Whether the component should ignore user interaction. Defaults to False.
     disabled: Var[bool]

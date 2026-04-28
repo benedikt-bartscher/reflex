@@ -300,7 +300,7 @@ def _override_base_method(fn: Callable[PARAMS, RETURN]) -> Callable[PARAMS, RETU
     Returns:
         The marked function.
     """
-    fn.__override_base_method__ = True  # pyright: ignore[reportFunctionMemberAccess]
+    fn.__override_base_method__ = True  # ty:ignore[unresolved-attribute]
     return fn
 
 
@@ -418,7 +418,7 @@ class BaseState(EvenMoreBasicBaseState):
                 "See https://reflex.dev/docs/state/ for further information."
             )
             raise ReflexRuntimeError(msg)
-        if self._mixin:
+        if self._mixin:  # ty:ignore[unresolved-attribute]
             msg = f"{type(self).__name__} is a state mixin and cannot be instantiated directly."
             raise ReflexRuntimeError(msg)
         kwargs["parent_state"] = parent_state
@@ -600,7 +600,7 @@ class BaseState(EvenMoreBasicBaseState):
                 if parent_state is not None and parent_state.event_handlers.get(name):
                     continue
                 value = cls._copy_fn(value)
-                value.__qualname__ = f"{cls.__name__}.{name}"
+                value.__qualname__ = f"{cls.__name__}.{name}"  # ty:ignore[unresolved-attribute]
                 events[name] = value
 
         # Create the setvar event handler for this state
@@ -646,11 +646,11 @@ class BaseState(EvenMoreBasicBaseState):
             The copied function.
         """
         newfn = FunctionType(
-            fn.__code__,
-            fn.__globals__,
-            name=fn.__name__,
-            argdefs=fn.__defaults__,
-            closure=fn.__closure__,
+            fn.__code__,  # ty:ignore[unresolved-attribute]
+            fn.__globals__,  # ty:ignore[unresolved-attribute]
+            name=fn.__name__,  # ty:ignore[unresolved-attribute]
+            argdefs=fn.__defaults__,  # ty:ignore[unresolved-attribute]
+            closure=fn.__closure__,  # ty:ignore[unresolved-attribute]
         )
         newfn.__annotations__ = fn.__annotations__
         if mark := getattr(fn, BACKGROUND_TASK_MARKER, None):
@@ -697,7 +697,7 @@ class BaseState(EvenMoreBasicBaseState):
         of_type = of_type or Component
 
         unique_var_name = (
-            ("dynamic_" + f.__module__ + "_" + f.__qualname__)
+            ("dynamic_" + f.__module__ + "_" + f.__qualname__)  # ty:ignore[unresolved-attribute]
             .replace("<", "")
             .replace(">", "")
             .replace(".", "_")
@@ -765,7 +765,7 @@ class BaseState(EvenMoreBasicBaseState):
 
     @classmethod
     @functools.cache
-    def _get_type_hints(cls) -> dict[str, Any]:
+    def _get_type_hints(cls) -> dict[str, Any]:  # ty:ignore[invalid-type-form]
         """Get the type hints for this class.
 
         If the class is dynamic, evaluate the type hints with the original
@@ -1210,7 +1210,7 @@ class BaseState(EvenMoreBasicBaseState):
         return None
 
     @staticmethod
-    def _get_base_functions() -> dict[str, FunctionType]:
+    def _get_base_functions() -> dict[str, FunctionType]:  # ty:ignore[invalid-type-form]
         """Get all functions of the state class excluding dunder methods.
 
         Returns:
@@ -1223,7 +1223,7 @@ class BaseState(EvenMoreBasicBaseState):
         }
 
     @classmethod
-    def _update_substate_inherited_vars(cls, vars_to_add: dict[str, Var]):
+    def _update_substate_inherited_vars(cls, vars_to_add: dict[str, Var]):  # ty:ignore[invalid-type-form]
         """Update the inherited vars of substates recursively when new vars are added.
 
         Also updates the var dependency tracking dicts after adding vars.
@@ -1244,7 +1244,7 @@ class BaseState(EvenMoreBasicBaseState):
         cls._init_var_dependency_dicts()
 
     @classmethod
-    def setup_dynamic_args(cls, args: dict[str, str]):
+    def setup_dynamic_args(cls, args: dict[str, str]):  # ty:ignore[invalid-type-form]
         """Set up args for easy access in renderer.
 
         Args:
@@ -1355,7 +1355,7 @@ class BaseState(EvenMoreBasicBaseState):
             else:
                 fn = functools.partial(handler.fn, self)
             fn.__module__ = handler.fn.__module__
-            fn.__qualname__ = handler.fn.__qualname__
+            fn.__qualname__ = handler.fn.__qualname__  # ty:ignore[unresolved-attribute]
             return fn
 
         backend_vars = super().__getattribute__("_backend_vars") or {}
@@ -1661,7 +1661,7 @@ class BaseState(EvenMoreBasicBaseState):
         if (
             var_value := getattr(var, "_var_value", unset)
         ) is not unset and not isinstance(var_value, Var):
-            return var_value  # pyright: ignore [reportReturnType]
+            return var_value  # ty:ignore[invalid-return-type]
 
         var_data = var._get_all_var_data()
         if var_data is None or not var_data.state:
@@ -1858,7 +1858,7 @@ class BaseState(EvenMoreBasicBaseState):
 
     def dict(
         self, include_computed: bool = True, initial: bool = False, **kwargs
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # ty:ignore[invalid-type-form]
         """Convert the object to a dictionary.
 
         Args:
@@ -1955,7 +1955,7 @@ class BaseState(EvenMoreBasicBaseState):
             state.pop(inherited_var_name, None)
         return state
 
-    def __setstate__(self, state: dict[str, Any]):
+    def __setstate__(self, state: dict[str, Any]):  # ty:ignore[invalid-type-form]
         """Set the state from redis deserialization.
 
         This method is called by pickle to deserialize the object.
@@ -2165,7 +2165,7 @@ class State(BaseState):
             from reflex.istate.shared import SharedStateBaseInternal
 
             shared_base = await self.get_state(SharedStateBaseInternal)
-            return await shared_base._resolve_linked_state(state_cls, linked_token)  # type: ignore[return-value]
+            return await shared_base._resolve_linked_state(state_cls, linked_token)  # type: ignore[return-value]  # ty:ignore[invalid-return-type]
         return await super()._get_state_from_redis(state_cls)
 
     @event
@@ -2415,7 +2415,7 @@ class ComponentState(State, mixin=True):
         Raises:
             ReflexRuntimeError: If the ComponentState is initialized directly.
         """
-        if self._mixin:
+        if self._mixin:  # ty:ignore[unresolved-attribute]
             raise ReflexRuntimeError(
                 f"{ComponentState.__name__} {type(self).__name__} is not meant to be initialized directly. "
                 + "Use the `create` method to create a new instance and access the state via the `State` attribute."

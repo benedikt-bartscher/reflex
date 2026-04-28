@@ -220,7 +220,7 @@ class StateProxy(wrapt.ObjectProxy):
             )
             raise ImmutableStateError(msg)
 
-        value = super().__getattr__(name)  # pyright: ignore[reportAttributeAccessIssue]
+        value = super().__getattr__(name)  # ty:ignore[unresolved-attribute]
         if not name.startswith("_self_") and isinstance(value, MutableProxy):
             # ensure mutations to these containers are blocked unless proxy is _mutable
             return ImmutableMutableProxy(
@@ -310,7 +310,7 @@ class StateProxy(wrapt.ObjectProxy):
             await self.__wrapped__.get_state(state_cls),
             event=self._self_event,
             parent_state_proxy=self,
-        )  # pyright: ignore [reportReturnType]
+        )  # ty:ignore[invalid-return-type]
 
     async def _as_state_update(self, *args, **kwargs) -> StateUpdate:
         """Temporarily allow mutability to access parent_state.
@@ -433,14 +433,14 @@ class MutableProxy(wrapt.ObjectProxy):
                     wrapper_cls_name,
                     (cls,),
                     {
-                        dataclasses._FIELDS: getattr(  # pyright: ignore [reportAttributeAccessIssue]
+                        dataclasses._FIELDS: getattr(  # ty:ignore[unresolved-attribute]
                             wrapped_cls,
-                            dataclasses._FIELDS,  # pyright: ignore [reportAttributeAccessIssue]
+                            dataclasses._FIELDS,  # ty:ignore[unresolved-attribute]
                         ),
                     },
                 )
             cls = cls.__dataclass_proxies__[wrapper_cls_name]
-        return super().__new__(cls)  # pyright: ignore[reportArgumentType]
+        return super().__new__(cls)
 
     def __init__(self, wrapped: Any, state: BaseState, field_name: str):
         """Create a proxy for a mutable object that tracks changes.
@@ -560,7 +560,7 @@ class MutableProxy(wrapt.ObjectProxy):
         Returns:
             The attribute value.
         """
-        value = super().__getattr__(__name)  # pyright: ignore[reportAttributeAccessIssue]
+        value = super().__getattr__(__name)  # ty:ignore[unresolved-attribute]
 
         if callable(value):
             if __name in self.__mark_dirty_attrs__:
@@ -571,7 +571,7 @@ class MutableProxy(wrapt.ObjectProxy):
                 # Wrap special methods that may return mutable objects tied to the state.
                 value = wrapt.FunctionWrapper(
                     value,
-                    self._wrap_recursive_decorator,  # pyright: ignore[reportArgumentType]
+                    self._wrap_recursive_decorator,  # ty:ignore[invalid-argument-type]
                 )
 
             if (
@@ -602,7 +602,7 @@ class MutableProxy(wrapt.ObjectProxy):
         Returns:
             The item value.
         """
-        value = super().__getitem__(key)  # pyright: ignore[reportAttributeAccessIssue]
+        value = super().__getitem__(key)  # ty:ignore[unresolved-attribute]
         if isinstance(key, slice) and isinstance(value, list):
             return [self._wrap_recursive(item) for item in value]
         # Recursively wrap mutable items retrieved through this proxy.
@@ -614,7 +614,7 @@ class MutableProxy(wrapt.ObjectProxy):
         Yields:
             Each item value (possibly wrapped in MutableProxy).
         """
-        for value in super().__iter__():  # pyright: ignore[reportAttributeAccessIssue]
+        for value in super().__iter__():  # ty:ignore[unresolved-attribute]
             # Recursively wrap mutable items retrieved through this proxy.
             yield self._wrap_recursive(value)
 
@@ -632,7 +632,7 @@ class MutableProxy(wrapt.ObjectProxy):
         Args:
             key: The key of the item.
         """
-        self._mark_dirty(super().__delitem__, args=(key,))  # pyright: ignore[reportAttributeAccessIssue]
+        self._mark_dirty(super().__delitem__, args=(key,))  # ty:ignore[unresolved-attribute]
 
     def __setitem__(self, key: str, value: Any):
         """Set the item on the proxied object and mark state dirty.
@@ -641,7 +641,7 @@ class MutableProxy(wrapt.ObjectProxy):
             key: The key of the item.
             value: The value of the item.
         """
-        self._mark_dirty(super().__setitem__, args=(key, value))  # pyright: ignore[reportAttributeAccessIssue]
+        self._mark_dirty(super().__setitem__, args=(key, value))  # ty:ignore[unresolved-attribute]
 
     def __setattr__(self, name: str, value: Any):
         """Set the attribute on the proxied object and mark state dirty.
@@ -734,7 +734,7 @@ def _json_encoder_default_wrapper(self: json.JSONEncoder, o: Any) -> Any:
     return _orig_json_encoder_default(self, o)
 
 
-json.JSONEncoder.default = _json_encoder_default_wrapper
+json.JSONEncoder.default = _json_encoder_default_wrapper  # ty:ignore[invalid-assignment]
 
 
 class ImmutableMutableProxy(MutableProxy):
@@ -770,7 +770,7 @@ class ImmutableMutableProxy(MutableProxy):
         Raises:
             ImmutableStateError: if the StateProxy is not mutable.
         """
-        if not self._self_state._is_mutable():  # pyright: ignore[reportAttributeAccessIssue]
+        if not self._self_state._is_mutable():  # ty:ignore[unresolved-attribute]
             msg = (
                 "Background task StateProxy is immutable outside of a context "
                 "manager. Use `async with self` to modify state."

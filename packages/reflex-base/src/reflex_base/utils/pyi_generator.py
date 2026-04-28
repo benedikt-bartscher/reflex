@@ -490,7 +490,7 @@ def _get_class_event_triggers(target_class: type) -> frozenset[str]:
     Returns:
         The event trigger names defined on the class.
     """
-    return frozenset(target_class.get_event_triggers())
+    return frozenset(target_class.get_event_triggers())  # ty:ignore[unresolved-attribute]
 
 
 def _generate_imports(
@@ -506,7 +506,7 @@ def _generate_imports(
     """
     return [
         *[
-            ast.ImportFrom(module=name, names=[ast.alias(name=val) for val in values])  # pyright: ignore [reportCallIssue]
+            ast.ImportFrom(module=name, names=[ast.alias(name=val) for val in values])  # ty:ignore[no-matching-overload]
             for name, values in DEFAULT_IMPORTS.items()
         ],
         ast.Import([ast.alias("reflex")]),
@@ -641,7 +641,7 @@ def _extract_class_props_as_ast_nodes(
                 #       with the annotation in some cases.
                 with contextlib.suppress(AttributeError, KeyError):
                     # Try to get default from pydantic field definition.
-                    default = target_class.__fields__[name].default
+                    default = target_class.__fields__[name].default  # ty:ignore[unresolved-attribute]
                     if isinstance(default, Var):
                         default = default._decode()
 
@@ -658,7 +658,7 @@ def _extract_class_props_as_ast_nodes(
                         )
                     ),
                 ),
-                ast.Constant(value=default),  # pyright: ignore [reportArgumentType]
+                ast.Constant(value=default),
             ))
     return kwargs
 
@@ -746,7 +746,7 @@ def type_to_ast(
         return ast.Name(id=str(typ))
 
     # Get the base type name (List, Dict, Optional, etc.)
-    base_name = getattr(origin, "_name", origin.__name__)
+    base_name = getattr(origin, "_name", origin.__name__)  # ty:ignore[unresolved-attribute]
 
     # Get type arguments
     args = get_args(typ)
@@ -837,7 +837,9 @@ def _generate_component_create_functiondef(
     # kwargs associated with props defined in the class and its parents
     all_classes = [c for c in clz.__mro__ if issubclass(c, Component)]
     prop_kwargs = _extract_class_props_as_ast_nodes(
-        clz.create, all_classes, type_hint_globals
+        clz.create,
+        all_classes,  # ty:ignore[invalid-argument-type]
+        type_hint_globals,
     )
     all_props = [arg[0].arg for arg in prop_kwargs]
     kwargs.extend(prop_kwargs)
@@ -964,7 +966,7 @@ def _generate_component_create_functiondef(
         defaults=[],
     )
 
-    return ast.FunctionDef(  # pyright: ignore [reportCallIssue]
+    return ast.FunctionDef(
         name="create",
         args=create_args,
         body=[
@@ -1016,7 +1018,7 @@ def _generate_staticmethod_call_functiondef(
             else []
         ),
     )
-    return ast.FunctionDef(  # pyright: ignore [reportCallIssue]
+    return ast.FunctionDef(
         name="__call__",
         args=call_args,
         body=[
@@ -1067,7 +1069,7 @@ def _generate_namespace_call_functiondef(
     # Determine which class is wrapped by the namespace __call__ method
     component_clz = clz.__call__.__self__
 
-    if clz.__call__.__func__.__name__ != "create":  # pyright: ignore [reportFunctionMemberAccess]
+    if clz.__call__.__func__.__name__ != "create":
         return None
 
     if not issubclass(component_clz, Component):
@@ -1158,7 +1160,7 @@ class StubGenerator(ast.NodeTransformer):
             The modified Module node.
         """
         self.generic_visit(node)
-        return self._remove_docstring(node)  # pyright: ignore [reportReturnType]
+        return self._remove_docstring(node)  # ty:ignore[invalid-return-type]
 
     def visit_Import(
         self, node: ast.Import | ast.ImportFrom

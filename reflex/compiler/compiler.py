@@ -714,8 +714,8 @@ def readable_name_from_component(
             if module is not None:
                 module_name = module.__name__
         if module_name is not None:
-            return f"{module_name}.{component.__name__}"
-        return component.__name__
+            return f"{module_name}.{component.__name__}"  # ty:ignore[unresolved-attribute]
+        return component.__name__  # ty:ignore[unresolved-attribute]
     return None
 
 
@@ -766,7 +766,7 @@ def into_component(component: Component | ComponentCallable) -> Component:
         raise TypeError(msg)
 
     try:
-        component_called = component()
+        component_called = component()  # ty:ignore[call-top-callable]
     except KeyError as e:
         if isinstance(e, ReflexError):
             _modify_exception(e)
@@ -860,7 +860,7 @@ def compile_unevaluated_page(
         # Add meta information to the component.
         utils.add_meta(
             component,
-            **meta_args,
+            **meta_args,  # ty:ignore[invalid-argument-type]
         )
 
     except Exception as e:

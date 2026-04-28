@@ -550,11 +550,11 @@ class ShikiCodeBlock(Component, MarkdownComponentMap):
 
     language: Var[LiteralCodeLanguage] = field(
         default=Var.create("python"), doc="The language to use."
-    )
+    )  # ty:ignore[invalid-assignment]
 
     theme: Var[LiteralCodeTheme] = field(
         default=Var.create("one-light"), doc='The theme to use ("light" or "dark").'
-    )
+    )  # ty:ignore[invalid-assignment]
 
     themes: Var[list[dict[str, Any]] | dict[str, str]] = field(
         doc="The set of themes to use for different modes."
@@ -565,11 +565,11 @@ class ShikiCodeBlock(Component, MarkdownComponentMap):
     transformers: Var[list[ShikiBaseTransformers | dict[str, Any]]] = field(
         default=Var.create([]),
         doc="The transformers to use for the syntax highlighter.",
-    )
+    )  # ty:ignore[invalid-assignment]
 
     decorations: Var[list[ShikiDecorations]] = field(
         default=Var.create([]), doc="The decorations to use for the syntax highlighter."
-    )
+    )  # ty:ignore[invalid-assignment]
 
     @classmethod
     def create(
@@ -613,7 +613,7 @@ class ShikiCodeBlock(Component, MarkdownComponentMap):
 
         transformer_styles = {}
         # Collect styles from transformers and wrapper
-        for transformer in code_block.transformers._var_value:  # pyright: ignore [reportAttributeAccessIssue]
+        for transformer in code_block.transformers._var_value:  # ty:ignore[unresolved-attribute]
             if isinstance(transformer, ShikiBaseTransformers) and transformer.style:
                 transformer_styles.update(transformer.style)
         transformer_styles.update(code_wrapper_props.pop("style", {}))
@@ -668,7 +668,7 @@ class ShikiCodeBlock(Component, MarkdownComponentMap):
             raise ValueError(msg)
         return ShikiBaseTransformers(
             library=library,
-            fns=[FunctionStringVar.create(fn) for fn in fns],  # pyright: ignore [reportCallIssue]
+            fns=[FunctionStringVar.create(fn) for fn in fns],
         )
 
     def _render(self, props: dict[str, Any] | None = None):

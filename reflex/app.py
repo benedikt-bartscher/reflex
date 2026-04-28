@@ -716,7 +716,7 @@ class App(MiddlewareMixin, LifespanMixin):
                 [self.api_transformer]
                 if not isinstance(self.api_transformer, Sequence)
                 else self.api_transformer
-            )
+            )  # ty:ignore[invalid-assignment]
 
             for api_transformer in api_transformers:
                 if isinstance(api_transformer, Starlette):
@@ -871,7 +871,7 @@ class App(MiddlewareMixin, LifespanMixin):
                 msg = "Route must be set if component is not a callable."
                 raise exceptions.RouteValueError(msg)
             # Format the route.
-            route = format.format_route(format.to_kebab_case(component.__name__))
+            route = format.format_route(format.to_kebab_case(component.__name__))  # ty:ignore[unresolved-attribute]
         else:
             route = format.format_route(route)
 
@@ -1525,7 +1525,7 @@ class App(MiddlewareMixin, LifespanMixin):
         )
         if self.theme is not None:
             # Fix #2992 by removing the top-level appearance prop
-            self.theme.appearance = None  # pyright: ignore[reportAttributeAccessIssue]
+            self.theme.appearance = None  # ty:ignore[unresolved-attribute]
         progress.advance(task)
 
         # Compile the app root.
@@ -1644,7 +1644,7 @@ class App(MiddlewareMixin, LifespanMixin):
         previous_dirty_vars: dict[str, set[str]] | None = None,
     ) -> contextlib.AbstractAsyncContextManager[BaseState]: ...
 
-    @contextlib.asynccontextmanager
+    @contextlib.asynccontextmanager  # ty:ignore[no-matching-overload]
     async def modify_state(
         self,
         token: BaseStateToken | str,

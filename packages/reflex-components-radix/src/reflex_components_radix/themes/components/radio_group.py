@@ -33,11 +33,11 @@ class RadioGroupRoot(RadixThemesComponent):
     size: Var[Responsive[Literal["1", "2", "3"]]] = field(
         default=LiteralVar.create("2"),
         doc='The size of the radio group: "1" | "2" | "3"',
-    )
+    )  # ty:ignore[invalid-assignment]
 
     variant: Var[Literal["classic", "surface", "soft"]] = field(
         default=LiteralVar.create("classic"), doc="The variant of the radio group"
-    )
+    )  # ty:ignore[invalid-assignment]
 
     color_scheme: Var[LiteralAccentColor] = field(doc="The color of the radio group")
 
@@ -94,20 +94,20 @@ class HighLevelRadioGroup(RadixThemesComponent):
 
     direction: Var[LiteralFlexDirection] = field(
         default=LiteralVar.create("row"), doc="The direction of the radio group."
-    )
+    )  # ty:ignore[invalid-assignment]
 
     spacing: Var[LiteralSpacing] = field(
         default=LiteralVar.create("2"),
         doc="The gap between the items of the radio group.",
-    )
+    )  # ty:ignore[invalid-assignment]
 
     size: Var[Literal["1", "2", "3"]] = field(
         default=LiteralVar.create("2"), doc="The size of the radio group."
-    )
+    )  # ty:ignore[invalid-assignment]
 
     variant: Var[Literal["classic", "surface", "soft"]] = field(
         default=LiteralVar.create("classic"), doc="The variant of the radio group"
-    )
+    )  # ty:ignore[invalid-assignment]
 
     color_scheme: Var[LiteralAccentColor] = field(doc="The color of the radio group")
 

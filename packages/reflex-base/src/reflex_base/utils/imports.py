@@ -50,7 +50,7 @@ def merge_imports(
             if isinstance(fields, (list, tuple, set)):
                 all_imports[lib].extend(
                     ImportVar(field) if isinstance(field, str) else field
-                    for field in fields
+                    for field in fields  # ty:ignore[invalid-argument-type]
                 )
             else:
                 all_imports[lib].append(

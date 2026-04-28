@@ -72,9 +72,9 @@ class Foreach(Component):
             LiteralVar.create(iterable).guess_type()
             if not isinstance(iterable, Var)
             else iterable.guess_type()
-        )
+        )  # ty:ignore[invalid-assignment]
 
-        if iterable._var_type == Any:
+        if iterable._var_type == Any:  # ty:ignore[unresolved-attribute]
             msg = (
                 f"Could not foreach over var `{iterable!s}` of type Any. "
                 "(If you are trying to foreach over a state var, add a type annotation to the var). "
@@ -97,7 +97,7 @@ class Foreach(Component):
 
         if not isinstance(iterable, ArrayVar):
             msg = (
-                f"Could not foreach over var `{iterable!s}` of type {iterable._var_type}. "
+                f"Could not foreach over var `{iterable!s}` of type {iterable._var_type}. "  # ty:ignore[unresolved-attribute]
                 "See https://reflex.dev/docs/library/dynamic-rendering/foreach/"
             )
             raise ForeachVarError(msg)
@@ -149,7 +149,7 @@ class Foreach(Component):
             if (render_fn_code := getattr(render_fn, "__code__", None)) is not None:
                 code_hash = md5(render_fn_code.co_code).hexdigest()
             elif isinstance(render_fn, functools.partial):
-                code_hash = md5(render_fn.func.__code__.co_code).hexdigest()
+                code_hash = md5(render_fn.func.__code__.co_code).hexdigest()  # ty:ignore[unresolved-attribute]
             else:
                 code_hash = md5(repr(render_fn).encode()).hexdigest()
             props["index_var_name"] = f"index_{code_hash}"

@@ -293,7 +293,7 @@ def _prepare_event(event: str, **kwargs) -> _Event | None:
         if key in properties or key not in kwargs:
             continue
 
-        properties[key] = kwargs[key]
+        properties[key] = kwargs[key]  # ty:ignore[invalid-key]
 
     stamp = datetime.now(UTC).isoformat()
 

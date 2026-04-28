@@ -22,4 +22,4 @@ def cn(
         Var: A Var representing the merged classes string.
 
     """
-    return CN.call(*classes).to(str)
+    return CN.call(*classes).to(str)  # ty:ignore[unresolved-attribute]

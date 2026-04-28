@@ -67,7 +67,7 @@ FRONTEND_POPEN_ARGS = {}
 T = TypeVar("T")
 TimeoutType = int | float | None
 if platform.system() == "Windows":
-    FRONTEND_POPEN_ARGS["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP  # pyright: ignore [reportAttributeAccessIssue]
+    FRONTEND_POPEN_ARGS["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP  # ty:ignore[unresolved-attribute]
     FRONTEND_POPEN_ARGS["shell"] = True
 else:
     FRONTEND_POPEN_ARGS["start_new_session"] = True
@@ -120,7 +120,7 @@ class AppHarness:
     backend: uvicorn.Server | None = None
     _frontends: list[WebDriver] = dataclasses.field(default_factory=list)
     _registry_token: contextvars.Token[RegistrationContext] | None = None
-    _base_registration_context: ClassVar[RegistrationContext] | None = None
+    _base_registration_context: ClassVar[RegistrationContext] | None = None  # ty:ignore[invalid-type-form]
 
     @classmethod
     def create(
@@ -152,14 +152,14 @@ class AppHarness:
             elif isinstance(app_source, functools.partial):
                 keywords = app_source.keywords
                 slug_suffix = "_".join([str(v) for v in keywords.values()])
-                func_name = app_source.func.__name__
+                func_name = app_source.func.__name__  # ty:ignore[unresolved-attribute]
                 app_name = f"{func_name}_{slug_suffix}"
                 app_name = re.sub(r"[^a-zA-Z0-9_]", "_", app_name)
             elif isinstance(app_source, str):
                 msg = "app_name must be provided when app_source is a string."
                 raise ValueError(msg)
             else:
-                app_name = app_source.__name__
+                app_name = app_source.__name__  # ty:ignore[unresolved-attribute]
 
             app_name = app_name.lower()
             while "__" in app_name:
@@ -249,7 +249,7 @@ class AppHarness:
         if self.app_source is not None:
             app_globals = self._get_globals_from_signature(self.app_source)
             if isinstance(self.app_source, functools.partial):
-                self.app_source = self.app_source.func
+                self.app_source = self.app_source.func  # ty:ignore[invalid-assignment]
             # get the source from a function or module object
             source_code = "\n".join([
                 "\n".join([
@@ -406,9 +406,7 @@ class AppHarness:
         def consume_frontend_output():
             while True:
                 try:
-                    line = (
-                        self.frontend_process.stdout.readline()  # pyright: ignore [reportOptionalMemberAccess]
-                    )
+                    line = self.frontend_process.stdout.readline()  # ty:ignore[unresolved-attribute]
                 # catch I/O operation on closed file.
                 except ValueError as e:
                     console.error(str(e))
@@ -635,29 +633,29 @@ class AppHarness:
             want_headless = True
         if driver_clz is None:
             requested_driver = environment.APP_HARNESS_DRIVER.get()
-            driver_clz = getattr(webdriver, requested_driver)  # pyright: ignore [reportPossiblyUnboundVariable]
+            driver_clz = getattr(webdriver, requested_driver)
             if driver_options is None:
-                driver_options = getattr(webdriver, f"{requested_driver}Options")()  # pyright: ignore [reportPossiblyUnboundVariable]
-        if driver_clz is webdriver.Chrome:  # pyright: ignore [reportPossiblyUnboundVariable]
+                driver_options = getattr(webdriver, f"{requested_driver}Options")()
+        if driver_clz is webdriver.Chrome:
             if driver_options is None:
                 from selenium.webdriver.chrome.options import Options
 
-                driver_options = Options()  # pyright: ignore [reportPossiblyUnboundVariable]
+                driver_options = Options()
             driver_options.add_argument("--class=AppHarness")
             if want_headless:
                 driver_options.add_argument("--headless=new")
-        elif driver_clz is webdriver.Firefox:  # pyright: ignore [reportPossiblyUnboundVariable]
+        elif driver_clz is webdriver.Firefox:
             if driver_options is None:
                 from selenium.webdriver.firefox.options import Options
 
-                driver_options = Options()  # pyright: ignore [reportPossiblyUnboundVariable]
+                driver_options = Options()
             if want_headless:
                 driver_options.add_argument("-headless")
-        elif driver_clz is webdriver.Edge:  # pyright: ignore [reportPossiblyUnboundVariable]
+        elif driver_clz is webdriver.Edge:
             if driver_options is None:
                 from selenium.webdriver.edge.options import Options
 
-                driver_options = Options()  # pyright: ignore [reportPossiblyUnboundVariable]
+                driver_options = Options()
             if want_headless:
                 driver_options.add_argument("headless")
         if driver_options is None:
@@ -674,7 +672,7 @@ class AppHarness:
                 driver_options.set_capability(key, value)
         if driver_kwargs is None:
             driver_kwargs = {}
-        driver = driver_clz(options=driver_options, **driver_kwargs)  # pyright: ignore [reportOptionalCall, reportArgumentType]
+        driver = driver_clz(options=driver_options, **driver_kwargs)
         driver.get(self.frontend_url)
         self._frontends.append(driver)
         return driver
@@ -874,8 +872,8 @@ class Subdir404TCPServer(socketserver.TCPServer):
             request,
             client_address,
             self,
-            directory=str(self.root),  # pyright: ignore [reportCallIssue]
-            error_page_map=self.error_page_map,  # pyright: ignore [reportCallIssue]
+            directory=str(self.root),  # ty:ignore[unknown-argument]
+            error_page_map=self.error_page_map,  # ty:ignore[unknown-argument]
         )
 
 

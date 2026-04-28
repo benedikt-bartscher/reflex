@@ -62,7 +62,7 @@ class TabsRoot(TabsBaseComponent):
     value: Var[str | int]
 
     # Callback invoked when new value is being set.
-    on_value_change: EventHandler[passthrough_event_spec(str | dict)]
+    on_value_change: EventHandler[passthrough_event_spec(str | dict)]  # ty:ignore[no-matching-overload]
 
     # The component orientation (layout flow direction). Defaults to "horizontal".
     orientation: Var[LiteralOrientation]

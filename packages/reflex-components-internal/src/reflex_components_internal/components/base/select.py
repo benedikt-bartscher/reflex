@@ -448,7 +448,7 @@ class SelectSeparator(SelectBaseComponent):
     tag = "Select.Separator"
 
     # The orientation of the separator.
-    orientation: Var[LiteralOrientation] = Var.create("horizontal")
+    orientation: Var[LiteralOrientation] = Var.create("horizontal")  # ty:ignore[invalid-assignment]
 
     # The render prop
     render_: Var[Component]

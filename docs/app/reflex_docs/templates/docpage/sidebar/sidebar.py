@@ -440,9 +440,9 @@ def sidebar_comp(
     )
     _is_docs_ai_builder = _path.startswith("/docs/ai/") | _path.startswith("/ai/")
 
-    return rx.box(  # pyright: ignore [reportCallIssue]
+    return rx.box(  # ty: ignore[missing-argument, unknown-argument, call-non-callable, too-many-positional-arguments, no-matching-overload]
         # Handle sidebar categories for docs/cloud first
-        rx.cond(  # pyright: ignore [reportCallIssue]
+        rx.cond(  # ty: ignore[missing-argument, unknown-argument, call-non-callable, too-many-positional-arguments, no-matching-overload]
             _is_docs_hosting,
             rx.el.ul(
                 sidebar_category(
@@ -453,7 +453,7 @@ def sidebar_comp(
                 # ),
                 class_name="flex flex-col items-start gap-2 w-full list-none",
             ),
-            rx.cond(  # pyright: ignore [reportCallIssue]
+            rx.cond(  # ty: ignore[missing-argument, unknown-argument, call-non-callable, too-many-positional-arguments, no-matching-overload]
                 _is_docs_ai_builder,
                 rx.el.ul(
                     sidebar_category(
@@ -506,9 +506,9 @@ def sidebar_comp(
             ),
         ),
         # Handle the sidebar content based on docs/cloud or docs
-        rx.cond(  # pyright: ignore [reportCallIssue]
+        rx.cond(  # ty: ignore[missing-argument, unknown-argument, call-non-callable, too-many-positional-arguments, no-matching-overload]
             _is_docs_hosting,
-            rx.match(  # pyright: ignore [reportCallIssue]
+            rx.match(  # ty: ignore[missing-argument, unknown-argument, call-non-callable, too-many-positional-arguments, no-matching-overload]
                 SidebarState.sidebar_index,
                 (
                     0,
@@ -537,9 +537,9 @@ def sidebar_comp(
                 #     ),
                 # ),
             ),
-            rx.cond(  # pyright: ignore [reportCallIssue]
+            rx.cond(  # ty: ignore[missing-argument, unknown-argument, call-non-callable, too-many-positional-arguments, no-matching-overload]
                 _is_docs_ai_builder,
-                rx.match(  # pyright: ignore [reportCallIssue]
+                rx.match(  # ty: ignore[missing-argument, unknown-argument, call-non-callable, too-many-positional-arguments, no-matching-overload]
                     SidebarState.sidebar_index,
                     (
                         0,
@@ -604,7 +604,7 @@ def sidebar_comp(
                     #     ),
                     # ),
                 ),
-                rx.match(  # pyright: ignore [reportCallIssue]
+                rx.match(  # ty: ignore[missing-argument, unknown-argument, call-non-callable, too-many-positional-arguments, no-matching-overload]
                     SidebarState.sidebar_index,
                     (
                         0,
@@ -657,17 +657,17 @@ def sidebar_comp(
                                 graphing_libs_index,
                                 url,
                             ),
-                            rx.link(  # pyright: ignore [reportCallIssue]
-                                rx.box(  # pyright: ignore [reportCallIssue]
-                                    rx.box(  # pyright: ignore [reportCallIssue]
-                                        rx.icon("atom", size=16),  # pyright: ignore [reportCallIssue]
+                            rx.link(  # ty: ignore[missing-argument, unknown-argument, call-non-callable, too-many-positional-arguments, no-matching-overload]
+                                rx.box(  # ty: ignore[missing-argument, unknown-argument, call-non-callable, too-many-positional-arguments, no-matching-overload]
+                                    rx.box(  # ty: ignore[missing-argument, unknown-argument, call-non-callable, too-many-positional-arguments, no-matching-overload]
+                                        rx.icon("atom", size=16),  # ty: ignore[missing-argument, unknown-argument, call-non-callable, too-many-positional-arguments, no-matching-overload]
                                         rx.el.h5(
                                             "Custom Components",
                                             class_name="font-smbold text-[0.875rem] text-slate-12 leading-5 tracking-[-0.01313rem] transition-color",
                                         ),
                                         class_name="flex flex-row items-center gap-3 text-slate-12",
                                     ),
-                                    rx.text(  # pyright: ignore [reportCallIssue]
+                                    rx.text(  # ty: ignore[missing-argument, unknown-argument, call-non-callable, too-many-positional-arguments, no-matching-overload]
                                         "See what components people have made with Reflex!",
                                         class_name="font-small text-slate-9",
                                     ),

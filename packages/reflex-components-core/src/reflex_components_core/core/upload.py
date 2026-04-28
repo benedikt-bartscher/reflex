@@ -118,7 +118,7 @@ def clear_selected_files(id_: str = DEFAULT_UPLOAD_ID) -> EventSpec:
     # UploadFilesProvider assigns a special function to clear selected files
     # into the shared global refs object to make it accessible outside a React
     # component via `run_script` (otherwise backend could never clear files).
-    return run_script(Var("__clear_selected_files")._as_ref().to(FunctionVar).call(id_))
+    return run_script(Var("__clear_selected_files")._as_ref().to(FunctionVar).call(id_))  # ty:ignore[unresolved-attribute]
 
 
 def cancel_upload(upload_id: str) -> EventSpec:
@@ -169,7 +169,7 @@ def get_upload_url(file_path: str | Var[str]) -> Var[str]:
     """
     Upload.is_used = True
 
-    return Var.create(f"{uploaded_files_url_prefix}/{file_path}")
+    return Var.create(f"{uploaded_files_url_prefix}/{file_path}")  # ty:ignore[invalid-return-type]
 
 
 _on_drop_spec = passthrough_event_spec(list[UploadFile])
@@ -201,7 +201,7 @@ def _default_drop_rejected(rejected_files: ArrayVar[list[dict[str, Any]]]) -> Ev
         title="Files not Accepted",
         description=rejected_files
         .to(ArrayVar)
-        .foreach(_format_rejected_file_record)
+        .foreach(_format_rejected_file_record)  # ty:ignore[unresolved-attribute]
         .join("\n\n"),
         close_button=True,
         style={"white_space": "pre-line"},

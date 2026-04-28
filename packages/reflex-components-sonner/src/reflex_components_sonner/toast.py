@@ -137,7 +137,7 @@ class ToastProps(NoExtrasAllowedProps):
     # Function that gets called when the toast disappears automatically after it's timeout (duration` prop).
     on_auto_close: Any | None
 
-    def dict(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
+    def dict(self, *args: Any, **kwargs: Any) -> dict[str, Any]:  # ty:ignore[invalid-type-form]
         """Convert the object to a dictionary.
 
         Args:
@@ -152,11 +152,11 @@ class ToastProps(NoExtrasAllowedProps):
         if "action" in d:
             d["action"] = self.action
             if isinstance(self.action, dict):
-                d["action"] = ToastAction(**self.action)
+                d["action"] = ToastAction(**self.action)  # ty:ignore[invalid-argument-type]
         if "cancel" in d:
             d["cancel"] = self.cancel
             if isinstance(self.cancel, dict):
-                d["cancel"] = ToastAction(**self.cancel)
+                d["cancel"] = ToastAction(**self.cancel)  # ty:ignore[invalid-argument-type]
         if "onDismiss" in d:
             d["onDismiss"] = format.format_queue_events(
                 self.on_dismiss, _toast_callback_signature
@@ -191,7 +191,7 @@ class Toaster(Component):
 
     position: Var[LiteralPosition] = field(
         default=LiteralVar.create("bottom-right"), doc="the position of the toast"
-    )
+    )  # ty:ignore[invalid-assignment]
 
     close_button: Var[bool] = field(
         default=LiteralVar.create(False), doc="whether to show the close button"
@@ -260,7 +260,7 @@ class Toaster(Component):
             ValueError: If the Toaster component is not created.
         """
         toast_command = (
-            ObjectVar.__getattr__(toast_ref.to(dict), level) if level else toast_ref
+            ObjectVar.__getattr__(toast_ref.to(dict), level) if level else toast_ref  # ty:ignore[no-matching-overload]
         ).to(FunctionVar)
 
         if isinstance(message, Var):
@@ -271,10 +271,10 @@ class Toaster(Component):
             raise ValueError(msg)
 
         if props:
-            args = LiteralVar.create(ToastProps(component_name="rx.toast", **props))  # pyright: ignore [reportCallIssue]
-            toast = toast_command.call(message, args)
+            args = LiteralVar.create(ToastProps(component_name="rx.toast", **props))  # ty:ignore[unknown-argument]
+            toast = toast_command.call(message, args)  # ty:ignore[unresolved-attribute]
         else:
-            toast = toast_command.call(message)
+            toast = toast_command.call(message)  # ty:ignore[unresolved-attribute]
 
         if fallback_to_alert:
             toast = ternary_operation(

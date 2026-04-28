@@ -24,7 +24,7 @@ def get_name(cls: type | Callable) -> str:
         The name of the state/func.
     """
     module = cls.__module__.replace(".", "___")
-    qualname = getattr(cls, "__qualname__", cls.__name__).replace(".", "___")
+    qualname = getattr(cls, "__qualname__", cls.__name__).replace(".", "___")  # ty:ignore[unresolved-attribute]
     return to_snake_case(f"{module}___{qualname}")
 
 

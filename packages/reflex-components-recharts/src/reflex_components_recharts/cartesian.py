@@ -121,7 +121,7 @@ class Axis(Recharts):
     stroke: Var[str | Color] = field(
         default=LiteralVar.create(Color("gray", 9)),
         doc='The stroke color of axis. Default: rx.color("gray", 9)',
-    )
+    )  # ty:ignore[invalid-assignment]
 
     text_anchor: Var[LiteralTextAnchor] = field(
         doc='The text anchor of axis. Default: "middle"'
@@ -216,7 +216,7 @@ class ZAxis(Recharts):
     range: Var[Sequence[int]] = field(
         default=LiteralVar.create([60, 400]),
         doc="The range of axis. Default: [60, 400]",
-    )
+    )  # ty:ignore[invalid-assignment]
 
     unit: Var[str | int] = field(
         doc="The unit of data displayed in the axis. This option will be used to represent an index unit in a scatter chart."
@@ -241,12 +241,12 @@ class Brush(Recharts):
     stroke: Var[str | Color] = field(
         default=LiteralVar.create(Color("gray", 9)),
         doc='Stroke color. Default: rx.color("gray", 9)',
-    )
+    )  # ty:ignore[invalid-assignment]
 
     fill: Var[str | Color] = field(
         default=LiteralVar.create(Color("gray", 2)),
         doc='The fill color of brush. Default: rx.color("gray", 2)',
-    )
+    )  # ty:ignore[invalid-assignment]
 
     data_key: Var[str | int] = field(doc="The key of data displayed in the axis.")
 
@@ -390,7 +390,7 @@ class Area(Cartesian):
     stroke: Var[str | Color] = field(
         default=LiteralVar.create(Color("accent", 9)),
         doc='The color of the line stroke. Default: rx.color("accent", 9)',
-    )
+    )  # ty:ignore[invalid-assignment]
 
     stroke_width: Var[str | int | float] = field(
         doc="The width of the line stroke. Default: 1"
@@ -399,12 +399,12 @@ class Area(Cartesian):
     fill: Var[str | Color] = field(
         default=LiteralVar.create(Color("accent", 5)),
         doc='The color of the area fill. Default: rx.color("accent", 5)',
-    )
+    )  # ty:ignore[invalid-assignment]
 
     type_: Var[LiteralCurveType] = field(
         default=LiteralVar.create("monotone"),
         doc="The interpolation type of area. And customized interpolation function can be set to type. 'basis' | 'basisClosed' | 'basisOpen' | 'bumpX' | 'bumpY' | 'bump' | 'linear' | 'linearClosed' | 'natural' | 'monotoneX' | 'monotoneY' | 'monotone' | 'step' | 'stepBefore' | 'stepAfter'. Default: \"monotone\"",
-    )
+    )  # ty:ignore[invalid-assignment]
 
     dot: Var[ACTIVE_DOT_TYPE] = field(
         doc="If false set, dots will not be drawn. If true set, dots will be drawn which have the props calculated internally. Default: False"
@@ -452,7 +452,7 @@ class Bar(Cartesian):
     fill: Var[str | Color] = field(
         default=LiteralVar.create(Color("accent", 9)),
         doc='The width of the line stroke. Default: Color("accent", 9)',
-    )
+    )  # ty:ignore[invalid-assignment]
 
     background: Var[bool] = field(
         doc="If false set, background of bars will not be drawn. If true set, background of bars will be drawn which have the props calculated internally. Default: False"
@@ -505,7 +505,7 @@ class Line(Cartesian):
     stroke: Var[str | Color] = field(
         default=LiteralVar.create(Color("accent", 9)),
         doc='The color of the line stroke. Default: rx.color("accent", 9)',
-    )
+    )  # ty:ignore[invalid-assignment]
 
     stroke_width: Var[str | int | float] = field(
         doc="The width of the line stroke. Default: 1"
@@ -597,7 +597,7 @@ class Scatter(Recharts):
     fill: Var[str | Color] = field(
         default=LiteralVar.create(Color("accent", 9)),
         doc='The fill color of the scatter. Default: rx.color("accent", 9)',
-    )
+    )  # ty:ignore[invalid-assignment]
 
     # Valid children components.
     _valid_children: ClassVar[list[str]] = ["LabelList", "ErrorBar"]
@@ -691,7 +691,7 @@ class Funnel(Recharts):
     stroke: Var[str | Color] = field(
         default=LiteralVar.create(Color("gray", 3)),
         doc='Stroke color. Default: rx.color("gray", 3)',
-    )
+    )  # ty:ignore[invalid-assignment]
 
     trapezoids: Var[Sequence[dict[str, Any]]] = field(
         doc="The coordinates of all the trapezoids in the funnel, usually calculated internally."
@@ -761,7 +761,7 @@ class ErrorBar(Recharts):
     stroke: Var[str | Color] = field(
         default=LiteralVar.create(Color("gray", 8)),
         doc='The stroke color of error bar. Default: rx.color("gray", 8)',
-    )
+    )  # ty:ignore[invalid-assignment]
 
     stroke_width: Var[str | int | float] = field(
         doc="The stroke width of error bar. Default: 1.5"
@@ -972,7 +972,7 @@ class CartesianGrid(Grid):
     stroke: Var[str | Color] = field(
         default=LiteralVar.create(Color("gray", 7)),
         doc='the stroke color of grid. Default: rx.color("gray", 7)',
-    )
+    )  # ty:ignore[invalid-assignment]
 
 
 class CartesianAxis(Grid):

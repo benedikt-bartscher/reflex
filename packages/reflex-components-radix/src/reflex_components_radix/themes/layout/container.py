@@ -26,7 +26,7 @@ class Container(elements.Div, RadixThemesComponent):
     size: Var[Responsive[LiteralContainerSize]] = field(
         default=LiteralVar.create("3"),
         doc='The size of the container: "1" - "4" (default "3")',
-    )
+    )  # ty:ignore[invalid-assignment]
 
     @classmethod
     def create(

@@ -581,23 +581,23 @@ def VarOperations():
             rx.box(
                 # Test that foreach works with various non-array inputs without throwing
                 rx.foreach(
-                    rx.Var("undefined").to(list),
+                    rx.Var("undefined").to(list),  # ty:ignore[invalid-argument-type]
                     rx.text.span,
                 ),
                 rx.foreach(
-                    rx.Var("null").to(list),
+                    rx.Var("null").to(list),  # ty:ignore[invalid-argument-type]
                     rx.text.span,
                 ),
                 rx.foreach(
-                    rx.Var("({})").to(list),
+                    rx.Var("({})").to(list),  # ty:ignore[invalid-argument-type]
                     rx.text.span,
                 ),
                 rx.foreach(
-                    rx.Var("2").to(list),
+                    rx.Var("2").to(list),  # ty:ignore[invalid-argument-type]
                     rx.text.span,
                 ),
                 rx.foreach(
-                    rx.Var("false").to(list),
+                    rx.Var("false").to(list),  # ty:ignore[invalid-argument-type]
                     rx.text.span,
                 ),
             ),
@@ -701,7 +701,7 @@ def VarOperations():
                 id="optional_list",
             ),
             rx.box(
-                rx.foreach(VarOperationState.optional_dict, rx.text.span),
+                rx.foreach(VarOperationState.optional_dict, rx.text.span),  # ty:ignore[invalid-argument-type]
                 id="optional_dict",
             ),
             rx.box(
@@ -709,7 +709,7 @@ def VarOperations():
                 id="optional_list_value",
             ),
             rx.box(
-                rx.foreach(VarOperationState.optional_dict_value, rx.text.span),
+                rx.foreach(VarOperationState.optional_dict_value, rx.text.span),  # ty:ignore[invalid-argument-type]
                 id="optional_dict_value",
             ),
             rx.box(

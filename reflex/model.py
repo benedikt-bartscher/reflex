@@ -51,7 +51,7 @@ class _ClassThatErrorsOnInit:
         _print_db_not_available(*args, **kwargs)
 
 
-if find_spec("sqlalchemy"):
+if TYPE_CHECKING or find_spec("sqlalchemy"):
     import sqlalchemy
     import sqlalchemy.exc
     import sqlalchemy.ext.asyncio
@@ -252,14 +252,16 @@ if find_spec("sqlalchemy"):
 
             return metadata
 
-else:
+elif not TYPE_CHECKING:
     get_engine_args = _print_db_not_available
     get_engine = _print_db_not_available
     get_async_engine = _print_db_not_available
     sqla_session = _print_db_not_available
-    ModelRegistry = _ClassThatErrorsOnInit  # pyright: ignore [reportAssignmentType]
+    ModelRegistry = _ClassThatErrorsOnInit
 
-if find_spec("sqlmodel") and find_spec("sqlalchemy") and find_spec("pydantic"):
+if TYPE_CHECKING or (
+    find_spec("sqlmodel") and find_spec("sqlalchemy") and find_spec("pydantic")
+):
     import alembic.autogenerate
     import alembic.command
     import alembic.config
@@ -361,7 +363,7 @@ if find_spec("sqlmodel") and find_spec("sqlalchemy") and find_spec("pydantic"):
 
         id: int | None = sqlmodel.Field(default=None, primary_key=True)
 
-        model_config = {  # pyright: ignore [reportAssignmentType]
+        model_config = {
             "arbitrary_types_allowed": True,
             "use_enum_values": True,
             "extra": "allow",
@@ -629,8 +631,8 @@ if find_spec("sqlmodel") and find_spec("sqlalchemy") and find_spec("pydantic"):
             )
         return _AsyncSessionLocal[url]()
 
-else:
+elif not TYPE_CHECKING:
     get_db_status = _print_db_not_available
     session = _print_db_not_available
     asession = _print_db_not_available
-    Model = _ClassThatErrorsOnInit  # pyright: ignore [reportAssignmentType]
+    Model = _ClassThatErrorsOnInit

@@ -138,12 +138,12 @@ def field(
     if default is not MISSING and default_factory is not None:
         msg = "cannot specify both default and default_factory"
         raise ValueError(msg)
-    return ComponentField(  # pyright: ignore [reportReturnType]
+    return ComponentField(
         default=default,
         default_factory=default_factory,
         is_javascript=is_javascript_property,
         doc=doc,
-    )
+    )  # ty:ignore[invalid-return-type]
 
 
 @dataclass_transform(kw_only_default=True, field_specifiers=(field,))
@@ -385,7 +385,7 @@ class BaseComponent(metaclass=BaseComponentMeta):
         """
 
     @abstractmethod
-    def _get_all_dynamic_imports(self) -> set[str]:
+    def _get_all_dynamic_imports(self) -> set[str]:  # ty:ignore[invalid-type-form]
         """Get dynamic imports for the component.
 
         Returns:
@@ -412,7 +412,7 @@ class BaseComponent(metaclass=BaseComponentMeta):
 class ComponentNamespace(SimpleNamespace):
     """A namespace to manage components with subcomponents."""
 
-    def __hash__(self) -> int:  # pyright: ignore [reportIncompatibleVariableOverride]
+    def __hash__(self) -> int:
         """Get the hash of the namespace.
 
         Returns:
@@ -574,15 +574,15 @@ DEFAULT_TRIGGERS_AND_DESC: Mapping[str, TriggerDefinition] = {
         description="Fired when focus has left the element (or left some element inside of it). For example, it is called when the user clicks outside of a focused text input.",
     ),
     EventTriggers.ON_CLICK: TriggerDefinition(
-        spec=pointer_event_spec,  # pyright: ignore [reportArgumentType]
+        spec=pointer_event_spec,
         description="Fired when the user clicks on an element. For example, it's called when the user clicks on a button.",
     ),
     EventTriggers.ON_CONTEXT_MENU: TriggerDefinition(
-        spec=pointer_event_spec,  # pyright: ignore [reportArgumentType]
+        spec=pointer_event_spec,
         description="Fired when the user right-clicks on an element.",
     ),
     EventTriggers.ON_DOUBLE_CLICK: TriggerDefinition(
-        spec=pointer_event_spec,  # pyright: ignore [reportArgumentType]
+        spec=pointer_event_spec,
         description="Fired when the user double-clicks on an element.",
     ),
     EventTriggers.ON_MOUSE_DOWN: TriggerDefinition(
@@ -1005,7 +1005,7 @@ class Component(BaseComponent, ABC):
         """
         # Look for component specific triggers,
         # e.g. variable declared as EventHandler types.
-        return DEFAULT_TRIGGERS | args_specs_from_fields(cls.get_fields())  # pyright: ignore [reportOperatorIssue]
+        return DEFAULT_TRIGGERS | args_specs_from_fields(cls.get_fields())
 
     def __repr__(self) -> str:
         """Represent the component in React.
@@ -1249,9 +1249,9 @@ class Component(BaseComponent, ABC):
             The style of the component.
         """
         component_style = None
-        if (style := styles.get(type(self))) is not None:  # pyright: ignore [reportArgumentType]
+        if (style := styles.get(type(self))) is not None:  # ty:ignore[invalid-argument-type]
             component_style = Style(style)
-        if (style := styles.get(self.create)) is not None:  # pyright: ignore [reportArgumentType]
+        if (style := styles.get(self.create)) is not None:  # ty:ignore[invalid-argument-type]
             component_style = Style(style)
         return component_style
 
@@ -2085,13 +2085,13 @@ class CustomComponent(Component):
         to_camel_cased_props = {
             format.to_camel_case(key): None for key in props if key not in event_types
         }
-        self.get_props = lambda: to_camel_cased_props  # pyright: ignore [reportIncompatibleVariableOverride]
+        self.get_props = lambda: to_camel_cased_props  # ty:ignore[invalid-assignment]
 
         # Unset the style.
         self.style = Style()
 
         # Set the tag to the name of the function.
-        self.tag = format.to_title_case(self.component_fn.__name__)
+        self.tag = format.to_title_case(self.component_fn.__name__)  # ty:ignore[unresolved-attribute]
 
         for key, value in props.items():
             # Skip kwargs that are not props.
@@ -2156,7 +2156,7 @@ class CustomComponent(Component):
         """
 
         def fn(*args):
-            return run_script(Var(name).to(FunctionVar).call(*args))
+            return run_script(Var(name).to(FunctionVar).call(*args))  # ty:ignore[unresolved-attribute]
 
         if event.args_spec:
             arg_spec = (
@@ -2165,7 +2165,7 @@ class CustomComponent(Component):
                 else event.args_spec[0]
             )
             names = inspect.getfullargspec(arg_spec).args
-            fn.__signature__ = inspect.Signature(  # pyright: ignore[reportFunctionMemberAccess]
+            fn.__signature__ = inspect.Signature(  # ty:ignore[unresolved-attribute]
                 parameters=[
                     inspect.Parameter(
                         name=name,
@@ -2881,31 +2881,32 @@ def render_dict_to_var(tag: dict | Component | str) -> Var:
         return Var.create(tag)
 
     if "contents" in tag:
-        return Var(tag["contents"])
+        return Var(tag["contents"])  # ty:ignore[invalid-argument-type]
 
     if "iterable" in tag:
         function_return = LiteralArrayVar.create([
-            render_dict_to_var(child.render()) for child in tag["children"]
+            render_dict_to_var(child.render())
+            for child in tag["children"]  # ty:ignore[invalid-argument-type, not-iterable]
         ])
 
         func = ArgsFunctionOperation.create(
-            (tag["arg_var_name"], tag["index_var_name"]),
+            (tag["arg_var_name"], tag["index_var_name"]),  # ty:ignore[invalid-argument-type]
             function_return,
         )
 
         return FunctionStringVar.create("Array.prototype.map.call").call(
-            tag["iterable"]
-            if not isinstance(tag["iterable"], ObjectVar)
-            else tag["iterable"].items(),
+            tag["iterable"]  # ty:ignore[invalid-argument-type]
+            if not isinstance(tag["iterable"], ObjectVar)  # ty:ignore[invalid-argument-type]
+            else tag["iterable"].items(),  # ty:ignore[invalid-argument-type]
             func,
         )
 
     if "match_cases" in tag:
-        element = Var(tag["cond"])
+        element = Var(tag["cond"])  # ty:ignore[invalid-argument-type]
 
-        conditionals = render_dict_to_var(tag["default"])
+        conditionals = render_dict_to_var(tag["default"])  # ty:ignore[invalid-argument-type]
 
-        for case in tag["match_cases"][::-1]:
+        for case in tag["match_cases"][::-1]:  # ty:ignore[invalid-argument-type, not-subscriptable]
             conditions, return_value = case
             condition = Var.create(False)
             for pattern in conditions:
@@ -2923,16 +2924,16 @@ def render_dict_to_var(tag: dict | Component | str) -> Var:
 
     if "cond_state" in tag:
         return ternary_operation(
-            Var(tag["cond_state"]),
-            render_dict_to_var(tag["true_value"]),
-            render_dict_to_var(tag["false_value"])
-            if tag["false_value"] is not None
+            Var(tag["cond_state"]),  # ty:ignore[invalid-argument-type]
+            render_dict_to_var(tag["true_value"]),  # ty:ignore[invalid-argument-type]
+            render_dict_to_var(tag["false_value"])  # ty:ignore[invalid-argument-type]
+            if tag["false_value"] is not None  # ty:ignore[invalid-argument-type]
             else LiteralNoneVar.create(),
         )
 
-    props = Var("({" + ",".join(tag["props"]) + "})")
+    props = Var("({" + ",".join(tag["props"]) + "})")  # ty:ignore[invalid-argument-type, no-matching-overload]
 
-    raw_tag_name = tag.get("name")
+    raw_tag_name = tag.get("name")  # ty:ignore[invalid-argument-type]
     tag_name = Var(raw_tag_name or "Fragment")
 
     return FunctionStringVar.create(
@@ -2940,7 +2941,7 @@ def render_dict_to_var(tag: dict | Component | str) -> Var:
     ).call(
         tag_name,
         props,
-        *[render_dict_to_var(child) for child in tag["children"]],
+        *[render_dict_to_var(child) for child in tag["children"]],  # ty:ignore[invalid-argument-type, not-iterable]
     )
 
 

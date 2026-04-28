@@ -9,4 +9,4 @@ from reflex_components_code.code import CodeBlock, Theme
 def test_code_light_dark_theme(theme, expected):
     code_block = CodeBlock.create(theme=theme)
 
-    assert code_block.theme._js_expr == expected  # pyright: ignore [reportAttributeAccessIssue]
+    assert code_block.theme._js_expr == expected  # ty:ignore[unresolved-attribute]

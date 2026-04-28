@@ -251,7 +251,9 @@ async def process_event(
         try:
             while True:
                 await chain_updates(
-                    next(events), root_state=root_state, handler_name=handler_name
+                    next(events),  # ty:ignore[invalid-argument-type]
+                    root_state=root_state,
+                    handler_name=handler_name,
                 )
         except StopIteration as si:
             # the "return" value of the generator is not available
@@ -391,7 +393,7 @@ class BaseStateEventProcessor(EventProcessor):
             if events := self.backend_exception_handler(ex):
                 await chain_updates(
                     events=events,
-                    handler_name=self.backend_exception_handler.__qualname__,
+                    handler_name=self.backend_exception_handler.__qualname__,  # ty:ignore[unresolved-attribute]
                 )
 
 

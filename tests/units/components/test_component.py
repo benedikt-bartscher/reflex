@@ -43,8 +43,8 @@ from reflex_components_radix.themes.layout.box import Box
 
 import reflex as rx
 from reflex import (
-    _COMPONENTS_BASE_MAPPING,  # pyright: ignore[reportAttributeAccessIssue]
-    _COMPONENTS_CORE_MAPPING,  # pyright: ignore[reportAttributeAccessIssue]
+    _COMPONENTS_BASE_MAPPING,  # ty:ignore[unresolved-import]
+    _COMPONENTS_CORE_MAPPING,  # ty:ignore[unresolved-import]
 )
 from reflex.compiler.utils import compile_custom_component
 from reflex.state import BaseState
@@ -873,7 +873,7 @@ def test_create_custom_component(my_component):
     """
     component = rx.memo(my_component)(prop1="test", prop2=1)
     assert component.tag == "MyComponent"
-    assert set(component.get_props()) == {"prop1", "prop2"}
+    assert set(component.get_props()) == {"prop1", "prop2"}  # ty:ignore[missing-argument]
     assert component.tag in CUSTOM_COMPONENTS
 
 
@@ -1313,7 +1313,7 @@ class EventState(rx.State):
             id="fstring-bare",
         ),
         pytest.param(
-            rx.text(as_=TEST_VAR),
+            rx.text(as_=TEST_VAR),  # ty:ignore[invalid-argument-type]
             [TEST_VAR],
             id="direct-prop",
         ),
@@ -1359,7 +1359,7 @@ class EventState(rx.State):
         ),
         pytest.param(
             rx.fragment(class_name=[TEST_VAR, "other-class"]),
-            [Var.create([TEST_VAR, "other-class"]).join(" ")],
+            [Var.create([TEST_VAR, "other-class"]).join(" ")],  # ty:ignore[unresolved-attribute]
             id="fstring-dual-class_name",
         ),
         pytest.param(
@@ -1414,17 +1414,17 @@ class EventState(rx.State):
             id="direct-event-handler",
         ),
         pytest.param(
-            rx.fragment(on_blur=EventState.handler2(TEST_VAR)),  # pyright: ignore [reportCallIssue]
+            rx.fragment(on_blur=EventState.handler2(TEST_VAR)),  # ty:ignore[invalid-argument-type, missing-argument]
             [ARG_VAR, TEST_VAR],
             id="direct-event-handler-arg",
         ),
         pytest.param(
-            rx.fragment(on_blur=EventState.handler2(EventState.v)),  # pyright: ignore [reportCallIssue]
+            rx.fragment(on_blur=EventState.handler2(EventState.v)),  # ty:ignore[invalid-argument-type, missing-argument]
             [ARG_VAR, EventState.v],
             id="direct-event-handler-arg2",
         ),
         pytest.param(
-            rx.fragment(on_blur=lambda: EventState.handler2(TEST_VAR)),  # pyright: ignore [reportCallIssue]
+            rx.fragment(on_blur=lambda: EventState.handler2(TEST_VAR)),  # ty:ignore[invalid-argument-type, missing-argument]
             [ARG_VAR, TEST_VAR],
             id="direct-event-handler-lambda",
         ),
@@ -1584,7 +1584,7 @@ def test_validate_valid_children():
             True,
             rx.fragment(valid_component2()),
             rx.fragment(
-                rx.foreach(LiteralVar.create([1, 2, 3]), lambda x: valid_component2(x))
+                rx.foreach(LiteralVar.create([1, 2, 3]), lambda x: valid_component2(x))  # ty:ignore[invalid-argument-type]
             ),
         )
     )
@@ -1644,7 +1644,7 @@ def test_validate_valid_parents():
             rx.fragment(valid_component3()),
             rx.fragment(
                 rx.foreach(
-                    LiteralVar.create([1, 2, 3]),
+                    LiteralVar.create([1, 2, 3]),  # ty:ignore[invalid-argument-type]
                     lambda x: valid_component2(valid_component3(x)),
                 )
             ),
@@ -1730,7 +1730,8 @@ def test_validate_invalid_children():
                 rx.fragment(invalid_component()),
                 rx.fragment(
                     rx.foreach(
-                        LiteralVar.create([1, 2, 3]), lambda x: invalid_component(x)
+                        LiteralVar.create([1, 2, 3]),  # ty:ignore[invalid-argument-type]
+                        lambda x: invalid_component(x),
                     )
                 ),
             )
@@ -1918,7 +1919,7 @@ def test_invalid_event_trigger():
 )
 def test_component_add_imports(tags):
     class BaseComponent(Component):
-        def _get_imports(self) -> ImportDict:  # pyright: ignore [reportIncompatibleMethodOverride]
+        def _get_imports(self) -> ImportDict:
             return {}
 
     class Reference(Component):
@@ -1930,7 +1931,7 @@ def test_component_add_imports(tags):
             )
 
     class TestBase(Component):
-        def add_imports(  # pyright: ignore [reportIncompatibleMethodOverride]
+        def add_imports(
             self,
         ) -> dict[str, str | ImportVar | list[str] | list[ImportVar]]:
             return {"foo": "bar"}
@@ -1960,7 +1961,7 @@ def test_component_add_hooks():
         pass
 
     class GrandchildComponent1(ChildComponent1):
-        def add_hooks(self):  # pyright: ignore [reportIncompatibleMethodOverride]
+        def add_hooks(self):
             return [
                 "const hook2 = 43",
                 "const hook3 = 44",
@@ -1973,11 +1974,11 @@ def test_component_add_hooks():
             ]
 
     class GrandchildComponent2(ChildComponent1):
-        def _get_hooks(self):  # pyright: ignore [reportIncompatibleMethodOverride]
+        def _get_hooks(self):
             return "const hook5 = 46"
 
     class GreatGrandchildComponent2(GrandchildComponent2):
-        def add_hooks(self):  # pyright: ignore [reportIncompatibleMethodOverride]
+        def add_hooks(self):
             return [
                 "const hook2 = 43",
                 "const hook6 = 47",
@@ -2052,7 +2053,7 @@ def test_component_add_custom_code():
             ]
 
     class GrandchildComponent2(ChildComponent1):
-        def _get_custom_code(self):  # pyright: ignore [reportIncompatibleMethodOverride]
+        def _get_custom_code(self):
             return "const custom_code5 = 46"
 
     class GreatGrandchildComponent2(GrandchildComponent2):
@@ -2170,7 +2171,7 @@ def test_add_style_embedded_vars(test_state: type[TestState]):
     class StyledComponent(ParentComponent):
         tag = "StyledComponent"
 
-        def add_style(self):  # pyright: ignore [reportIncompatibleMethodOverride]
+        def add_style(self):
             return {
                 "color": v1,
                 "fake": v2,

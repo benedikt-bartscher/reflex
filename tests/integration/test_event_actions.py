@@ -76,12 +76,12 @@ def TestEventAction():
             ),
             rx.button(
                 "Click event",
-                on_click=EventActionState.on_click("no_event_actions"),  # pyright: ignore [reportCallIssue]
+                on_click=EventActionState.on_click("no_event_actions"),  # ty:ignore[invalid-argument-type, missing-argument]
                 id="btn-click-event",
             ),
             rx.button(
                 "Click stop propagation",
-                on_click=EventActionState.on_click("stop_propagation").stop_propagation,  # pyright: ignore [reportCallIssue]
+                on_click=EventActionState.on_click("stop_propagation").stop_propagation,  # ty:ignore[invalid-argument-type, missing-argument]
                 id="btn-click-stop-propagation",
             ),
             rx.button(
@@ -97,15 +97,15 @@ def TestEventAction():
             rx.link(
                 "Link",
                 href="?link",
-                on_click=EventActionState.on_click("link_no_event_actions"),  # pyright: ignore [reportCallIssue]
+                on_click=EventActionState.on_click("link_no_event_actions"),  # ty:ignore[invalid-argument-type, missing-argument]
                 id="link",
             ),
             rx.link(
                 "Link Stop Propagation",
                 href="?link-stop-propagation",
-                on_click=EventActionState.on_click(  # pyright: ignore [reportCallIssue]
-                    "link_stop_propagation"
-                ).stop_propagation,
+                on_click=EventActionState.on_click(
+                    "link_stop_propagation"  # ty:ignore[invalid-argument-type]
+                ).stop_propagation,  # ty:ignore[missing-argument]
                 id="link-stop-propagation",
             ),
             rx.link(
@@ -117,44 +117,42 @@ def TestEventAction():
             rx.link(
                 "Link Prevent Default",
                 href="/invalid",
-                on_click=EventActionState.on_click(  # pyright: ignore [reportCallIssue]
-                    "link_prevent_default"
-                ).prevent_default,
+                on_click=EventActionState.on_click(
+                    "link_prevent_default"  # ty:ignore[invalid-argument-type]
+                ).prevent_default,  # ty:ignore[missing-argument]
                 id="link-prevent-default",
             ),
             rx.link(
                 "Link Both",
                 href="/invalid",
-                on_click=EventActionState.on_click(  # pyright: ignore [reportCallIssue]
-                    "link_both"
-                ).stop_propagation.prevent_default,
+                on_click=EventActionState.on_click(
+                    "link_both"  # ty:ignore[invalid-argument-type]
+                ).stop_propagation.prevent_default,  # ty:ignore[missing-argument]
                 id="link-stop-propagation-prevent-default",
             ),
             EventFiringComponent.create(
                 id="custom-stop-propagation",
-                on_click=EventActionState.on_click(  # pyright: ignore [reportCallIssue]
-                    "custom-stop-propagation"
-                ).stop_propagation,
+                on_click=EventActionState.on_click(
+                    "custom-stop-propagation"  # ty:ignore[invalid-argument-type]
+                ).stop_propagation,  # ty:ignore[missing-argument]
             ),
             EventFiringComponent.create(
                 id="custom-prevent-default",
-                on_click=EventActionState.on_click(  # pyright: ignore [reportCallIssue]
-                    "custom-prevent-default"
-                ).prevent_default,
+                on_click=EventActionState.on_click(
+                    "custom-prevent-default"  # ty:ignore[invalid-argument-type]
+                ).prevent_default,  # ty:ignore[missing-argument]
             ),
             rx.button(
                 "Throttle",
                 id="btn-throttle",
                 on_click=lambda: (
-                    EventActionState.on_click_throttle.throttle(  # pyright: ignore [reportFunctionMemberAccess]
-                        200
-                    ).stop_propagation
+                    EventActionState.on_click_throttle.throttle(200).stop_propagation  # ty:ignore[unresolved-attribute]
                 ),
             ),
             rx.button(
                 "Debounce",
                 id="btn-debounce",
-                on_click=EventActionState.on_click_debounce.debounce(  # pyright: ignore [reportFunctionMemberAccess]
+                on_click=EventActionState.on_click_debounce.debounce(  # ty:ignore[unresolved-attribute]
                     200
                 ).stop_propagation,
             ),
@@ -165,7 +163,7 @@ def TestEventAction():
                 ),
                 id="event_order",
             ),
-            on_click=EventActionState.on_click("outer"),  # pyright: ignore [reportCallIssue]
+            on_click=EventActionState.on_click("outer"),  # ty:ignore[invalid-argument-type, missing-argument]
         ), rx.form(
             rx.dialog.root(
                 rx.dialog.trigger(
@@ -176,12 +174,12 @@ def TestEventAction():
                     rx.dialog.close(
                         rx.form(
                             rx.button("Submit", id="btn-submit"),
-                            on_submit=EventActionState.on_submit.stop_propagation,  # pyright: ignore [reportCallIssue]
+                            on_submit=EventActionState.on_submit.stop_propagation,
                         ),
                     ),
                 ),
             ),
-            on_submit=EventActionState.on_submit,  # pyright: ignore [reportCallIssue]
+            on_submit=EventActionState.on_submit,
         )
 
     app = rx.App()
@@ -361,8 +359,8 @@ def test_event_actions_dialog_form_in_form(
 
     driver.find_element(By.ID, open_dialog_id).click()
     el = wait.until(EC.element_to_be_clickable((By.ID, submit_button_id)))
-    el.click()  # pyright: ignore[reportAttributeAccessIssue]
-    el.send_keys(Keys.ESCAPE)  # pyright: ignore[reportAttributeAccessIssue]
+    el.click()
+    el.send_keys(Keys.ESCAPE)
 
     btn_no_events = wait.until(EC.element_to_be_clickable((By.ID, "btn-no-events")))
     btn_no_events.location_once_scrolled_into_view

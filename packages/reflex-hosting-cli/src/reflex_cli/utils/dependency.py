@@ -31,7 +31,7 @@ def detect_encoding(filename: Path) -> str | None:
         raise FileNotFoundError
 
     for encoding in [
-        None if sys.version_info < (3, 10) else io.text_encoding(None),
+        None if sys.version_info < (3, 10) else io.text_encoding(None),  # ty:ignore[unresolved-attribute]
         "utf-8",
     ]:
         try:

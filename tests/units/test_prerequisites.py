@@ -93,7 +93,7 @@ def test_initialise_vite_config(config, expected_output):
 def test_cached_procedure():
     call_count = 0
 
-    temp_file = tempfile.mktemp()
+    temp_file = tempfile.mktemp()  # ty:ignore[deprecated]
 
     @cached_procedure(
         cache_file_path=lambda: Path(temp_file), payload_fn=lambda: "constant"
