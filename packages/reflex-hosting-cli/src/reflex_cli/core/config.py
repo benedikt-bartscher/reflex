@@ -241,7 +241,7 @@ class Config:
             raise ConfigError(f"Config file not found at {pyproject_path}.")
 
         try:
-            import tomllib  # ty:ignore[unresolved-import]
+            import tomllib
         except ImportError as e:
             raise ConfigError(
                 "TOML support is not available. Please use Python 3.11 or later."

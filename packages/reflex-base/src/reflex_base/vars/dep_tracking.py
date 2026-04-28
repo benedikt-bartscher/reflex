@@ -96,7 +96,7 @@ class DependencyTracker:
     _getting_state_class: type[BaseState] | ModuleType | None = dataclasses.field(
         default=None
     )
-    _get_var_value_positions: dis.Positions | None = dataclasses.field(default=None)  # ty:ignore[unresolved-attribute]
+    _get_var_value_positions: dis.Positions | None = dataclasses.field(default=None)
     _last_import_name: str | None = dataclasses.field(default=None)
 
     INVALID_NAMES: ClassVar[list[str]] = ["parent_state", "substates", "get_substate"]
@@ -311,7 +311,7 @@ class DependencyTracker:
             # Attribute access on an inline `get_state`, not assigned to a variable.
             self.load_attr_or_method(instruction)
 
-    def _eval_var(self, positions: dis.Positions) -> Var:  # ty:ignore[unresolved-attribute]
+    def _eval_var(self, positions: dis.Positions) -> Var:
         """Evaluate instructions from the wrapped function to get the Var object.
 
         Args:
@@ -372,10 +372,10 @@ class DependencyTracker:
             VarValueError: if the source code for the var cannot be determined.
         """
         if instruction.opname == "CALL":
-            if instruction.positions is None:  # ty:ignore[unresolved-attribute]
+            if instruction.positions is None:
                 msg = f"Cannot determine the source code for the var in {self.func!r}."
                 raise VarValueError(msg)
-            the_var = self._eval_var(instruction.positions)  # ty:ignore[unresolved-attribute]
+            the_var = self._eval_var(instruction.positions)
             the_var_data = the_var._get_all_var_data()
             if the_var_data is None:
                 msg = f"Cannot determine the source code for the var in {self.func!r}."

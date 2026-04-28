@@ -136,6 +136,12 @@ path = "scripts/hatch_build.py"
 dependencies = ["plotly", "ruff"]
 require-runtime-dependencies = true
 
+[tool.ty.environment]
+# Type-check against Python 3.11 stdlib so newer-Python-only features like
+# `dis.Positions`, `tomllib`, and `ExceptionGroup` resolve. Reflex still
+# supports Python 3.10 at runtime via `sys.version_info >= (3, 11)` guards.
+python-version = "3.11"
+
 [tool.ty.src]
 exclude = [
   ".venv",

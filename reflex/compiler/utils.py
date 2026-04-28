@@ -188,7 +188,7 @@ def save_error(error: Exception) -> str:
     timestamp = datetime.now().strftime("%Y-%m-%d__%H-%M-%S")
     constants.Reflex.LOGS_DIR.mkdir(parents=True, exist_ok=True)
     log_path = constants.Reflex.LOGS_DIR / f"error_{timestamp}.log"
-    traceback.TracebackException.from_exception(error).print(file=log_path.open("w+"))  # ty:ignore[unresolved-attribute]
+    traceback.TracebackException.from_exception(error).print(file=log_path.open("w+"))
     return str(log_path)
 
 

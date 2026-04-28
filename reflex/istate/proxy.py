@@ -433,10 +433,7 @@ class MutableProxy(wrapt.ObjectProxy):
                     wrapper_cls_name,
                     (cls,),
                     {
-                        dataclasses._FIELDS: getattr(  # ty:ignore[unresolved-attribute]
-                            wrapped_cls,
-                            dataclasses._FIELDS,  # ty:ignore[unresolved-attribute]
-                        ),
+                        "__dataclass_fields__": wrapped_cls.__dataclass_fields__,
                     },
                 )
             cls = cls.__dataclass_proxies__[wrapper_cls_name]
