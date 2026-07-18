@@ -27,8 +27,11 @@ from reflex_base.event.processor.timeout import DrainTimeoutManager
 from reflex_base.registry import RegisteredEventHandler, RegistrationContext
 
 if TYPE_CHECKING:
+    from contextlib import AbstractAsyncContextManager
+
     from reflex.app import EventNamespace
     from reflex.event import Event, EventSpec
+    from reflex_base.event.processor.cancel import CancelPreviousBroker
 
 if hasattr(asyncio, "QueueShutDown"):
 
@@ -129,6 +132,12 @@ class EventProcessor:
     _cancel_keys: dict[tuple[str, str], str] = dataclasses.field(
         default_factory=dict, init=False
     )
+    _cancel_broker: CancelPreviousBroker | None = dataclasses.field(
+        default=None, init=False
+    )
+    _cancel_broker_ctx: AbstractAsyncContextManager[None] | None = dataclasses.field(
+        default=None, init=False
+    )
 
     def configure(
         self,
@@ -205,6 +214,7 @@ class EventProcessor:
             emit_delta_impl=emit_delta_impl,
             emit_event_impl=emit_event_impl,
         )
+        self._cancel_broker = state_manager.cancel_previous_broker()
         return self
 
     async def __aenter__(self) -> Self:
@@ -234,6 +244,11 @@ class EventProcessor:
         self._attached_root_context_token = EventContext.set(self._root_context)
         self._queue = asyncio.Queue()
         self._ensure_queue_task()
+        if self._cancel_broker is not None:
+            self._cancel_broker_ctx = self._cancel_broker.subscribe(
+                self._on_remote_supersede
+            )
+            await self._cancel_broker_ctx.__aenter__()
 
     async def _stop_tasks(self, timeout: float | None = None) -> None:
         """Stop all running tasks with an optional drain time.
@@ -314,6 +329,11 @@ class EventProcessor:
                     )
                 )
             self._queue_task = None
+        # Stop listening for cross-worker cancellation signals.
+        if self._cancel_broker_ctx is not None:
+            with contextlib.suppress(Exception):
+                await self._cancel_broker_ctx.__aexit__(None, None, None)
+            self._cancel_broker_ctx = None
         # Discard any pending per-token queue entries.
         self._token_queues.clear()
         self._cancel_keys.clear()
@@ -683,6 +703,15 @@ class EventProcessor:
                         self._create_event_task(
                             entry=entry, registered_handler=registered_handler
                         )
+                        if (
+                            self._cancel_broker is not None
+                            and registered_handler.handler.is_cancel_previous_task
+                        ):
+                            # Publish this run as the latest for its cancel key so
+                            # a superseded run on another worker cancels itself.
+                            await self._cancel_broker.claim(
+                                entry.ctx.token, entry.event.name, entry.ctx.txid
+                            )
                     else:
                         # Sequential events go through the per-token queue.
                         self._enqueue_for_token(
@@ -698,6 +727,27 @@ class EventProcessor:
                 queue.task_done()
         if self._queue_task is asyncio.current_task():
             self._queue_task = None
+
+    def _on_remote_supersede(
+        self, token: str, event_name: str, latest_txid: str
+    ) -> None:
+        """Cancel a locally-owned cancel-previous run superseded by another worker.
+
+        Invoked by the cancellation broker when any worker claims a new latest
+        run for ``(token, event_name)``. If this worker owns an older run for
+        that key, it is cancelled here; the owning worker is the only one that
+        can cancel its own task.
+
+        Args:
+            token: The client token the superseding run belongs to.
+            event_name: The fully-qualified event handler name.
+            latest_txid: The transaction id of the current winning run.
+        """
+        local_txid = self._cancel_keys.get((token, event_name))
+        if local_txid is not None and local_txid != latest_txid:
+            task = self._tasks.get(local_txid)
+            if task is not None and not task.done():
+                task.cancel()
 
     async def _handle_backend_exception(
         self, ex: Exception, ev_ctx: EventContext | None = None

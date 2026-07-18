@@ -16,6 +16,8 @@ from reflex.istate.manager.token import TOKEN_TYPE, StateToken
 from reflex.utils import console, prerequisites
 
 if TYPE_CHECKING:
+    from reflex_base.event.processor.cancel import CancelPreviousBroker
+
     from reflex.state import BaseState
 
 
@@ -31,6 +33,21 @@ EmptyContext = StateModificationContext()
 @dataclasses.dataclass
 class StateManager(ABC):
     """A class to manage many client states."""
+
+    def cancel_previous_broker(self) -> "CancelPreviousBroker | None":
+        """Get a broker for cross-worker ``cancel_previous_task`` coordination.
+
+        Single-process managers rely on the in-process ``EventProcessor`` to
+        cancel superseded background runs and return ``None``. Managers that
+        share state across multiple workers (e.g. redis) return a broker so a
+        run superseded on one worker can be cancelled on the worker that owns
+        it.
+
+        Returns:
+            A broker if this manager supports cross-worker coordination, else
+            ``None``.
+        """
+        return None
 
     @property
     def state(self):

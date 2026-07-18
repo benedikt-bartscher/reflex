@@ -8,13 +8,14 @@ import os
 import sys
 import time
 import uuid
-from collections.abc import AsyncIterator
-from typing import Any, TypedDict, cast
+from collections.abc import AsyncIterator, Callable
+from typing import Any, ClassVar, TypedDict, cast
 
 from redis import ResponseError
 from redis.asyncio import Redis
 from reflex_base.config import get_config
 from reflex_base.environment import environment
+from reflex_base.event.processor.cancel import CancelPreviousBroker
 from reflex_base.utils import console
 from reflex_base.utils.exceptions import (
     InvalidLockWarningThresholdError,
@@ -1134,3 +1135,103 @@ class StateManagerRedis(StateManager):
             await asyncio.gather(*self._local_leases.values(), return_exceptions=True)
         finally:
             await self.redis.aclose(close_connection_pool=True)
+
+    @override
+    def cancel_previous_broker(self) -> "RedisCancelPreviousBroker":
+        """Get the redis-backed broker for cross-worker cancellation.
+
+        Returns:
+            A broker that coordinates ``cancel_previous_task`` via redis so a run
+            superseded on one worker is cancelled on the worker that owns it.
+        """
+        return RedisCancelPreviousBroker(manager=self)
+
+
+@dataclasses.dataclass
+class RedisCancelPreviousBroker(CancelPreviousBroker):
+    """Redis-backed ``CancelPreviousBroker`` using keyspace notifications.
+
+    Each ``(token, event name)`` maps to a single redis key holding the latest
+    dispatched run's ``txid``. Claiming writes that key; because redis applies
+    writes in a total order, concurrent claims from different workers converge
+    on exactly one winner (the last write). The ``SET`` fires a keyspace
+    notification that every worker observes, letting the worker that still owns
+    a now-superseded run cancel it locally.
+    """
+
+    manager: "StateManagerRedis"
+    _KEY_PREFIX: ClassVar[str] = "reflex_cancel_prev:"
+
+    def _key(self, token: str, event_name: str) -> str:
+        """Build the redis key for a cancel-previous entry.
+
+        A NUL byte separates the token and event name so the pair can be
+        recovered unambiguously from a keyspace notification channel.
+
+        Args:
+            token: The client token.
+            event_name: The fully-qualified event handler name.
+
+        Returns:
+            The redis key string.
+        """
+        return f"{self._KEY_PREFIX}{token}\x00{event_name}"
+
+    async def claim(self, token: str, event_name: str, txid: str) -> None:
+        """Record ``txid`` as the latest run for ``(token, event_name)``.
+
+        Args:
+            token: The client token the event belongs to.
+            event_name: The fully-qualified event handler name.
+            txid: The transaction id of the newly dispatched run.
+        """
+        await self.manager.redis.set(
+            self._key(token, event_name), txid, ex=self.manager.token_expiration
+        )
+
+    @contextlib.asynccontextmanager
+    async def subscribe(
+        self, on_supersede: Callable[[str, str, str], None]
+    ) -> AsyncIterator[None]:
+        """Run a keyspace-notification listener for the lifetime of the context.
+
+        Args:
+            on_supersede: Called as ``on_supersede(token, event_name, latest_txid)``
+                whenever a cancel-previous key is written.
+
+        Yields:
+            None, while the listener task is running.
+        """
+        await self.manager._enable_keyspace_notifications()
+        redis_db = self.manager.redis.get_connection_kwargs().get("db", 0)
+        channel_prefix = f"__keyspace@{redis_db}__:".encode()
+        key_prefix = self._KEY_PREFIX.encode()
+        pattern = f"__keyspace@{redis_db}__:{self._KEY_PREFIX}*"
+
+        async def handle_supersede(message: RedisPubSubMessage) -> None:
+            if message["data"] != b"set":
+                return
+            key = message["channel"][len(channel_prefix) :]
+            latest = await self.manager.redis.get(key)
+            if latest is None:
+                # Key was removed between the notification and the read; nothing
+                # supersedes the current owner, so leave it running.
+                return
+            token, _, event_name = key[len(key_prefix) :].partition(b"\x00")
+            latest_txid = latest.decode() if isinstance(latest, bytes) else str(latest)
+            on_supersede(token.decode(), event_name.decode(), latest_txid)
+
+        async with self.manager.redis.pubsub() as pubsub:
+            await pubsub.psubscribe(**{pattern: handle_supersede})  # pyright: ignore[reportArgumentType]
+
+            async def listen() -> None:
+                async for _ in pubsub.listen():
+                    pass
+
+            listen_task = asyncio.create_task(listen())
+            try:
+                yield
+            finally:
+                listen_task.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await listen_task
