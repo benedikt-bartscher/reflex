@@ -851,6 +851,20 @@ def _context_exports(
     ])
 
 
+@pytest.fixture
+def context_module_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Pin the env mode and owner stacks a compiled context module depends on.
+
+    Dev mode without owner stacks imports React for the owner-stack pin.
+
+    Args:
+        monkeypatch: Sets both variables and restores them afterwards.
+    """
+    monkeypatch.setenv(environment.REFLEX_ENV_MODE.name, constants.Env.DEV.value)
+    monkeypatch.setenv(environment.REFLEX_REACT_OWNER_STACKS.name, "false")
+
+
+@pytest.mark.usefixtures("context_module_env")
 def test_compile_contexts_encodes_the_initial_state_for_the_decoders(
     mocker: MockerFixture,
 ):
